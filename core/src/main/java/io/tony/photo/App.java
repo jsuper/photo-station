@@ -51,7 +51,6 @@ public class App {
         pageNo = Integer.parseInt(page);
       }
       int from = pageNo * pageSize;
-      System.out.println(pis == null);
 
       try {
         List<PhotoMetadata> data = pis.list(from, pageSize, Collections.emptyMap());
