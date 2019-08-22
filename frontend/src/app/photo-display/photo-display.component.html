@@ -1,0 +1,7 @@
+<div fxflexfill="" class="flex-container">
+    <div fxflexfill="" fxlayoutgap="10px grid" class="flex-photo-container" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="selector" [fromRoot]="true" [scrollWindow]="false" (scrolled)="onScrollDown()">
+        <div fxflex="25" class="photo-box" *ngFor="let p of photos">
+            <div class="photo-thumbnail" fxflexfill="" fxlayoutalign="center center">{{ p + ' photo'}}</div>
+        </div>
+    </div>
+</div>
