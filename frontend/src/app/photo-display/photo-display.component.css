@@ -1,4 +1,4 @@
-.photo-thumbnail {
+/* .photo-thumbnail {
     height: 100%;
     min-height: 100%;
     min-width: 100%;
@@ -9,6 +9,14 @@
     box-sizing: border-box;
     display: flex;
     background-color: #009688;
+    background-size: cover;
+} */
+.photo-thumbnail{
+  min-width: 375px;
+  min-height: 375px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .flex-container {
@@ -19,9 +27,9 @@
     padding: 0px 10px 10px 0px;
     flex: 1 1 25%;
     box-sizing: border-box;
-    max-width: 25%;
-    min-width: 400px;
-    min-height: 400px;
+    display: flex;
+    flex-direction: row;
+
 }
 
 .flex-photo-container {
