@@ -17,6 +17,7 @@ import io.tony.photo.utils.Strings;
 import io.tony.photo.web.WebServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.ext.web.handler.StaticHandler;
 
 public class App {
 
@@ -41,6 +42,8 @@ public class App {
     log.info("Running photo station on port: {}, folder: {}", port, path);
     final PhotoIndexStore pis = ((PhotoStoreImpl) photoStore).getIndexStore();
 
+    webServer.registerHandler("/static/*", StaticHandler.create());
+    webServer.registerHandler("/", ctx -> ctx.reroute("/static/index.html"));
     webServer.registerHandler("/api/photos", "application/json", ctx -> {
       HttpServerRequest request = ctx.request();
       String page = request.getParam("page");
@@ -94,6 +97,6 @@ public class App {
   }
 
   public static void main(String[] args) throws Exception {
-    new App("D:\\photos",8888).run();
+    new App("D:\\photos", 8889).run();
   }
 }

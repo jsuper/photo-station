@@ -1,12 +1,17 @@
 package io.tony.photo.service.impl;
 
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.resizers.configurations.Antialiasing;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,11 +29,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import io.tony.photo.exception.PhotoDuplicateException;
 import io.tony.photo.pojo.PhotoMetadata;
 import io.tony.photo.service.IndexBatcher;
+import io.tony.photo.service.PhotoChangedListener;
+import io.tony.photo.service.PhotoChangedListener.EventType;
+import io.tony.photo.service.PhotoChangedListener.PhotoChangedEvent;
 import io.tony.photo.service.PhotoIndexStore;
 import io.tony.photo.service.MetadataService;
 import io.tony.photo.service.PhotoListener;
@@ -42,6 +51,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PhotoStoreImpl implements PhotoStore {
   private static final Logger log = LoggerFactory.getLogger(PhotoStoreImpl.class);
   static final Map<String, String> acceptFileType;
+
+  private static final int THUMBNAIL_WIDTH = 600;
 
   static {
     Map<String, String> temp = new HashMap<>();
@@ -62,6 +73,7 @@ public class PhotoStoreImpl implements PhotoStore {
   private Path metaData;
   private Path trashStore;
   private Path indexPath;
+  private Path thumbnails;
 
   //meta-data lock
   private ConcurrentMap<String, Object> metaDataLock = new ConcurrentHashMap<>();
@@ -69,12 +81,18 @@ public class PhotoStoreImpl implements PhotoStore {
   @Getter
   private MetadataService metadataService;
 
-  private List<PhotoListener> listeners = new LinkedList<>();
+  private List<PhotoChangedListener> beforeChangedListeners = new LinkedList<>();
+  private List<PhotoChangedListener> afterChangedListeners = new LinkedList<>();
 
   private IndexBatcher<PhotoMetadata> indexBatcher;
 
   @Getter
   private PhotoIndexStore indexStore;
+
+  /**
+   * 是否正在刷新
+   */
+  private AtomicBoolean refreshing = new AtomicBoolean(false);
 
 
   public PhotoStoreImpl(String photoStoreFolder) {
@@ -83,31 +101,37 @@ public class PhotoStoreImpl implements PhotoStore {
     this.metaData = Paths.get(photoStoreFolder, ".meta");
     this.trashStore = Paths.get(photoStoreFolder, ".trash");
     this.indexPath = Paths.get(photoStoreFolder, ".index");
-    Stream.of(container, photoStore, metaData, trashStore, indexPath).forEach(FileOp::createDirectoryQuietly);
+    this.thumbnails = Paths.get(photoStoreFolder, ".thumbnails");
+    Stream.of(container, photoStore, metaData, trashStore, indexPath, thumbnails).forEach(FileOp::createDirectoryQuietly);
 
     this.metadataService = new MetadataServiceImpl();
     this.indexStore = new LucenePhotoIndexStore(this.indexPath);
     this.indexBatcher = new IndexBatcher<>(p -> indexStore.index(p), new PhotoMetadata());
-   /* this.listeners.add(new PhotoListener() {
-      @Override
-      public void before(PhotoMetadata metadata, OpType type) {
-        //ignore
-      }
 
-      @Override
-      public void after(PhotoMetadata metadata, OpType type) {
-        indexBatcher.add(metadata);
-      }
-    });*/
-    listeners.add(new PhotoListener() {
-      @Override
-      public void before(PhotoMetadata metadata, OpType type) {
+    this.beforeChangedListeners.add(event -> {
+      if (event.getEventType() == EventType.META_CREATED) {
+        PhotoMetadata photo = event.getPhoto();
+        long start = System.currentTimeMillis();
+        try {
+          //create thumbnail for current photo
+          int width = photo.getWidth();
+          int thumbnailHeight = (int) ((Double.valueOf(THUMBNAIL_WIDTH) / width) * photo.getHeight());
+          Thumbnails.of(Paths.get(photo.getPath()).toFile())
+            .outputQuality(1.0d).antialiasing(Antialiasing.ON).size(THUMBNAIL_WIDTH, thumbnailHeight)
+            .allowOverwrite(true).outputFormat("jpg")
+            .toFile(this.thumbnails.resolve(photo.getId() + ".jpg").toFile());
 
+          log.info("Created thumbnail for image: {}, total times: {}ms", photo.getId(), (System.currentTimeMillis() - start));
+        } catch (Exception e) {
+          log.error("Failed to create thumbnails for file: {}", photo.getPath(), e);
+        }
       }
-
-      @Override
-      public void after(PhotoMetadata metadata, OpType type) {
-        indexStore.index(metadata);
+    });
+    this.afterChangedListeners.add(event -> {
+      switch (event.getEventType()) {
+        case ADD:
+          indexStore.index(event.getPhoto());
+          break;
       }
     });
   }
@@ -136,7 +160,7 @@ public class PhotoStoreImpl implements PhotoStore {
     if (photoMetadata == null) {
       return false;
     }
-    this.listeners.forEach(listener -> listener.before(photoMetadata, PhotoListener.OpType.META_CREATE));
+    fireBeforeChangeListener(photoMetadata);
     final Date shootingDate = photoMetadata.getShootingDate();
     Calendar c = Calendar.getInstance();
     c.setTime(shootingDate);
@@ -148,17 +172,28 @@ public class PhotoStoreImpl implements PhotoStore {
     }
 
     try {
-      Files.copy(photo, targetStoreFile);
+      if (!Files.isSameFile(photo, targetStoreFile)) {
+        Files.copy(photo, targetStoreFile);
+      }
       photoMetadata.setPath(targetStoreFile.toFile().getCanonicalPath());
       writeMetaData(photoMetadata);
-
-      this.listeners.forEach(after -> after.after(photoMetadata, PhotoListener.OpType.ADD));
+      firePostChangeListener(photoMetadata);
       return true;
     } catch (IOException e) {
       e.printStackTrace();
       log.error("Failed move photo from {} to {}.", photo, targetStoreFile, e);
     }
     return false;
+  }
+
+  private void firePostChangeListener(PhotoMetadata photoMetadata) {
+    PhotoChangedEvent after = new PhotoChangedEvent(photoMetadata, EventType.ADD);
+    this.afterChangedListeners.forEach(l -> l.onChanged(after));
+  }
+
+  private void fireBeforeChangeListener(PhotoMetadata photoMetadata) {
+    PhotoChangedEvent before = new PhotoChangedEvent(photoMetadata, EventType.META_CREATED);
+    this.beforeChangedListeners.forEach(l -> l.onChanged(before));
   }
 
   private void writeMetaData(PhotoMetadata metadata) {
@@ -252,8 +287,63 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   @Override
+  public void refresh() {
+    if (refreshing.get()) {
+      log.info("Refreshing is ongoing, do nothing...");
+      return;
+    }
+
+    if (refreshing.compareAndSet(false, true)) {
+      log.info("Starting refreshing process...");
+      try {
+        Files.walkFileTree(this.photoStore, new SimpleFileVisitor<>() {
+          @Override
+          public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            final String fileName = file.getFileName().toString();
+            int lastDotIndex = -1;
+            if (fileName != null && !fileName.isBlank() && (lastDotIndex = fileName.lastIndexOf('.')) > 0) {
+              String fileExtension = fileName.substring(lastDotIndex);
+              if (acceptFileType.containsKey(fileExtension.toLowerCase())) {
+                log.info("Refresh metadata and index: {}", file.toFile().getCanonicalFile());
+                PhotoMetadata metadata = metadataService.readMetadata(file);
+                metadata.setPath(file.toFile().getCanonicalPath());
+
+                PhotoMetadata origin = Json.from(metaData.resolve(metadata.getId()), PhotoMetadata.class);
+                if (origin.getTags() != null) {
+                  metadata.setTags(origin.getTags());
+                }
+                if (origin.getAlbum() != null) {
+                  metadata.setAlbum(origin.getAlbum());
+                }
+                fireBeforeChangeListener(metadata);
+                writeMetaData(metadata);
+                firePostChangeListener(metadata);
+              }
+            }
+            return super.visitFile(file, attrs);
+          }
+        });
+      } catch (IOException e) {
+        log.error("Refresh directory failed.", e);
+      } finally {
+        refreshing.compareAndSet(true, false);
+      }
+    }
+  }
+
+  @Override
   public void close() throws IOException {
     this.indexBatcher.close();
     this.indexStore.close();
+  }
+
+  public static void main(String[] args) {
+    PhotoStore ps = new PhotoStoreImpl("D:\\photos");
+    ps.refresh();
   }
 }

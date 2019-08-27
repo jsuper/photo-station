@@ -2,14 +2,79 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>photo-station</artifactId>
-        <groupId>io.tony.photo</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>photo-station</artifactId>
+    <groupId>io.tony.photo</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>frontend</artifactId>
+  <artifactId>frontend</artifactId>
 
-
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.8.0</version>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <configuration>
+              <nodeVersion>v10.16.3</nodeVersion>
+              <npmVersion>6.9.0</npmVersion>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>install --verbose --registry=https://registry.npm.taobao.org</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run build --verbose --registry=https://registry.npm.taobao.org</arguments>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <nodeDownloadRoot>https://npm.taobao.org/mirrors/node/</nodeDownloadRoot>
+          <!-- optional: where to download npm from. Defaults to https://registry.npmjs.org/npm/-/ -->
+<!--          <npmDownloadRoot>https://registry.npm.taobao.org/-/</npmDownloadRoot>-->
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes/webroot
+              </outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/dist/${project.parent.artifactId}</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

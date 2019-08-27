@@ -1,32 +1,28 @@
 <div class="flex-container">
-  <div fxlayoutgap="10px grid" class="flex-photo-container" infiniteScroll [infiniteScrollDistance]="1"
+  <div class="flex-photo-container" fxLayout="row wrap"  fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1"
        [infiniteScrollThrottle]="50" [infiniteScrollContainer]="selector" [fromRoot]="true" [scrollWindow]="false"
        (scrolled)="onScrollDown()">
-    <div fxflex="25" class="photo-box" *ngFor="let p of photos">
-        <mat-card class="example-card" fxlayoutalign="center center">
-            <!-- <mat-card-header>
-              <div mat-card-avatar class="example-header-image"></div>
-              <mat-card-title>Shiba Inu</mat-card-title>
-              <mat-card-subtitle>Dog Breed</mat-card-subtitle>
-            </mat-card-header> -->
-            <div [ngStyle]="{ 'background-image': 'url(' + p.thumbnail + ')' }" class="photo-thumbnail  mat-card-image"></div>
-            <!-- <img mat-card-image [src]="p.thumbnail" alt="Photo of a Shiba Inu" class="photo-thumbnail"> -->
-            <mat-card-content>
-              <p>
-                The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
-                A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
-                bred for hunting.
-              </p>
-            </mat-card-content>
-            <mat-card-actions>
-              <button mat-button>LIKE</button>
-              <button mat-button>SHARE</button>
-            </mat-card-actions>
-          </mat-card>
-      <!-- <div class=""
-           [ngStyle]="{ 'background-image': 'url(' + p.thumbnail + ')' }">
-        {{ p + " photo" }}
-      </div> -->
+    <div fxflex="auto" class="photo-box" *ngFor="let p of photos" [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33"
+         [fxFlex.xs]="100">
+      <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
+        <div style="padding-bottom: 100%;position:relative;">
+          <div [ngStyle]="{ 'background-image': 'url(' + p.thumbnail + ')' }" class="photo-thumbnail">
+          </div>
+        </div>
+        <mat-card-content>
+          <div style="padding: 16px;">
+              <div>
+                <h3 title="Package / 2019">Package / 2019</h3>
+              </div>
+              <div class="caption">
+
+                  August 26, 2019 3:29 PM<br>
+                  Canon D5300<br>
+                  中国, 重庆<br>
+              </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   </div>
 </div>

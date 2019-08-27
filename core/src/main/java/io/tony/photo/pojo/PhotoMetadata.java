@@ -48,4 +48,8 @@ public class PhotoMetadata {
 
   private String type;
 
+  private int width;
+
+  private int height;
+
 }

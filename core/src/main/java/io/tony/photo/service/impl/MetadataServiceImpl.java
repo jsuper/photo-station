@@ -81,6 +81,16 @@ public class MetadataServiceImpl implements MetadataService {
         metadata.getDirectoriesOfType(ExifSubIFDDirectory.class).stream().findFirst().ifPresent(ed -> {
           Date dateDigitized = ed.getDateDigitized();
           pm.setShootingDate(dateDigitized);
+
+          try {
+            int width = ed.getInt(ExifDirectoryBase.TAG_EXIF_IMAGE_WIDTH);
+            int height = ed.getInt(ExifDirectoryBase.TAG_EXIF_IMAGE_HEIGHT);
+
+            pm.setWidth(width);
+            pm.setHeight(height);
+          } catch (Exception e) {
+            log.warn("Failed to read image width and height.", e);
+          }
         });
 
         metadata.getDirectoriesOfType(GpsDirectory.class)

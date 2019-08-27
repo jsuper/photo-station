@@ -37,4 +37,9 @@ public interface PhotoStore extends Closeable {
 
   PhotoMetadata getMetadataFromDisk(String metadataId);
 
+  /**
+   * 刷新当前存储，重新生成照片元数据、重新索引。
+   */
+  void refresh();
+
 }
