@@ -1,9 +1,13 @@
 package io.tony.photo;
 
+import com.drew.lang.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -46,15 +50,11 @@ public class App {
     webServer.registerHandler("/", ctx -> ctx.reroute("/static/index.html"));
     webServer.registerHandler("/api/photos", "application/json", ctx -> {
       HttpServerRequest request = ctx.request();
-      String page = request.getParam("page");
-      int pageNo;
-      if (page == null || !page.matches("\\d+")) {
-        pageNo = 0;
-      } else {
-        pageNo = Integer.parseInt(page);
+      String fromParam = request.getParam("from");
+      int from = 0 ;
+      if(fromParam!=null && !fromParam.isBlank()) {
+        from = Integer.parseInt(fromParam) ;
       }
-      int from = pageNo * pageSize;
-
       try {
         List<PhotoMetadata> data = pis.list(from, pageSize, Collections.emptyMap());
         data.forEach(meta -> {
@@ -73,22 +73,38 @@ public class App {
 
 
     });
-    webServer.registerHandler("/photo/:photo", ctx -> {
+    webServer.registerHandler("/api/photo/:photo", ctx -> {
       String photoId = ctx.request().getParam("photo");
+      boolean isThumbnail ="true".equals( ctx.request().getParam("t"));
+
       if (!Strings.isBlank(photoId)) {
-        PhotoMetadata metadataFromDisk = photoStore.getMetadataFromDisk(photoId);
-        if (metadataFromDisk != null && !Strings.isBlank(metadataFromDisk.getPath())) {
-          try {
-            File filePath = new File(new URL(metadataFromDisk.getPath()).toURI());
-            HttpServerResponse response = ctx.response();
-            response.putHeader("Content-Type", "image/" + metadataFromDisk.getType());
-            response.sendFile(filePath.getCanonicalPath()).end();
-          } catch (Exception e) {
-            e.printStackTrace();
-            ctx.fail(500, e);
+        File imagePath = null ;
+        String type ;
+        if (isThumbnail) {
+          imagePath = photoStore.getThumbnail(photoId).toFile() ;
+          type = "jpg" ;
+        }else {
+          PhotoMetadata metadataFromDisk = photoStore.getMetadataFromDisk(photoId);
+          type = metadataFromDisk.getType() ;
+          if (metadataFromDisk != null && !Strings.isBlank(metadataFromDisk.getPath())) {
+            try {
+              imagePath = new File(new URL(metadataFromDisk.getPath()).toURI());
+            } catch (URISyntaxException | MalformedURLException e) {
+              e.printStackTrace();
+            }
           }
-          return;
         }
+
+        if(imagePath!=null && imagePath.exists()) {
+          HttpServerResponse response = ctx.response();
+          response.putHeader("Content-Type", "image/" + type);
+          try {
+            response.sendFile(imagePath.getCanonicalPath()).end();
+          } catch (IOException e) {
+            ctx.fail(500,e);
+          }
+        }
+        return;
       }
       ctx.fail(404);
     });
@@ -97,6 +113,6 @@ public class App {
   }
 
   public static void main(String[] args) throws Exception {
-    new App("D:\\photos", 8889).run();
+    new App("D:\\test-photos", 8889).run();
   }
 }

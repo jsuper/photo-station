@@ -172,7 +172,7 @@ public class PhotoStoreImpl implements PhotoStore {
     }
 
     try {
-      if (!Files.isSameFile(photo, targetStoreFile)) {
+      if (Files.notExists(targetStoreFile)||!Files.isSameFile(photo, targetStoreFile)) {
         Files.copy(photo, targetStoreFile);
       }
       photoMetadata.setPath(targetStoreFile.toFile().getCanonicalPath());
@@ -337,13 +337,19 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   @Override
+  public Path getThumbnail(String photoId) {
+    return this.thumbnails.resolve(photoId+".jpg");
+  }
+
+  @Override
   public void close() throws IOException {
     this.indexBatcher.close();
     this.indexStore.close();
   }
 
   public static void main(String[] args) {
-    PhotoStore ps = new PhotoStoreImpl("D:\\photos");
-    ps.refresh();
+    PhotoStore ps = new PhotoStoreImpl("D:\\test-photos");
+    ps.importPhoto(Paths.get("D:/Photos/2019/7"));
+
   }
 }
