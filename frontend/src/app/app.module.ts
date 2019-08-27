@@ -8,6 +8,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MaterialModule } from "./material.module";
 import { PhotoDisplayComponent } from "./photo-display/photo-display.component";
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { PhotoDisplayComponent } from "./photo-display/photo-display.component";
     BrowserAnimationsModule,
     MaterialModule,
     FlexLayoutModule,
-    InfiniteScrollModule
+    InfiniteScrollModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

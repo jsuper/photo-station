@@ -187,7 +187,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     String type = document.get("type");
     String device = document.get("device");
 
-    Long size = Optional.ofNullable(document.getField("size")).map(f -> f.numericValue().longValue()).orElse(0l);
+    Long size = Optional.ofNullable(document.getField("size"))
+      .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
     Set<String> allTags = getSetField(document, "tags");
     Set<String> album = getSetField(document, "album");
 
