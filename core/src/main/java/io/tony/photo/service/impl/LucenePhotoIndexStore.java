@@ -47,13 +47,9 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +66,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   public static final String TAG_FACET_NAME = "Tags";
   public static final String SHOOTING_DATES_FACET_NAME = "Shooting dates";
   public static final String ALBUMS_FACET_NAME = "Albums";
+
   private Path indexDataFolder;
   private IndexWriterConfig.OpenMode openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND;
 
@@ -80,6 +77,9 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   private DirectoryTaxonomyWriter facetWriter;
   private DirectoryTaxonomyReader facetReader;
   private FacetsConfig facetsConfig = new FacetsConfig();
+
+  private AtomicReference<IndexSearcher> searcherHolder = new AtomicReference<>();
+  private Map<String, String> facetFieldMap;
 
   public LucenePhotoIndexStore(Path indexFolder) {
     this.indexDataFolder = indexFolder;
@@ -95,6 +95,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
       this.writer = new IndexWriter(storeFolder, iwc);
       this.reader = DirectoryReader.open(writer);
       this.searcherManager = new SearcherManager(writer, new SearcherFactory());
+      this.searcherHolder.compareAndSet(null, searcherManager.acquire());
 
       FSDirectory facetDir = FSDirectory.open(facets);
       this.facetWriter = new DirectoryTaxonomyWriter(facetDir);
@@ -103,7 +104,6 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     } catch (IOException e) {
       throw new IllegalStateException("Create internal searcher and reader failed.", e);
     }
-
     facetsConfig.setIndexFieldName(TAG_FACET_NAME, "tags");
     facetsConfig.setMultiValued(TAG_FACET_NAME, true);
 
@@ -113,7 +113,11 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     facetsConfig.setIndexFieldName(ALBUMS_FACET_NAME, "albums");
     facetsConfig.setMultiValued(ALBUMS_FACET_NAME, true);
 
-
+    Map<String, String> fc = new HashMap<>();
+    fc.put("tags", TAG_FACET_NAME);
+    fc.put("shoot_date", SHOOTING_DATES_FACET_NAME);
+    fc.put("albums", ALBUMS_FACET_NAME);
+    this.facetFieldMap = Collections.unmodifiableMap(fc);
   }
 
   @Override
@@ -137,6 +141,13 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
         writer.commit();
         facetWriter.commit();
 
+        this.searcherHolder.updateAndGet((s) -> {
+          try {
+            return searcherManager.acquire();
+          } catch (IOException e) {
+            throw new IllegalStateException(e);
+          }
+        });
       } catch (Exception e) {
         throw new IllegalStateException("Index failed.", e);
       }
@@ -177,28 +188,24 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
 
     try {
-      IndexSearcher acquire = searcherManager.acquire();
-      FacetsCollector fc = new FacetsCollector();
+      /*FacetsCollector fc = new FacetsCollector();
       FacetsCollector.search(acquire, imageQuery, size, MultiCollector.wrap(collector, fc));
       Facets tag = new FastTaxonomyFacetCounts("tags", this.facetReader, this.facetsConfig, fc);
-      FacetResult topChildren = tag.getTopChildren(10, TAG_FACET_NAME);
-      for (LabelAndValue lv : topChildren.labelValues) {
-        System.out.println(lv.label + ":" + lv.value);
-      }
-
-//      acquire.search(imageQuery, collector);
+      FacetResult topChildren = tag.getTopChildren(10, TAG_FACET_NAME);*/
+      final IndexSearcher searcher = searcherHolder.get();
+      searcher.search(imageQuery, collector);
       TopDocs pageDocs = collector.topDocs(from, size);
       return Optional.ofNullable(pageDocs.scoreDocs)
-        .map(doc ->
-          Stream.of(doc).map(scoreDoc -> {
-            try {
-              return acquire.doc(scoreDoc.doc);
-            } catch (IOException e) {
-              return null;
-            }
-          }).filter(Objects::nonNull)
-            .map(this::toPhotoMetadata)
-            .collect(Collectors.toList())).orElse(Collections.emptyList());
+          .map(doc ->
+              Stream.of(doc).map(scoreDoc -> {
+                try {
+                  return searcher.doc(scoreDoc.doc);
+                } catch (IOException e) {
+                  return null;
+                }
+              }).filter(Objects::nonNull)
+                  .map(this::toPhotoMetadata)
+                  .collect(Collectors.toList())).orElse(Collections.emptyList());
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -207,11 +214,37 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   @Override
   public long total() {
-    try {
-      return searcherManager.acquire().getIndexReader().numDocs();
-    } catch (IOException e) {
-      return -1;
+    return searcherHolder.get().getIndexReader().numDocs();
+  }
+
+  @Override
+  public Map<String, Map<String, Long>> aggregate(int topN, String... aggFieldName) {
+    if (aggFieldName == null || aggFieldName.length == 0 || topN <= 0) {
+      return Collections.emptyMap();
     }
+    Query matchAll = new MatchAllDocsQuery();
+
+    FacetsCollector fc = new FacetsCollector();
+    try {
+      FacetsCollector.search(searcherHolder.get(), matchAll, 1, fc);
+      Map<String, Map<String, Long>> facetResults = new HashMap<>();
+      for (String aggIndexField : aggFieldName) {
+        if (facetFieldMap.containsKey(aggIndexField)) {
+          Facets facets = new FastTaxonomyFacetCounts(aggIndexField, facetReader, facetsConfig, fc);
+          FacetResult facetResult = facets.getTopChildren(topN, facetFieldMap.get(aggIndexField));
+          Map<String, Long> fieldFacet = Optional.ofNullable(facetResult).flatMap(f -> Optional.ofNullable(f.labelValues))
+              .map(lv -> Arrays.stream(lv).collect(Collectors.toMap(l -> l.label, l -> l.value.longValue())))
+              .orElse(Collections.emptyMap());
+          if (!fieldFacet.isEmpty()) {
+            facetResults.put(aggIndexField, fieldFacet);
+          }
+        }
+      }
+      return facetResults;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return Collections.emptyMap();
   }
 
   private PhotoMetadata toPhotoMetadata(Document document) {
@@ -222,7 +255,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     String device = document.get("device");
 
     Long size = Optional.ofNullable(document.getField("size"))
-      .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
+        .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
     Set<String> allTags = getSetField(document, "tags");
     Set<String> album = getSetField(document, "album");
 
@@ -259,8 +292,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   private Set<String> getSetField(Document doc, String field) {
     return Optional.ofNullable(doc.getFields(field))
-      .map(fields -> Arrays.stream(fields).map(IndexableField::stringValue).collect(Collectors.toSet()))
-      .orElse(Collections.emptySet());
+        .map(fields -> Arrays.stream(fields).map(IndexableField::stringValue).collect(Collectors.toSet()))
+        .orElse(Collections.emptySet());
   }
 
   private static FieldType createType(boolean store, boolean tokenized) {
@@ -284,7 +317,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
     LocalDateTime localTime = metadata.getShootingDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     document.add(new FacetField(SHOOTING_DATES_FACET_NAME, String.valueOf(localTime.getYear()),
-      String.valueOf(localTime.getMonthValue())));
+        String.valueOf(localTime.getMonthValue())));
 
     if (metadata.getTags() != null) {
       for (String tag : metadata.getTags()) {
@@ -315,7 +348,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   public void close() {
     Stream.of(this.writer, this.facetWriter, this.reader, this.facetReader)
-      .filter(Objects::nonNull).forEach(LucenePhotoIndexStore::close);
+        .filter(Objects::nonNull).forEach(LucenePhotoIndexStore::close);
   }
 
   private static void close(Closeable closeable) {

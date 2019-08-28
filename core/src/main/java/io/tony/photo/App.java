@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import io.tony.photo.pojo.PhotoMetadata;
 import io.tony.photo.service.PhotoIndexStore;
@@ -113,6 +114,11 @@ public class App {
   }
 
   public static void main(String[] args) throws Exception {
-    new App("D:\\photos", 8889).run();
+    if(args == null || args.length<1) {
+      return ;
+    }
+    String storage = args[0] ;
+    int port = args.length>=2 ?Integer.parseInt(args[1]):8888 ;
+    new App(storage, port).run();
   }
 }
