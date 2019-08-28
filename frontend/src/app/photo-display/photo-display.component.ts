@@ -2,8 +2,8 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 import { Observable, fromEvent, merge, of } from 'rxjs';
 import { map, filter, debounceTime, tap, switchAll, distinct, flatMap } from 'rxjs/operators';
 
-import { Photo } from "../photo";
-import { PhotoService } from "../photo.service";
+import { Photo } from "app/photo";
+import { PhotoService } from "app/photo.service";
 
 @Component({
   selector: 'app-photo-display',

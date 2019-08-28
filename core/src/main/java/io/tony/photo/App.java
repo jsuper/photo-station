@@ -113,6 +113,6 @@ public class App {
   }
 
   public static void main(String[] args) throws Exception {
-    new App("D:\\test-photos", 8889).run();
+    new App("D:\\photos", 8889).run();
   }
 }

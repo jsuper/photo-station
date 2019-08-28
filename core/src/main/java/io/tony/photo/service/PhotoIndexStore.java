@@ -15,4 +15,6 @@ public interface PhotoIndexStore extends Closeable {
   void get(String photoId);
 
   List<PhotoMetadata> list(int start, int page, Map<String, Object> query);
+
+  long total();
 }

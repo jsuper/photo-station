@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from "rxjs";
-import { Photo } from "./photo";
+import { Photo } from "app/photo";
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({

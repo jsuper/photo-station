@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import io.tony.photo.exception.PhotoDuplicateException;
@@ -172,7 +173,7 @@ public class PhotoStoreImpl implements PhotoStore {
     }
 
     try {
-      if (Files.notExists(targetStoreFile)||!Files.isSameFile(photo, targetStoreFile)) {
+      if (Files.notExists(targetStoreFile) || !Files.isSameFile(photo, targetStoreFile)) {
         Files.copy(photo, targetStoreFile);
       }
       photoMetadata.setPath(targetStoreFile.toFile().getCanonicalPath());
@@ -295,7 +296,9 @@ public class PhotoStoreImpl implements PhotoStore {
 
     if (refreshing.compareAndSet(false, true)) {
       log.info("Starting refreshing process...");
+      long start = System.currentTimeMillis();
       try {
+        AtomicInteger counter = new AtomicInteger();
         Files.walkFileTree(this.photoStore, new SimpleFileVisitor<>() {
           @Override
           public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -313,13 +316,17 @@ public class PhotoStoreImpl implements PhotoStore {
                 PhotoMetadata metadata = metadataService.readMetadata(file);
                 metadata.setPath(file.toFile().getCanonicalPath());
 
-                PhotoMetadata origin = Json.from(metaData.resolve(metadata.getId()), PhotoMetadata.class);
-                if (origin.getTags() != null) {
-                  metadata.setTags(origin.getTags());
+                Path previousMeta = metaData.resolve(metadata.getId());
+                if (Files.exists(previousMeta)) {
+                  PhotoMetadata origin = Json.from(previousMeta, PhotoMetadata.class);
+                  if (origin.getTags() != null) {
+                    metadata.setTags(origin.getTags());
+                  }
+                  if (origin.getAlbum() != null) {
+                    metadata.setAlbum(origin.getAlbum());
+                  }
                 }
-                if (origin.getAlbum() != null) {
-                  metadata.setAlbum(origin.getAlbum());
-                }
+                counter.incrementAndGet();
                 fireBeforeChangeListener(metadata);
                 writeMetaData(metadata);
                 firePostChangeListener(metadata);
@@ -328,6 +335,9 @@ public class PhotoStoreImpl implements PhotoStore {
             return super.visitFile(file, attrs);
           }
         });
+
+        log.info("Finished refreshing metadata, total files: {}, index docs: {}, elapsed: {}ms",
+          counter.get(), this.indexStore.total(), System.currentTimeMillis() - start);
       } catch (IOException e) {
         log.error("Refresh directory failed.", e);
       } finally {
@@ -338,7 +348,7 @@ public class PhotoStoreImpl implements PhotoStore {
 
   @Override
   public Path getThumbnail(String photoId) {
-    return this.thumbnails.resolve(photoId+".jpg");
+    return this.thumbnails.resolve(photoId + ".jpg");
   }
 
   @Override
@@ -348,8 +358,20 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   public static void main(String[] args) {
-    PhotoStore ps = new PhotoStoreImpl("D:\\test-photos");
-    ps.importPhoto(Paths.get("D:/Photos/2019/7"));
-
+    PhotoStoreImpl ps = new PhotoStoreImpl("D:\\photos");
+    ps.beforeChangedListeners.add(new PhotoChangedListener() {
+      @Override
+      public void onChanged(PhotoChangedEvent event) {
+        Set<String> tags = new HashSet<>();
+        if (event.getPhoto().getTags() != null) {
+          tags.addAll(event.getPhoto().getTags());
+        }
+        tags.add("铁山坪");
+        tags.add("猪八戒团建");
+        event.getPhoto().setTags(tags);
+      }
+    });
+//    ps.importPhoto(Paths.get("D:/Photos/2019/7"));
+    ps.refresh();
   }
 }

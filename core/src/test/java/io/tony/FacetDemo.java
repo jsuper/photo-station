@@ -159,6 +159,7 @@ public class FacetDemo {
     results.add(author.getTopChildren(10, "Author"));
 
     Facets pubDate = new FastTaxonomyFacetCounts("pubdate", taxoReader, config, fc);
+
     results.add(pubDate.getTopChildren(10, "Publish Date"));
 
     Facets tags = new FastTaxonomyFacetCounts("tags", taxoReader, config, fc);

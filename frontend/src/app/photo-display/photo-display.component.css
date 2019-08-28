@@ -22,3 +22,13 @@
   padding:0px;
   margin-bottom: 16px !important;
 }
+.caption{
+  font-weight: 400;
+  font-size: 12px !important;
+}
+.caption .material-icons{
+  font-size:14px !important;
+  margin-right: 2px;
+  height: 14px;
+  width: 14px;
+}

@@ -10,7 +10,12 @@ import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
+import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.facet.Facets;
+import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.LabelAndValue;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.DirectoryReader;
@@ -18,10 +23,15 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MultiCollector;
+import org.apache.lucene.search.MultiCollectorManager;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SearcherFactory;
+import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
@@ -65,7 +75,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   private IndexWriter writer;
   private IndexReader reader;
-  private IndexSearcher searcher;
+  private SearcherManager searcherManager;
 
   private DirectoryTaxonomyWriter facetWriter;
   private DirectoryTaxonomyReader facetReader;
@@ -84,7 +94,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
       FSDirectory storeFolder = FSDirectory.open(indexes);
       this.writer = new IndexWriter(storeFolder, iwc);
       this.reader = DirectoryReader.open(writer);
-      this.searcher = new IndexSearcher(this.reader);
+      this.searcherManager = new SearcherManager(writer, new SearcherFactory());
 
       FSDirectory facetDir = FSDirectory.open(facets);
       this.facetWriter = new DirectoryTaxonomyWriter(facetDir);
@@ -118,13 +128,15 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
         photoMetadata.stream().forEach(meta -> {
           try {
             Document document = toDocument(meta);
-            this.writer.addDocument(facetsConfig.build(facetWriter, document));
+            this.writer.updateDocument(new Term("id", meta.getId()), facetsConfig.build(facetWriter, document));
+//            this.writer.updateDocument(new Term("id", meta.getId()), document);
           } catch (IOException e) {
             throw new IllegalStateException("Index document failed.", e);
           }
         });
         writer.commit();
         facetWriter.commit();
+
       } catch (Exception e) {
         throw new IllegalStateException("Index failed.", e);
       }
@@ -134,7 +146,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   @Override
   public void get(String photoId) {
     try {
-      TopDocs docs = this.searcher.search(new TermQuery(new Term("id", photoId)), 1);
+      TopDocs docs = searcherManager.acquire().search(new TermQuery(new Term("id", photoId)), 1);
       if (docs.totalHits.value == 1) {
         System.out.println(docs);
       }
@@ -154,20 +166,33 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
     int numDocs = from + size;
     int totalDocs = this.reader.numDocs();
+    if (from > totalDocs) {
+      return Collections.emptyList();
+    }
 
     int numHint = Math.max(1, Math.min(numDocs, totalDocs));
     Sort sort = new Sort(new SortField("timestamp", SortField.Type.LONG, true));
 
     TopFieldCollector collector = TopFieldCollector.create(sort, numHint, null, 10000);
 
+
     try {
-      this.searcher.search(imageQuery, collector);
+      IndexSearcher acquire = searcherManager.acquire();
+      FacetsCollector fc = new FacetsCollector();
+      FacetsCollector.search(acquire, imageQuery, size, MultiCollector.wrap(collector, fc));
+      Facets tag = new FastTaxonomyFacetCounts("tags", this.facetReader, this.facetsConfig, fc);
+      FacetResult topChildren = tag.getTopChildren(10, TAG_FACET_NAME);
+      for (LabelAndValue lv : topChildren.labelValues) {
+        System.out.println(lv.label + ":" + lv.value);
+      }
+
+//      acquire.search(imageQuery, collector);
       TopDocs pageDocs = collector.topDocs(from, size);
       return Optional.ofNullable(pageDocs.scoreDocs)
         .map(doc ->
           Stream.of(doc).map(scoreDoc -> {
             try {
-              return this.searcher.doc(scoreDoc.doc);
+              return acquire.doc(scoreDoc.doc);
             } catch (IOException e) {
               return null;
             }
@@ -178,6 +203,15 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
       e.printStackTrace();
     }
     return Collections.emptyList();
+  }
+
+  @Override
+  public long total() {
+    try {
+      return searcherManager.acquire().getIndexReader().numDocs();
+    } catch (IOException e) {
+      return -1;
+    }
   }
 
   private PhotoMetadata toPhotoMetadata(Document document) {
@@ -238,7 +272,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   private Document toDocument(PhotoMetadata metadata) {
     Document document = new Document();
-    document.add(new StoredField("id", metadata.getId()));
+
+    document.add(new StringField("id", metadata.getId(), YES));
     document.add(new StoredField("path", metadata.getPath().toString()));
     document.add(new StoredField("type", metadata.getType()));
     document.add(new StoredField("device", metadata.getDevice()));
@@ -294,15 +329,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   public static void main(String[] args) {
     LucenePhotoIndexStore store = new LucenePhotoIndexStore(Paths.get("D:\\photos\\.index"));
 
-    System.out.println("page 1");
-    List<PhotoMetadata> list = store.list(0, 5, null);
-    for (PhotoMetadata metadata : list) {
-      System.out.println(Json.toJson(metadata));
-    }
-
-    System.out.println("page 2");
-    List<PhotoMetadata> list1 = store.list(5, 5, null);
-    list1.stream().map(Json::toJson).forEach(System.out::println);
+    List<PhotoMetadata> list = store.list(0, 10000, Collections.emptyMap());
+    list.forEach(d -> System.out.println(d.getId()));
   }
 
 }
