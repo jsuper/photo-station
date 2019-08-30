@@ -351,6 +351,7 @@ public class PhotoStoreImpl implements PhotoStore {
     return this.thumbnails.resolve(photoId + ".jpg");
   }
 
+
   @Override
   public void close() throws IOException {
     this.indexBatcher.close();

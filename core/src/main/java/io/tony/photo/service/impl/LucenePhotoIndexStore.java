@@ -196,16 +196,16 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
       searcher.search(imageQuery, collector);
       TopDocs pageDocs = collector.topDocs(from, size);
       return Optional.ofNullable(pageDocs.scoreDocs)
-          .map(doc ->
-              Stream.of(doc).map(scoreDoc -> {
-                try {
-                  return searcher.doc(scoreDoc.doc);
-                } catch (IOException e) {
-                  return null;
-                }
-              }).filter(Objects::nonNull)
-                  .map(this::toPhotoMetadata)
-                  .collect(Collectors.toList())).orElse(Collections.emptyList());
+        .map(doc ->
+          Stream.of(doc).map(scoreDoc -> {
+            try {
+              return searcher.doc(scoreDoc.doc);
+            } catch (IOException e) {
+              return null;
+            }
+          }).filter(Objects::nonNull)
+            .map(this::toPhotoMetadata)
+            .collect(Collectors.toList())).orElse(Collections.emptyList());
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -233,8 +233,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
           Facets facets = new FastTaxonomyFacetCounts(aggIndexField, facetReader, facetsConfig, fc);
           FacetResult facetResult = facets.getTopChildren(topN, facetFieldMap.get(aggIndexField));
           Map<String, Long> fieldFacet = Optional.ofNullable(facetResult).flatMap(f -> Optional.ofNullable(f.labelValues))
-              .map(lv -> Arrays.stream(lv).collect(Collectors.toMap(l -> l.label, l -> l.value.longValue())))
-              .orElse(Collections.emptyMap());
+            .map(lv -> Arrays.stream(lv).collect(Collectors.toMap(l -> l.label, l -> l.value.longValue())))
+            .orElse(Collections.emptyMap());
           if (!fieldFacet.isEmpty()) {
             facetResults.put(aggIndexField, fieldFacet);
           }
@@ -255,7 +255,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     String device = document.get("device");
 
     Long size = Optional.ofNullable(document.getField("size"))
-        .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
+      .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
     Set<String> allTags = getSetField(document, "tags");
     Set<String> album = getSetField(document, "album");
 
@@ -292,8 +292,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   private Set<String> getSetField(Document doc, String field) {
     return Optional.ofNullable(doc.getFields(field))
-        .map(fields -> Arrays.stream(fields).map(IndexableField::stringValue).collect(Collectors.toSet()))
-        .orElse(Collections.emptySet());
+      .map(fields -> Arrays.stream(fields).map(IndexableField::stringValue).collect(Collectors.toSet()))
+      .orElse(Collections.emptySet());
   }
 
   private static FieldType createType(boolean store, boolean tokenized) {
@@ -317,7 +317,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
     LocalDateTime localTime = metadata.getShootingDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     document.add(new FacetField(SHOOTING_DATES_FACET_NAME, String.valueOf(localTime.getYear()),
-        String.valueOf(localTime.getMonthValue())));
+      String.valueOf(localTime.getMonthValue())));
 
     if (metadata.getTags() != null) {
       for (String tag : metadata.getTags()) {
@@ -348,7 +348,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   public void close() {
     Stream.of(this.writer, this.facetWriter, this.reader, this.facetReader)
-        .filter(Objects::nonNull).forEach(LucenePhotoIndexStore::close);
+      .filter(Objects::nonNull).forEach(LucenePhotoIndexStore::close);
   }
 
   private static void close(Closeable closeable) {
@@ -361,9 +361,11 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
   public static void main(String[] args) {
     LucenePhotoIndexStore store = new LucenePhotoIndexStore(Paths.get("D:\\photos\\.index"));
-
+    Map<String, Map<String, Long>> tags = store.aggregate(10, "tags");
+    System.out.println(tags);
+/*
     List<PhotoMetadata> list = store.list(0, 10000, Collections.emptyMap());
-    list.forEach(d -> System.out.println(d.getId()));
+    list.forEach(d -> System.out.println(d.getId()));*/
   }
 
 }

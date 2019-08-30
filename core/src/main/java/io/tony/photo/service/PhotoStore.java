@@ -42,6 +42,7 @@ public interface PhotoStore extends Closeable {
    */
   void refresh();
 
-  Path getThumbnail(String photoId) ;
+  Path getThumbnail(String photoId);
 
+  PhotoIndexStore getIndexStore();
 }

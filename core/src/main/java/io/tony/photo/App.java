@@ -1,6 +1,7 @@
 package io.tony.photo;
 
 import com.drew.lang.StringUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,76 +50,20 @@ public class App {
 
     webServer.registerHandler("/static/*", StaticHandler.create());
     webServer.registerHandler("/", ctx -> ctx.reroute("/static/index.html"));
-    webServer.registerHandler("/api/photos", "application/json", ctx -> {
-      HttpServerRequest request = ctx.request();
-      String fromParam = request.getParam("from");
-      int from = 0 ;
-      if(fromParam!=null && !fromParam.isBlank()) {
-        from = Integer.parseInt(fromParam) ;
-      }
-      try {
-        List<PhotoMetadata> data = pis.list(from, pageSize, Collections.emptyMap());
-        data.forEach(meta -> {
-          String path = "//" + request.host() + "/photo/" + meta.getId();
-          meta.setPath(path);
-        });
 
-        HttpServerResponse response = ctx.response();
-        response.putHeader("content-type", "application/json");
-        String chunk = Json.toJson(data);
-        response.end(chunk);
-      } catch (Exception e) {
-        e.printStackTrace();
-        ctx.response().end(e.getMessage());
-      }
-
-
-    });
     webServer.registerHandler("/api/photo/:photo", ctx -> {
-      String photoId = ctx.request().getParam("photo");
-      boolean isThumbnail ="true".equals( ctx.request().getParam("t"));
 
-      if (!Strings.isBlank(photoId)) {
-        File imagePath = null ;
-        String type ;
-        if (isThumbnail) {
-          imagePath = photoStore.getThumbnail(photoId).toFile() ;
-          type = "jpg" ;
-        }else {
-          PhotoMetadata metadataFromDisk = photoStore.getMetadataFromDisk(photoId);
-          type = metadataFromDisk.getType() ;
-          if (metadataFromDisk != null && !Strings.isBlank(metadataFromDisk.getPath())) {
-            try {
-              imagePath = new File(new URL(metadataFromDisk.getPath()).toURI());
-            } catch (URISyntaxException | MalformedURLException e) {
-              e.printStackTrace();
-            }
-          }
-        }
-
-        if(imagePath!=null && imagePath.exists()) {
-          HttpServerResponse response = ctx.response();
-          response.putHeader("Content-Type", "image/" + type);
-          try {
-            response.sendFile(imagePath.getCanonicalPath()).end();
-          } catch (IOException e) {
-            ctx.fail(500,e);
-          }
-        }
-        return;
-      }
-      ctx.fail(404);
     });
 
     webServer.start();
   }
 
   public static void main(String[] args) throws Exception {
-    if(args == null || args.length<1) {
-      return ;
+    if (args == null || args.length < 1) {
+      return;
     }
-    String storage = args[0] ;
-    int port = args.length>=2 ?Integer.parseInt(args[1]):8888 ;
+    String storage = args[0];
+    int port = args.length >= 2 ? Integer.parseInt(args[1]) : 6666;
     new App(storage, port).run();
   }
 }

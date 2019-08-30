@@ -2,6 +2,10 @@ package io.tony.photo.web;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Handler;
@@ -20,6 +24,7 @@ public class WebServer implements Closeable {
   private AtomicBoolean started = new AtomicBoolean(false);
 
   private Vertx vertx;
+  private Set<RequestRegistry> registries = new HashSet<>();
 
   public WebServer(int port) {
     System.setProperty("vertx.disableDnsResolve", "true");
@@ -27,6 +32,10 @@ public class WebServer implements Closeable {
     httpServer = vertx.createHttpServer();
     router = Router.router(vertx);
     this.port = port;
+  }
+
+  public void registryRequestHandler(RequestRegistry requestRegistry) {
+    this.registries.add(requestRegistry);
   }
 
   public void registerHandler(String route, Handler<RoutingContext> handler) {
@@ -39,6 +48,8 @@ public class WebServer implements Closeable {
 
   public void start() {
     if (started.compareAndSet(false, true)) {
+
+
       httpServer.requestHandler(router).listen(port);
     }
   }
