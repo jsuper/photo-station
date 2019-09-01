@@ -359,20 +359,22 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   public static void main(String[] args) {
-    PhotoStoreImpl ps = new PhotoStoreImpl("D:\\photos");
-    ps.beforeChangedListeners.add(new PhotoChangedListener() {
-      @Override
-      public void onChanged(PhotoChangedEvent event) {
-        Set<String> tags = new HashSet<>();
-        if (event.getPhoto().getTags() != null) {
-          tags.addAll(event.getPhoto().getTags());
-        }
-        tags.add("铁山坪");
-        tags.add("猪八戒团建");
-        event.getPhoto().setTags(tags);
+    PhotoStoreImpl ps = new PhotoStoreImpl(args[0]);
+    ps.beforeChangedListeners.add(event -> {
+      Set<String> tags = new HashSet<>();
+      if (event.getPhoto().getTags() != null) {
+        tags.addAll(event.getPhoto().getTags());
       }
+      tags.add("唐熙言");
+      event.getPhoto().setTags(tags);
+
+      Set<String> albums = new HashSet<>();
+      if (event.getPhoto().getAlbum() != null) {
+        albums.addAll(event.getPhoto().getAlbum());
+      }
+      albums.add("宝宝");
+      event.getPhoto().setAlbum(albums);
     });
-//    ps.importPhoto(Paths.get("D:/Photos/2019/7"));
     ps.refresh();
   }
 }

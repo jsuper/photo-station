@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.tony.photo.pojo.PhotoMetadata;
 import io.tony.photo.service.PhotoIndexStore;
@@ -18,19 +21,21 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
-public class IndexRequestHandlerRegistry implements RequestRegistry {
+public class PhotoRequestHandlerRegistry implements RequestRegistry {
   private static final int PAGE_SIZE = 12;
   private PhotoStore photoStore;
   private PhotoIndexStore photoIndexStore;
 
-  public IndexRequestHandlerRegistry(PhotoStore photoStorage) {
+  private static final String[] AGG_FIELD = new String[]{"tags", "albums","shoot_date"};
+
+  public PhotoRequestHandlerRegistry(PhotoStore photoStorage) {
     this.photoStore = photoStorage;
     this.photoIndexStore = photoStorage.getIndexStore();
   }
 
   @Override
   public void buildRequestRegistry(Router router) {
-    router.route("/api/nav").handler(this::navigationHandler);
+    router.route("/api/nav-agg").handler(this::navigationHandler);
     router.route("/api/photos").handler(this::handlePhotoLists);
     router.route("/api/photo/:photo").handler(this::handlePhotoImage);
   }
@@ -39,7 +44,18 @@ public class IndexRequestHandlerRegistry implements RequestRegistry {
    * 生成导航菜单
    */
   private void navigationHandler(RoutingContext ctx) {
+    HttpServerRequest request = ctx.request();
 
+    String aggFields = request.getParam("agg");
+    String[] aggregation = null;
+    if (aggFields == null || aggFields.isBlank()) {
+      aggregation = AGG_FIELD;
+    } else {
+      aggregation = aggFields.split(",");
+    }
+    Map<String, Map<String, Long>> aggregate = this.photoIndexStore.aggregate(10, aggregation);
+    ctx.response().putHeader("Content-Type", "application/json");
+    ctx.response().end(Json.toJson(aggregate));
   }
 
   /**

@@ -360,7 +360,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   }
 
   public static void main(String[] args) {
-    LucenePhotoIndexStore store = new LucenePhotoIndexStore(Paths.get("D:\\photos\\.index"));
+    LucenePhotoIndexStore store = new LucenePhotoIndexStore(Paths.get(args[0]));
     Map<String, Map<String, Long>> tags = store.aggregate(10, "tags");
     System.out.println(tags);
 /*

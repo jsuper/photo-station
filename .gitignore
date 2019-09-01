@@ -5,3 +5,10 @@ logs/
 
 .idea/
 *.iml
+
+#eclipse
+.settings/
+.project
+.classpath
+.factorypath
+classpath-data.json

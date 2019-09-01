@@ -31,6 +31,6 @@
     <logger name="io.tony.photo" level="debug"/>
     <root level="warn">
         <appender-ref ref="console"/>
-        <appender-ref ref="file"/>
+<!--        <appender-ref ref="file"/>-->
     </root>
 </configuration>
