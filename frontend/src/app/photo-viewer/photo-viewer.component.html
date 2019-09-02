@@ -1,11 +1,33 @@
-<div mat-dialog-content class="photo-viewer-dialog" id="photo-viewer-dialog">
-  <div class="photo-viewer-container">
-    <div class="photo-viewer">
-      <div class="header-bar">header</div>
-      <div class="images">images</div>
-      <span class="previous">P</span>
-      <span class="next">N</span>
+<div mat-dialog-content class="photo-viewer" id="photo-viewer">
+    <div class="photo-viewer-container">
+        <div class="photo-viewer">
+            <div class="header-bar">
+                <span class="exit">
+                    <mat-icon>keyboard_backspace</mat-icon>
+                </span>
+                <div class="toolbar">
+                    <div class="button">
+                        <mat-icon>info</mat-icon>
+                    </div>
+                    <div class="button">
+                        <mat-icon>star_border</mat-icon>
+                    </div>
+                    <div class="button">
+                        <mat-icon>delete_outline</mat-icon>
+                    </div>
+                    <div class="button">
+                        <mat-icon>more_vert</mat-icon>
+                    </div>
+                </div>
+            </div>
+            <div class="images">
+                <div class="image-content">
+
+                </div>
+            </div>
+            <span class="previous">P</span>
+            <span class="next">N</span>
+        </div>
+        <div class="info-viewer"></div>
     </div>
-    <div class="info-viewer"></div>
-  </div>
 </div>

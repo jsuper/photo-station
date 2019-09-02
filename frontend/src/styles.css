@@ -23,214 +23,238 @@ mat-sidenav {
 }
 
 .starting.mat-drawer-transition .mat-drawer-content {
-  transition: none;
+    transition: none;
 }
 
 app-nav-menu {
-  display: block;
-  margin: 0 auto;
-  max-width: 260px;
-  font-size: 13px;
-  font-size: 1.3rem;
+    display: block;
+    margin: 0 auto;
+    max-width: 260px;
+    font-size: 13px;
+    font-size: 1.3rem;
 }
-app-nav-menu ul, app-nav-menu a {
-  margin: 0;
+
+app-nav-menu ul,
+app-nav-menu a {
+    margin: 0;
 }
+
 app-nav-menu:first-child {
-  margin-top: 16px;
+    margin-top: 16px;
 }
+
 app-nav-menu app-nav-item div a {
-  padding-left: 6px;
+    padding-left: 6px;
 }
 
 mat-sidenav.mat-sidenav.sidenav {
-  position: fixed;
-  top: 64px;
-  bottom: 0;
-  left: 0;
-  padding: 0;
-  min-width: 260px;
-  background-color: #FFFFFF;
-  box-shadow: 6px 0 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    padding: 0;
+    min-width: 260px;
+    background-color: #FFFFFF;
+    box-shadow: 6px 0 6px rgba(0, 0, 0, 0.1);
 }
+
 mat-sidenav.mat-sidenav.sidenav.collapsed {
-  top: 56px;
+    top: 56px;
 }
 
 mat-sidenav-container.sidenav-container {
-  min-height: 100%;
-  height: auto !important;
-  max-width: 100%;
-  margin: 0;
-  transform: none;
+    min-height: 100%;
+    height: auto !important;
+    max-width: 100%;
+    margin: 0;
+    transform: none;
 }
+
 mat-sidenav-container.sidenav-container.has-floating-toc {
-  max-width: 82%;
+    max-width: 82%;
 }
 
 mat-sidenav-container.sidenav-container.mat-drawer-container.mat-sidenav-container,
 mat-sidenav-container .sidenav-content {
-  background-color: #FFFFFF;
+    background-color: #FFFFFF;
 }
 
 mat-sidenav-container div.mat-sidenav-content {
-  height: auto;
+    height: auto;
 }
 
 .vertical-menu-item {
-  box-sizing: border-box;
-  color: #444444;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  overflow-wrap: break-word;
-  padding: 8px;
-  text-decoration: none;
-  text-align: left;
-  width: 100%;
-  word-wrap: break-word;
+    box-sizing: border-box;
+    color: #444444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow-wrap: break-word;
+    padding: 8px;
+    text-decoration: none;
+    text-align: left;
+    width: 100%;
+    word-wrap: break-word;
 }
+
 .vertical-menu-item:hover {
-  background-color: #DBDBDB;
-  color: #1976D2;
-  text-shadow: 0 0 5px #ffffff;
+    background-color: #DBDBDB;
+    color: #1976D2;
+    text-shadow: 0 0 5px #ffffff;
 }
+
 .vertical-menu-item:focus {
-  outline: #1E88E5 auto 2px;
+    outline: #1E88E5 auto 2px;
 }
+
 .vertical-menu-item.selected {
-  color: #1976D2;
+    color: #1976D2;
 }
+
 .vertical-menu-item.level-2 {
-  padding-top: 4px;
-  padding-bottom: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
+
 .vertical-menu-item span {
-  padding-right: 32px;
+    padding-right: 32px;
 }
+
 .vertical-menu-item .mat-icon {
-  height: 24px;
-  width: 24px;
+    height: 24px;
+    width: 24px;
 }
 
 button.vertical-menu-item {
-  border: none;
-  background-color: transparent;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin: 0;
-  width: 100%;
+    border: none;
+    background-color: transparent;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin: 0;
+    width: 100%;
 }
 
 .heading {
-  color: #444444;
-  cursor: pointer;
-  position: relative;
-  text-transform: uppercase;
+    color: #444444;
+    cursor: pointer;
+    position: relative;
+    text-transform: uppercase;
 }
 
 .heading-children.expanded {
-  visibility: visible;
-  opacity: 1;
-  padding-left: 0;
-  max-height: 4000px;
-  transition: visibility 500ms, opacity 500ms, max-height 500ms;
-  -webkit-transition-timing-function: ease-in-out;
-  transition-timing-function: ease-in-out;
+    visibility: visible;
+    opacity: 1;
+    padding-left: 0;
+    max-height: 4000px;
+    transition: visibility 500ms, opacity 500ms, max-height 500ms;
+    -webkit-transition-timing-function: ease-in-out;
+    transition-timing-function: ease-in-out;
 }
+
 .heading-children.collapsed {
-  overflow: hidden;
-  visibility: hidden;
-  padding-left: 0;
-  opacity: 0;
-  max-height: 1px;
-  transition: visibility 275ms, opacity 275ms, max-height 280ms;
-  -webkit-transition-timing-function: ease-out;
-  transition-timing-function: ease-out;
+    overflow: hidden;
+    visibility: hidden;
+    padding-left: 0;
+    opacity: 0;
+    max-height: 1px;
+    transition: visibility 275ms, opacity 275ms, max-height 280ms;
+    -webkit-transition-timing-function: ease-out;
+    transition-timing-function: ease-out;
 }
 
 .no-animations .heading-children.expanded,
 .no-animations .heading-children.collapsed {
-  transition: none !important;
+    transition: none !important;
 }
 
 .level-1 {
-  font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  padding-left: 20px;
-  margin: 0;
-  transition: background-color 0.2s;
-  text-transform: uppercase;
+    font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    padding-left: 20px;
+    margin: 0;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
 }
+
 .level-1.expanded .mat-icon,
 .level-1 .level-2.expanded .mat-icon {
-  -moz-transform: rotate(90deg);
-  -webkit-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
-  transform: rotate(90deg);
-  transition: transform 150ms;
-  transition-timing-function: ease-in-out;
+    -moz-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+    transition: transform 150ms;
+    transition-timing-function: ease-in-out;
 }
+
 .level-1:not(.expanded) .mat-icon,
 .level-1 .level-2:not(.expanded) .mat-icon {
-  -moz-transform: rotate(0deg);
-  -webkit-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  -ms-transform: rotate(0deg);
-  transform: rotate(0deg);
-  transition: transform 150ms;
-  transition-timing-function: ease-in-out;
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+    transition: transform 150ms;
+    transition-timing-function: ease-in-out;
 }
 
 .level-2 {
-  color: #6E6E6E;
-  font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  margin: 0;
-  padding-left: 32px;
-  text-transform: none;
+    color: #6E6E6E;
+    font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+    padding-left: 32px;
+    text-transform: none;
 }
 
 .level-3 {
-  color: #6E6E6E;
-  font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 14px;
-  margin: 0;
-  padding-left: 40px;
+    color: #6E6E6E;
+    font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 14px;
+    margin: 0;
+    padding-left: 40px;
 }
 
 app-nav-menu.top-menu {
-  padding: 24px 0 0;
+    padding: 24px 0 0;
 }
+
 app-nav-menu.top-menu app-nav-item:last-child div {
-  border-bottom: 1px solid rgba(110, 110, 110, 0.5);
+    border-bottom: 1px solid rgba(110, 110, 110, 0.5);
 }
+
 app-nav-menu.top-menu app-nav-item:first-child div {
-  border-top: 1px solid rgba(110, 110, 110, 0.5);
+    border-top: 1px solid rgba(110, 110, 110, 0.5);
 }
 
 mat-sidenav .doc-version {
-  padding: 8px;
-  border-top: 1px solid #DBDBDB;
-}
-mat-sidenav .doc-version select {
-  outline: none;
-  width: 100%;
-  background: rgba(219, 219, 219, 0.5);
-  height: 32px;
-  border: 1px solid #DBDBDB;
-  color: #444444;
-}
-mat-sidenav .doc-version select option {
-  font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 14px;
-  font-size: 1.4rem;
+    padding: 8px;
+    border-top: 1px solid #DBDBDB;
 }
 
-.photo-viewer-dialog .mat-dialog-container{
-  border-radius: 0px !important;
+mat-sidenav .doc-version select {
+    outline: none;
+    width: 100%;
+    background: rgba(219, 219, 219, 0.5);
+    height: 32px;
+    border: 1px solid #DBDBDB;
+    color: #444444;
+}
+
+mat-sidenav .doc-version select option {
+    font-family: "Roboto", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-size: 14px;
+    font-size: 1.4rem;
+}
+
+.photo-viewer-dialog {
+    background: transparent;
+}
+
+.photo-viewer-dialog .mat-dialog-container {
+    border-radius: 0px !important;
+    padding: 0px;
 }
