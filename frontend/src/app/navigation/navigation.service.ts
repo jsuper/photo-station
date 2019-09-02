@@ -18,7 +18,7 @@ export class NavigationService {
   };
 
   private aggMenus = {
-    'albums' : {
+    'albums': {
       title: 'Albums',
       tooltip: 'Photo albums.',
       hidden: false,
@@ -31,35 +31,36 @@ export class NavigationService {
   };
   private aggregations: Object;
   constructor(private http: HttpClient) {
-    
+
   }
 
-  
+
 
   getNavMenus(): Observable<NavigationNode[]> {
     const menu = this.getBaseAggregation().pipe(map(val => {
       let dynamicNodes: NavigationNode[] = [];
       dynamicNodes.push(this.homeNode);
-      
-      for(let agg in val) {
-        let node:NavigationNode = this.aggMenus[agg] ;
-        let aggVal = Object.keys(val[agg]) ;
-        console.log(agg+':'+aggVal);
-        if(node && aggVal.length) {
-           let children:NavigationNode[] = [] ;
-           let aggregation = val[agg] ;
 
-           for(let name in aggregation) {
-             console.log('aggName:'+name);
-             children.push({
-               url: '/query?q='+name,
-               title: name+'('+aggregation[name]+')',
-               tooltip:name,
-               hidden:false
-             })
-           } 
-           node.children = children ;
-           dynamicNodes.push(node) ;
+      for (let agg in val) {
+        let node: NavigationNode = this.aggMenus[agg];
+        let aggVal = Object.keys(val[agg]);
+        console.log(agg + ':' + aggVal);
+        if (node && aggVal.length) {
+          let children: NavigationNode[] = [];
+          let aggregation = val[agg];
+
+          for (let name in aggregation) {
+            console.log('aggName:' + name);
+            children.push({
+              url: '/photos/' + agg,
+              title: name + '(' + aggregation[name] + ')',
+              tooltip: name,
+              hidden: false,
+              params: { "q": name }
+            })
+          }
+          node.children = children;
+          dynamicNodes.push(node);
         }
       }
       return dynamicNodes;

@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -359,21 +360,26 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   public static void main(String[] args) {
+    Random r = new Random();
     PhotoStoreImpl ps = new PhotoStoreImpl(args[0]);
+    String[] testTags = {"猪八戒", "团建", "人物"};
+    String[] testAlbums = {"猪八戒", "铁山坪"};
     ps.beforeChangedListeners.add(event -> {
       Set<String> tags = new HashSet<>();
       if (event.getPhoto().getTags() != null) {
         tags.addAll(event.getPhoto().getTags());
       }
-      tags.add("唐熙言");
+      tags.add(testTags[r.nextInt(testTags.length)]);
       event.getPhoto().setTags(tags);
 
+//      if (r.nextInt(10) % 2 == 0) {
       Set<String> albums = new HashSet<>();
       if (event.getPhoto().getAlbum() != null) {
         albums.addAll(event.getPhoto().getAlbum());
       }
-      albums.add("宝宝");
+      albums.add(testAlbums[r.nextInt(testAlbums.length)]);
       event.getPhoto().setAlbum(albums);
+//      }
     });
     ps.refresh();
   }

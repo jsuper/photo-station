@@ -1,0 +1,12 @@
+
+.header-bar {
+  display: block;
+  top: 0;
+  left: 0;
+  position: absolute;
+  height: 72px;
+  background-color: transparent;
+  width: 100%;
+  color: black;
+  text-align: right;
+}

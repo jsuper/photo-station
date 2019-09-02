@@ -230,3 +230,7 @@ mat-sidenav .doc-version select option {
   font-size: 14px;
   font-size: 1.4rem;
 }
+
+.photo-viewer-dialog .mat-dialog-container{
+  border-radius: 0px !important;
+}

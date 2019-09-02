@@ -25,6 +25,8 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MultiCollector;
@@ -173,6 +175,12 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
     if (query == null || query.isEmpty()) {
       imageQuery = new MatchAllDocsQuery();
+    } else {
+      BooleanQuery.Builder builder = new BooleanQuery.Builder();
+      query.forEach((k, v) -> {
+        builder.add(new TermQuery(new Term(k, String.valueOf(v))), BooleanClause.Occur.SHOULD);
+      });
+      imageQuery = builder.build();
     }
 
     int numDocs = from + size;
@@ -257,7 +265,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     Long size = Optional.ofNullable(document.getField("size"))
       .flatMap(f -> Optional.ofNullable(f.numericValue())).map(n -> n.longValue()).orElse(0l);
     Set<String> allTags = getSetField(document, "tags");
-    Set<String> album = getSetField(document, "album");
+    Set<String> album = getSetField(document, "albums");
 
     String nation = document.get("nation");
     String province = document.get("province");
@@ -328,7 +336,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
 
     if (metadata.getAlbum() != null) {
       for (String album : metadata.getAlbum()) {
-        document.add(new StringField("album", album, YES));
+        document.add(new StringField("albums", album, YES));
         document.add(new FacetField(ALBUMS_FACET_NAME, album));
       }
     }

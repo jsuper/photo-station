@@ -26,7 +26,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   private PhotoStore photoStore;
   private PhotoIndexStore photoIndexStore;
 
-  private static final String[] AGG_FIELD = new String[]{"tags", "albums","shoot_date"};
+  private static final String[] AGG_FIELD = new String[]{"tags", "albums", "shoot_date"};
 
   public PhotoRequestHandlerRegistry(PhotoStore photoStorage) {
     this.photoStore = photoStorage;
@@ -64,12 +64,20 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   private void handlePhotoLists(RoutingContext ctx) {
     HttpServerRequest request = ctx.request();
     String fromParam = request.getParam("from");
+    Map<String, Object> fq = Collections.emptyMap();
     int from = 0;
     if (fromParam != null && !fromParam.isBlank()) {
       from = Integer.parseInt(fromParam);
     }
+    String query = request.getParam("q");
+    if (query != null && !query.isBlank()) {
+      fq = Arrays.stream(query.split(",")).map(qf -> qf.split(":"))
+        .collect(Collectors.toMap(qf -> qf[0], qf -> qf[1]));
+
+    }
+
     try {
-      List<PhotoMetadata> data = photoIndexStore.list(from, PAGE_SIZE, Collections.emptyMap());
+      List<PhotoMetadata> data = photoIndexStore.list(from, PAGE_SIZE, fq);
       data.forEach(meta -> {
         String path = "//" + request.host() + "/photo/" + meta.getId();
         meta.setPath(path);
