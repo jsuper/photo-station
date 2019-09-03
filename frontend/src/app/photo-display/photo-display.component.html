@@ -1,28 +1,24 @@
 <div class="flex-container">
-  <div class="flex-photo-container" fxLayout="row wrap" fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1"
-       [infiniteScrollThrottle]="50" [infiniteScrollContainer]="selector" [fromRoot]="true" [scrollWindow]="false"
-       (scrolled)="onScrollDown()" [alwaysCallback]="true">
-    <div fxflex="auto" class="photo-box" *ngFor="let p of photos;let i = index" [attr.data-index]="i"
-     [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33"
-         [fxFlex.xs]="100">
-      <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
-        <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer(i)">
-          <div [ngStyle]="{ 'background-image': 'url(/api/photo/' + p.id + '?t=true)' }" class="photo-thumbnail">
-          </div>
+    <div class="flex-photo-container" fxLayout="row wrap" fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.main-container'" [fromRoot]="true" [scrollWindow]="false" (scrolled)="onScrollDown()">
+        <div fxflex="auto" class="photo-box" *ngFor="let p of photos;let i = index" [attr.data-index]="i" [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33" [fxFlex.xs]="100">
+            <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
+                <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer(i)">
+                    <div [ngStyle]="{ 'background-image': 'url(/api/photo/' + p.id + '?t=true)' }" class="photo-thumbnail">
+                    </div>
+                </div>
+                <mat-card-content>
+                    <div style="padding: 16px;">
+                        <div>
+                            <h3 title="Package / 2019">Package / 2019</h3>
+                        </div>
+                        <div class="caption">
+                            <mat-icon>calendar_today</mat-icon>{{p.shootingDate}}<br>
+                            <mat-icon>camera_alt</mat-icon>{{p.device}}<br>
+                            <mat-icon>room</mat-icon>{{p.locationInfo.nation && p.locationInfo.province ? p.locationInfo.nation+','+p.locationInfo.province:'Unknown'}}<br>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
         </div>
-        <mat-card-content>
-          <div style="padding: 16px;">
-            <div>
-              <h3 title="Package / 2019">Package / 2019</h3>
-            </div>
-            <div class="caption">
-              <mat-icon>calendar_today</mat-icon>{{p.shootingDate}}<br>
-              <mat-icon>camera_alt</mat-icon>{{p.device}}<br>
-              <mat-icon>room</mat-icon>{{p.locationInfo.nation && p.locationInfo.province ? p.locationInfo.nation+','+p.locationInfo.province:'Unknown'}}<br>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
     </div>
-  </div>
 </div>

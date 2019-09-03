@@ -15,13 +15,6 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class PhotoDisplayComponent implements OnInit {
 
-  selector = ".main-container"
-  total = 0;
-  throttle = 300;
-  scrollDistance = 1;
-  scrollUpDistance = 2;
-  direction = '';
-
   pageSize = 12;
   lastReturn = -1;
   from = 0;
