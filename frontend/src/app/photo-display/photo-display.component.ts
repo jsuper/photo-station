@@ -30,6 +30,8 @@ export class PhotoDisplayComponent implements OnInit {
   queryField: string;
   queryVal: string;
 
+  onScrolling = false;
+
   constructor(private photoService: PhotoService,
     private route: ActivatedRoute,
     private router: Router,
@@ -40,6 +42,7 @@ export class PhotoDisplayComponent implements OnInit {
       if (field == this.queryField && q == this.queryVal) {
         console.log("Url not changed...");
       } else {
+        this.onScrolling = false;
         this.queryField = field;
         this.queryVal = q;
         this.photos = [];
@@ -55,31 +58,39 @@ export class PhotoDisplayComponent implements OnInit {
   }
 
   onScrollDown() {
-    if (this.lastReturn == 0) {
+    if (!this.onScrolling) {
+      console.log("Called on scroll down");
+    }
+    this.onScrolling = true;
+    if (this.lastReturn != -1 && this.lastReturn < this.pageSize) {
       console.log("There is no more pictures.");
       return;
     }
     const q = this.queryField && this.queryVal ? this.queryField + ":" + this.queryVal : "";
-    this.photoService.search(this.from, q).subscribe(photos => {
-      this.lastReturn = this.photos.length;
-      if (photos && photos.length) {
-        this.from += photos.length;
-        for (let i = 0; i < photos.length; i++) {
-          this.photos.push(photos[i]);
+    this.photoService.search(this.from, q).subscribe({
+      next: filterPhotos => {
+        this.onScrolling = false;
+        this.lastReturn = filterPhotos.length;
+        console.log("last return: " + this.lastReturn);
+        if (filterPhotos && filterPhotos.length) {
+          this.from += filterPhotos.length;
+          for (let i = 0; i < filterPhotos.length; i++) {
+            this.photos.push(filterPhotos[i]);
+          }
         }
       }
     });
   }
 
-  openImageViewer() {
-    console.log("opened image");
+  openImageViewer(index: number) {
+    console.log("opened image:" + index);
     const dialogRef = this.dialog.open(PhotoViewerComponent, {
       minWidth: '100%',
       minHeight: '100%',
-      height:'100%',
-      width:'100%',
-      panelClass:'photo-viewer-dialog',
-      data: { name: 'demo' }
+      height: '100%',
+      width: '100%',
+      panelClass: 'photo-viewer-dialog',
+      data: { photo: this.photos[index] }
     });
   }
 

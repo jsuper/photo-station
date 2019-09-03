@@ -2,10 +2,11 @@
   <div class="flex-photo-container" fxLayout="row wrap" fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1"
        [infiniteScrollThrottle]="50" [infiniteScrollContainer]="selector" [fromRoot]="true" [scrollWindow]="false"
        (scrolled)="onScrollDown()" [alwaysCallback]="true">
-    <div fxflex="auto" class="photo-box" *ngFor="let p of photos" [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33"
+    <div fxflex="auto" class="photo-box" *ngFor="let p of photos;let i = index" [attr.data-index]="i"
+     [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33"
          [fxFlex.xs]="100">
       <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
-        <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer()">
+        <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer(i)">
           <div [ngStyle]="{ 'background-image': 'url(/api/photo/' + p.id + '?t=true)' }" class="photo-thumbnail">
           </div>
         </div>

@@ -273,6 +273,10 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     String district = document.get("district");
     String street = document.get("street");
 
+    IndexableField width = document.getField("width");
+    IndexableField height = document.getField("height");
+
+
     PhotoMetadata metadata = new PhotoMetadata();
     metadata.setId(id);
     metadata.setPath(path);
@@ -286,6 +290,8 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     metadata.setSize(size);
     metadata.setTags(allTags);
     metadata.setAlbum(album);
+    metadata.setWidth(width.numericValue().intValue());
+    metadata.setHeight(height.numericValue().intValue());
 
     LocationInfo locationInfo = new LocationInfo();
     locationInfo.setNation(nation);
@@ -315,9 +321,11 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     Document document = new Document();
 
     document.add(new StringField("id", metadata.getId(), YES));
-    document.add(new StoredField("path", metadata.getPath().toString()));
+    document.add(new StoredField("path", metadata.getPath()));
     document.add(new StoredField("type", metadata.getType()));
     document.add(new StoredField("device", metadata.getDevice()));
+    document.add(new StoredField("width", metadata.getWidth()));
+    document.add(new StoredField("height", metadata.getHeight()));
 
     document.add(new Field("size", new BytesRef(Bytes.longToBytes(metadata.getSize())), createType(true, false)));
     document.add(new Field("shootingDate", DateTools.dateToString(metadata.getShootingDate(), Resolution.SECOND), createType(true, false)));

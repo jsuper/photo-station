@@ -1,33 +1,52 @@
 <div mat-dialog-content class="photo-viewer" id="photo-viewer">
-    <div class="photo-viewer-container">
-        <div class="photo-viewer">
-            <div class="header-bar">
-                <span class="exit">
-                    <mat-icon>keyboard_backspace</mat-icon>
-                </span>
-                <div class="toolbar">
-                    <div class="button">
-                        <mat-icon>info</mat-icon>
-                    </div>
-                    <div class="button">
-                        <mat-icon>star_border</mat-icon>
-                    </div>
-                    <div class="button">
-                        <mat-icon>delete_outline</mat-icon>
-                    </div>
-                    <div class="button">
-                        <mat-icon>more_vert</mat-icon>
-                    </div>
-                </div>
-            </div>
-            <div class="images">
-                <div class="image-content">
+  <div class="photo-viewer-container">
+    <div class="photo-viewer">
+      <div class="header-bar">
+        <span class="exit">
+          <button mat-fab (click)="closeDialog()">
+            <mat-icon>keyboard_backspace</mat-icon>
+          </button>
+        </span>
+        <div class="toolbar">
+          <div class="button">
+            <button mat-fab>
+              <mat-icon>info</mat-icon>
+            </button>
+          </div>
+          <div class="button">
+            <button mat-fab>
+              <mat-icon>star_border</mat-icon>
+            </button>
+          </div>
+          <div class="button">
+            <button mat-fab>
+              <mat-icon>delete_outline</mat-icon>
+            </button>
 
-                </div>
-            </div>
-            <span class="previous">P</span>
-            <span class="next">N</span>
+          </div>
+          <div class="button">
+            <button mat-fab>
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
         </div>
-        <div class="info-viewer"></div>
+      </div>
+      <div class="images" [ngStyle]="{'height':imageHeight+'px','width': imageWidth+'px'}">
+        <div class="image-content">
+          <img [src]="src" style="height: auto;width:100%;">
+        </div>
+      </div>
+      <span class="previous">
+        <button mat-fab>
+          <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+      </span>
+      <span class="next">
+        <button mat-fab>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
+      </span>
     </div>
+    <div class="info-viewer"></div>
+  </div>
 </div>
