@@ -113,6 +113,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
         type = metadataFromDisk.getType();
         if (metadataFromDisk != null && !Strings.isBlank(metadataFromDisk.getPath())) {
           try {
+            System.out.println(metadataFromDisk.getPath()) ;
             imagePath = new File(metadataFromDisk.getPath());
           } catch (Exception e) {
             e.printStackTrace();
