@@ -67,15 +67,17 @@ export class PhotoDisplayComponent implements OnInit {
       return;
     }
     const q = this.queryField && this.queryVal ? this.queryField + ":" + this.queryVal : "";
-    this.photoService.search(this.from, q).subscribe({
-      next: filterPhotos => {
-        this.onScrolling = false;
-        this.lastReturn = filterPhotos.length;
-        console.log("last return: " + this.lastReturn);
-        if (filterPhotos && filterPhotos.length) {
-          this.from += filterPhotos.length;
-          for (let i = 0; i < filterPhotos.length; i++) {
-            this.photos.push(filterPhotos[i]);
+    this.photoService.search(this.from, this.pageSize, q).subscribe({
+      next: () => {
+        filterPhotos => {
+          this.onScrolling = false;
+          this.lastReturn = filterPhotos.length;
+          console.log("last return: " + this.lastReturn);
+          if (filterPhotos && filterPhotos.length) {
+            this.from += filterPhotos.length;
+            for (let i = 0; i < filterPhotos.length; i++) {
+              this.photos.push(filterPhotos[i]);
+            }
           }
         }
       }

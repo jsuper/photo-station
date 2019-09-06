@@ -64,6 +64,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   private void handlePhotoLists(RoutingContext ctx) {
     HttpServerRequest request = ctx.request();
     String fromParam = request.getParam("from");
+    String size = request.getParam("size");
     Map<String, Object> fq = Collections.emptyMap();
     int from = 0;
     if (fromParam != null && !fromParam.isBlank()) {
@@ -77,7 +78,8 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     }
 
     try {
-      List<PhotoMetadata> data = photoIndexStore.list(from, PAGE_SIZE, fq);
+      int pageSize = size == null || size.isBlank() ? PAGE_SIZE : Integer.parseInt(size);
+      List<PhotoMetadata> data = photoIndexStore.list(from, pageSize, fq);
       data.forEach(meta -> {
         String path = "//" + request.host() + "/photo/" + meta.getId();
         meta.setPath(path);

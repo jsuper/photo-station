@@ -10,8 +10,8 @@ export class PhotoService {
   private photoApi = "api/photos";
   constructor(private http:HttpClient) { }
 
-  search(from:number,query:string):Observable<Object[]> {
-    const apiWithParam = this.photoApi+"?from="+from+"&q="+query;
+  search(from:number,size:number,query:string):Observable<Object[]> {
+    const apiWithParam = this.photoApi+"?from="+from+'&size='+size+"&q="+query;
     return this.http.get<Object[]>(apiWithParam) ;
   }
 }
