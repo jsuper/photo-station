@@ -22,7 +22,6 @@
             <button mat-fab>
               <mat-icon>delete_outline</mat-icon>
             </button>
-
           </div>
           <div class="button">
             <button mat-fab>
@@ -31,17 +30,17 @@
           </div>
         </div>
       </div>
-      <div class="images" [ngStyle]="{'height':imageHeight+'px','width': imageWidth+'px'}">
+      <div class="images" [ngStyle]="{ height: imageHeight + 'px', width: imageWidth + 'px' }">
         <div class="image-content">
-          <img [src]="src" style="height: auto;width:100%;">
+          <img [src]="src" style="height: auto;width:100%;" />
         </div>
       </div>
-      <span class="previous">
+      <span class="previous" [hidden]="index == 0" (click)="showPreviousPhoto()">
         <button mat-fab>
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
       </span>
-      <span class="next">
+      <span class="next" [hidden]="index == max - 1" (click)="showNextPhoto()">
         <button mat-fab>
           <mat-icon>keyboard_arrow_right</mat-icon>
         </button>

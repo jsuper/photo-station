@@ -290,8 +290,14 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     metadata.setSize(size);
     metadata.setTags(allTags);
     metadata.setAlbum(album);
-    metadata.setWidth(width.numericValue().intValue());
-    metadata.setHeight(height.numericValue().intValue());
+    if (width != null) {
+      Number widthNumber = width.numericValue();
+      metadata.setWidth(widthNumber.intValue());
+    }
+    if (height != null) {
+      Number heightNumber = height.numericValue();
+      metadata.setHeight(heightNumber.intValue());
+    }
 
     LocationInfo locationInfo = new LocationInfo();
     locationInfo.setNation(nation);
