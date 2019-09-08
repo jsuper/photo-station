@@ -12,6 +12,7 @@ import { PhotoDisplayComponent } from "app/photo-display/photo-display.component
 import { NavMenuComponent } from "app/layout/nav-menu/nav-menu.component";
 import { NavItemComponent } from "app/layout/nav-item/nav-item.component";
 import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
+import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.component';
 
 
 @NgModule({
@@ -21,6 +22,7 @@ import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
     NavMenuComponent,
     NavItemComponent,
     PhotoViewerComponent,
+    PhotoUploaderComponent,
   ],
   imports: [
     BrowserModule,

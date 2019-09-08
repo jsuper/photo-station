@@ -1,0 +1,20 @@
+<input type="file" style="display:none" #files (change)="firePhotoChosen($event)" multiple
+       accept=".3fr,.3gp,.arw,.avi,.cr2,.crw,.dc2,.dcr,.dng,.erf,.heic,.jpeg,.k25,.kdc,.mdc,.mef,.mkv,.mos,.mov,.mrw,.mts,.nef,.nrw,.orf,.pef,.qtk,.raf,.raw,.rdc,.rw2,.sr2,.srf,.x3f,image/bmp,image/gif,image/jpeg,image/png,image/tiff,image/webp,video/mp4,video/x-m4v,video/*">
+<button mat-button (click)="files.click()">
+  <mat-icon>cloud_upload</mat-icon>
+  上传
+</button>
+
+
+<div class="uploader-indicator" *ngIf="uploading">
+  <div class="photo-preview">
+    <img [src]="preview" height="100px" width="100px">
+  </div>
+  <div class="uploader-progress">
+    <span class="uploader-info">正在上传至</span>
+    <h3>照片库</h3>
+    <span class="uploader-info">第5张，共5张</span>
+    <mat-progress-bar class="uploader-progress-bar" color="preimary" mode="indeterminate" value="50" bufferValue="70">
+    </mat-progress-bar>
+  </div>
+</div>
