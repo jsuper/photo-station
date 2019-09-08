@@ -4,7 +4,7 @@ import { PhotoDisplayComponent } from './photo-display/photo-display.component';
 
 
 const routes: Routes = [
-  // { path: '', redirectTo: '/photos', pathMatch: 'full' },
+  { path: '', redirectTo: '/photos', pathMatch: 'full', data: { 'q': '' } },
   { path: 'photos', component: PhotoDisplayComponent },
   { path: 'photos/:field', component: PhotoDisplayComponent }
 ];

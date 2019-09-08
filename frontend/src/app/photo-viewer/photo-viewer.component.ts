@@ -21,10 +21,8 @@ export class PhotoViewerComponent implements OnInit {
     let photo = data['photo'];
     this.index = data['index'];
     this.photoReader = data['photoReader'];
-    this.max = data['max'];
-
+    this.max = data['max']
     this.reloadPhoto(photo);
-
   }
 
   reloadPhoto(photo: any) {
@@ -37,7 +35,6 @@ export class PhotoViewerComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.photoReader(0));
   }
 
   closeDialog() {
@@ -45,7 +42,6 @@ export class PhotoViewerComponent implements OnInit {
   }
 
   showPreviousPhoto() {
-    console.log("Show previous photos");
     this.index--;
     let photo = this.photoReader(this.index);
     if (photo) {
@@ -57,7 +53,6 @@ export class PhotoViewerComponent implements OnInit {
     this.index++;
     let photo = this.photoReader(this.index);
     if (photo) {
-      console.log(photo);
       this.reloadPhoto(photo);
     }
   }

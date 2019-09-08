@@ -11,10 +11,11 @@ export class NavigationService {
 
   private nav_agg = "api/nav-agg";
   private homeNode: NavigationNode = {
-    url: '/',
+    url: '/photos',
     title: 'Photos',
     tooltip: 'Show all photos',
-    hidden: false
+    hidden: false,
+    params: { 'q': '' }
   };
 
   private aggMenus = {
@@ -44,13 +45,11 @@ export class NavigationService {
       for (let agg in val) {
         let node: NavigationNode = this.aggMenus[agg];
         let aggVal = Object.keys(val[agg]);
-        console.log(agg + ':' + aggVal);
         if (node && aggVal.length) {
           let children: NavigationNode[] = [];
           let aggregation = val[agg];
 
           for (let name in aggregation) {
-            console.log('aggName:' + name);
             children.push({
               url: '/photos/' + agg,
               title: name + '(' + aggregation[name] + ')',

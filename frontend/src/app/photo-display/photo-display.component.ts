@@ -30,8 +30,9 @@ export class PhotoDisplayComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog) {
     this.route.queryParams.subscribe(qp => {
-      let q = qp['q'];
+      let q = qp['q'] || '';
       let field = this.route.snapshot.params['field'];
+
       if (this.queryVal === q && this.queryField == field) {
         console.log("Page query not changed.");
       } else {
@@ -105,9 +106,9 @@ export class PhotoDisplayComponent implements OnInit {
       width: '100%',
       panelClass: 'photo-viewer-dialog',
       data: {
-        max:this.photos.length,
-        photo: this.photos[index], 
-        index: index, 
+        max: this.photos.length,
+        photo: this.photos[index],
+        index: index,
         photoReader: index => {
           return this.photos[index];
         }
