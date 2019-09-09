@@ -14,7 +14,8 @@
     <span class="uploader-info">正在上传至</span>
     <h3>照片库</h3>
     <span class="uploader-info">第{{current+1}}张，共{{total}}张</span>
-    <mat-progress-bar class="uploader-progress-bar" color="preimary" mode="determinate" value="50" bufferValue="70">
+    <mat-progress-bar class="uploader-progress-bar" color="preimary" mode="determinate"
+                      [value]="progress">
     </mat-progress-bar>
   </div>
 </div>

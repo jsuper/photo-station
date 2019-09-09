@@ -28,6 +28,11 @@ export class NavigationService {
       title: 'Tags',
       tooltip: 'All tags in photos',
       hidden: false,
+    },
+    "shoot_date":{
+      title:'Date & Time',
+      tooltip: 'Shooting date',
+      hidden: false
     }
   };
   private aggregations: Object;

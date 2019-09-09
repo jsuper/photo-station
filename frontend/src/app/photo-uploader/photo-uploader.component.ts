@@ -11,10 +11,11 @@ export class PhotoUploaderComponent implements OnInit {
 
   uploading: boolean = false;
 
-  preview;
+  preview = '';
 
   total: number;
   current: number;
+  progress: number;
 
   uploadQueue: File[] = [];
 
@@ -24,28 +25,45 @@ export class PhotoUploaderComponent implements OnInit {
   }
 
   firePhotoChosen(fileInput: any) {
+    this.reset();
     let files = <FileList>fileInput.target.files;
 
     for (let i = 0; i < files.length; i++) {
       this.uploadQueue.push(files[i]);
     }
     this.total = files.length;
-    this.doUploadFile();
+    if (this.total > 0) {
+      this.doUploadFile();
+    }
   }
 
   doUploadFile() {
+    this.current = -1;
     this.uploading = true;
-    this.current = 0;
     this.doNextSubmit();
   }
 
+  reset() {
+    this.uploading = false;
+    this.uploadQueue = [];
+    this.total = 0;
+    this.progress = 0;
+    this.preview = '';
+  }
+
   doNextSubmit() {
+    this.current++;
+    this.progress = Math.floor((this.current + 1) / this.total * 100);
     if (this.current > this.total) {
+      console.log("No more files");
+      // this.reset();
       return;
     }
     let file = this.uploadQueue[this.current];
 
     if (file == null) {
+      console.log("no file");
+      this.reset();
       return;
     }
     let previewReader = new FileReader();
@@ -60,14 +78,7 @@ export class PhotoUploaderComponent implements OnInit {
 
   doHttpSubmit(data: FormData, callback: Function) {
     this.http.post('/api/photos/upload', data).subscribe(resp => {
-      console.log("Upload result: " + resp);
-      this.current++;
-      if (this.current >= this.total) {
-        console.log('上传完毕');
-        return;
-      } else {
-        callback();
-      }
+      callback();
     });
   }
 }

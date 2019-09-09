@@ -18,8 +18,9 @@ import javax.imageio.ImageIO;
 public class MetadataReader {
 
   public static void main(String[] args) throws ImageProcessingException, IOException, MetadataException {
-    String img = "C:\\Users\\Ling\\Pictures\\devops.png";
+//    String img = "C:\\Users\\Ling\\Pictures\\devops.png";
 //    String img = "D:\\photos\\photos\\2015\\3\\IMG_4243.JPG";
+    String img = "D:\\test-photos\\photos\\2017\\8\\IMG_20170914_162704.jpg";
     Metadata metadata = ImageMetadataReader.readMetadata(new File(img));
 
 
