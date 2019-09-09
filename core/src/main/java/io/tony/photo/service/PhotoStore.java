@@ -1,6 +1,7 @@
 package io.tony.photo.service;
 
 import java.io.Closeable;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,8 @@ import io.tony.photo.pojo.PhotoMetadata;
 public interface PhotoStore extends Closeable {
 
   boolean add(Path photo);
+
+  boolean add(InputStream photoStream);
 
   boolean add(List<Path> photos);
 

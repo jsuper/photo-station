@@ -48,7 +48,10 @@ public class WebServer implements Closeable {
 
   public void start() {
     if (started.compareAndSet(false, true)) {
-      this.registries.stream().forEach(registry -> registry.buildRequestRegistry(router));
+      this.registries.stream().forEach(registry -> {
+        registry.setVertx(this.vertx);
+        registry.buildRequestRegistry(router);
+      });
       if (log.isDebugEnabled()) {
         router.getRoutes().forEach(route -> log.debug("Mapped {}", route.getPath()));
       }

@@ -26,12 +26,36 @@ export class PhotoViewerComponent implements OnInit {
   }
 
   reloadPhoto(photo: any) {
+    this.src = "/api/photo/" + photo.id;
+
     let width = photo.width;
     let height = photo.height;
-    let ratio: number = window.innerHeight / height;
-    this.imageHeight = window.innerHeight;
-    this.imageWidth = Math.floor(width * ratio);
-    this.src = "/api/photo/" + photo.id;
+    console.log("photo: " + width + "," + height);
+
+    let maxWidth = window.innerWidth;
+    let maxHeight = window.innerHeight;
+
+    if (width > maxWidth || height > maxHeight) {
+      if (width > maxWidth && height < maxHeight) {
+        //以x缩放
+        let ratio: number = maxWidth / width;
+        this.imageWidth = maxWidth;
+        this.imageHeight = Math.floor(height * ratio);
+      } else if (width < maxWidth && height > maxHeight) {
+        //以y缩放
+        let ratio: number = maxHeight / height;
+        this.imageHeight = maxHeight;
+        this.imageWidth = Math.floor(ratio * width);
+      } else {
+        let ratio: number = window.innerHeight / height;
+        this.imageHeight = window.innerHeight;
+        this.imageWidth = Math.floor(width * ratio);
+      }
+    } else {
+      this.imageHeight = height;
+      this.imageWidth = width;
+    }
+
   }
 
   ngOnInit() {

@@ -117,7 +117,7 @@ public class PhotoStoreImpl implements PhotoStore {
         try {
           //create thumbnail for current photo
           int width = photo.getWidth();
-          int thumbnailHeight = (int) ((Double.valueOf(THUMBNAIL_WIDTH) / width) * photo.getHeight());
+          int thumbnailHeight = width == -1 ? 600 : (int) ((Double.valueOf(THUMBNAIL_WIDTH) / width) * photo.getHeight());
           Thumbnails.of(Paths.get(photo.getPath()).toFile())
             .outputQuality(1.0d).antialiasing(Antialiasing.ON).size(THUMBNAIL_WIDTH, thumbnailHeight)
             .allowOverwrite(true).outputFormat("jpg")
@@ -185,6 +185,11 @@ public class PhotoStoreImpl implements PhotoStore {
       e.printStackTrace();
       log.error("Failed move photo from {} to {}.", photo, targetStoreFile, e);
     }
+    return false;
+  }
+
+  @Override
+  public boolean add(InputStream photoStream) {
     return false;
   }
 
