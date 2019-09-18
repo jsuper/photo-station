@@ -9,8 +9,8 @@
         </span>
         <div class="toolbar">
           <div class="button">
-            <button mat-fab>
-              <mat-icon>info</mat-icon>
+            <button mat-fab (click)="showPhotoInformation()">
+              <mat-icon>info_outline</mat-icon>
             </button>
           </div>
           <div class="button">
@@ -46,6 +46,107 @@
         </button>
       </span>
     </div>
-    <div class="info-viewer"></div>
+  </div>
+  <div class="info" [hidden]="hiddenInformation">
+    <div style="display: flex;flex-direction: row-reverse;align-items: center;
+      font: 400 1.125rem/1.5rem 'Google Sans',Roboto,Arial,sans-serif;justify-content:flex-end;padding:8px;">
+      信息
+      <button mat-icon-button (click)="showPhotoInformation()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div style="padding: 20px;">
+      <mat-form-field style="width: 100%;">
+        <input matInput type="text" placeholder="照片标题..." [(ngModel)]="currentPhoto.title"
+               (keyup)="onInputChanged($event,'title')">
+        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('title')">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+
+    <div style="padding: 20px">
+      <mat-form-field class="example-chip-list" style="width: 100%">
+        <mat-chip-list #albumList aria-label="Albums selection">
+          <mat-chip *ngFor="let alb of currentPhoto.album" removable="true" (removed)="removeElement(alb,'album')">
+            {{alb}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <input placeholder="Albums..." matChipInputAddOnBlur="true"
+                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputFor]="albumList"
+                 (matChipInputTokenEnd)="addElement($event,'album')">
+        </mat-chip-list>
+      </mat-form-field>
+    </div>
+
+    <div style="padding: 20px">
+      <mat-form-field class="example-chip-list" style="width: 100%">
+        <mat-chip-list #tagList aria-label="Tags selection">
+          <mat-chip *ngFor="let tag of currentPhoto.tags" removable="true" color="primary"
+                    (removed)="removeElement(tag,'tags')">
+            {{tag}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <input placeholder="Labels..." [matChipInputFor]="tagList" matChipInputAddOnBlur="true"
+                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                 (matChipInputTokenEnd)="addElement($event,'tags')">
+        </mat-chip-list>
+      </mat-form-field>
+    </div>
+    <div style="padding: 20px;">
+      <mat-form-field style="width: 100%;">
+        <textarea matInput type="text" placeholder="照片描述..." [(ngModel)]="currentPhoto.note"
+               (keyup)="onInputChanged($event,'note')" style="resize: none;min-height: 80px;"></textarea>
+        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('note')">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <div class="photo-info-detail">
+      <div class="title">
+        详情
+      </div>
+      <dl style="margin: 0;padding: 0;">
+        <div class="row">
+          <dt>
+            <mat-icon>event_outline</mat-icon>
+          </dt>
+          <dd>
+            <div class="headline">2019年9月18日</div>
+            <div class="subline">
+              <span class="sprMub">周三，下午14:32</span>
+            </div>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>
+            <mat-icon>image_outline</mat-icon>
+          </dt>
+          <dd>
+            <div class="headline">IMG_4235.JPG</div>
+            <div class="subline">
+              <span class="sprMUb">11.1MP</span>
+              <span class="sprMUb">4080 x 2700</span>
+              <span class="sprMUb"> 1.7MB</span>
+            </div>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>
+            <mat-icon>camera_outline</mat-icon>
+          </dt>
+          <dd>
+            <div class="headline">Canon Canon EOS 5D Mark II</div>
+            <div class="subline">
+              <span class="sprMUb" aria-label="光圈：ƒ/8">ƒ/8</span>
+              <span class="sprMUb" aria-label="曝光时间：1/125">1/125</span>
+              <span class="sprMUb" aria-label="焦距：35 毫米">35毫米</span>
+              <span class="sprMUb" aria-label="">ISO640</span></div>
+          </dd>
+        </div>
+      </dl>
+    </div>
   </div>
 </div>

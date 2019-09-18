@@ -5,18 +5,25 @@
   max-height: 100% !important;
   background: #000;
   color: white;
+  display: flex;
+}
+
+.photo-viewer-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
 .header-bar {
   display: block;
   top: 0;
   left: 0;
-  position: absolute;
   height: 72px;
   background-color: transparent;
   width: 100%;
   text-align: right;
   z-index: 100;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4));
 }
 
 .header-bar .exit {
@@ -33,28 +40,36 @@
   margin: 8px 0;
 }
 
-.photo-viewer button {
+.photo-viewer-container button {
   background-color: transparent;
   color: #fff;
-
+  box-shadow: none !important;
 }
 
-.photo-viewer button::before {
+.photo-viewer-container button::before {
   opacity: .08;
 }
 
 .photo-viewer .previous {
-  top: 50%;
   position: absolute;
-  left: 50px;
   transform: translateY(-50%);
+  top: 50%;
+  left: 28px;
 }
 
 .photo-viewer .next {
-  top: 50%;
   position: absolute;
-  right: 50px;
+  right: 28px;
+  top: 50%;
   transform: translateY(-50%);
+}
+
+.photo-viewer .previous button {
+  background: rgba(66, 66, 66, 0.54);
+}
+
+.photo-viewer .next button {
+  background: rgba(66, 66, 66, 0.54);
 }
 
 .images {
@@ -64,4 +79,82 @@
   left: 0;
   right: 0;
   bottom: 0;
+  transition: all 0.5s;
+}
+
+.photo-viewer .info {
+  width: 340px;
+  background-color: #fff;
+  color: #000;
+}
+
+.photo-viewer .info button {
+  color: #000;
+}
+
+.photo-info-detail .row {
+  padding: 18px 24px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.photo-info-detail .title {
+  color: #80868b;
+  padding: 14px 24px;
+  letter-spacing: .07272727em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: .6875rem;
+  font-weight: 500;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.photo-info-detail .row dt {
+  min-width: 40px;
+}
+
+.photo-info-detail .row dd {
+  margin: 0;
+}
+
+.photo-info-detail mat-icon {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.photo-info-detail .headline {
+  color: #3c4043;
+  word-wrap: break-word;
+  letter-spacing: .00625em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+.photo-info-detail .subline {
+  -webkit-align-items: center;
+  align-items: center;
+  color: #5f6368;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  margin-top: 0;
+  letter-spacing: .01428571em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: .875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+}
+
+.subline .sprMUb {
+  margin-top: 0;
+  margin-right: 12px;
+}
+
+.info input.mat-chip-input {
+  width: 20px !important;
+  flex: 1 0 20px !important;
 }

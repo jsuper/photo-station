@@ -367,7 +367,7 @@ public class PhotoStoreImpl implements PhotoStore {
   public static void main(String[] args) {
     Random r = new Random();
     PhotoStoreImpl ps = new PhotoStoreImpl(args[0]);
-    /*String[] testTags = {"猪八戒", "团建", "人物"};
+    String[] testTags = {"猪八戒", "团建", "人物"};
     String[] testAlbums = {"猪八戒", "铁山坪"};
     ps.beforeChangedListeners.add(event -> {
       Set<String> tags = new HashSet<>();
@@ -377,15 +377,15 @@ public class PhotoStoreImpl implements PhotoStore {
       tags.add(testTags[r.nextInt(testTags.length)]);
       event.getPhoto().setTags(tags);
 
-//      if (r.nextInt(10) % 2 == 0) {
-      Set<String> albums = new HashSet<>();
-      if (event.getPhoto().getAlbum() != null) {
-        albums.addAll(event.getPhoto().getAlbum());
+      if (r.nextInt(10) % 2 == 0) {
+        Set<String> albums = new HashSet<>();
+        if (event.getPhoto().getAlbum() != null) {
+          albums.addAll(event.getPhoto().getAlbum());
+        }
+        albums.add(testAlbums[r.nextInt(testAlbums.length)]);
+        event.getPhoto().setAlbum(albums);
       }
-      albums.add(testAlbums[r.nextInt(testAlbums.length)]);
-      event.getPhoto().setAlbum(albums);
-//      }
-    });*/
+    });
     ps.refresh();
   }
 }

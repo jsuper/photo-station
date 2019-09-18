@@ -13,6 +13,7 @@ import { NavMenuComponent } from "app/layout/nav-menu/nav-menu.component";
 import { NavItemComponent } from "app/layout/nav-item/nav-item.component";
 import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.componen
     MaterialModule,
     FlexLayoutModule,
     InfiniteScrollModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   entryComponents: [
     PhotoViewerComponent,],

@@ -11,7 +11,7 @@ export class PhotoUploaderComponent implements OnInit {
 
   uploading: boolean = false;
 
-  preview = '';
+  preview:string = '';
 
   total: number;
   current: number;
@@ -69,7 +69,7 @@ export class PhotoUploaderComponent implements OnInit {
     let previewReader = new FileReader();
     previewReader.readAsDataURL(file);
     previewReader.onload = e => {
-      this.preview = previewReader.result;
+      this.preview = previewReader.result.toString();
     }
     let formData = new FormData();
     formData.append('file', file);

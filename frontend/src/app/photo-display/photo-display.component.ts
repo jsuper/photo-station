@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, fromEvent, merge, of } from 'rxjs';
 import { map, filter, debounceTime, tap, switchAll, distinct, flatMap, switchMap } from 'rxjs/operators';
 
-import { Photo } from "app/photo";
+import { Photo } from "app/photo.model";
 import { PhotoService } from "app/photo.service";
 import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { MatDialog } from '@angular/material/dialog';
@@ -17,13 +17,13 @@ export class PhotoDisplayComponent implements OnInit {
 
   pageSize = 12;
   from = 0;
-  photos = [];
+  photos: Photo[] = [];
 
   queryField: string;
   queryVal: string;
 
   //cache photos
-  photosCache = [];
+  photosCache: Photo[] = [];
 
   constructor(private photoService: PhotoService,
     private route: ActivatedRoute,
@@ -33,9 +33,7 @@ export class PhotoDisplayComponent implements OnInit {
       let q = qp['q'] || '';
       let field = this.route.snapshot.params['field'];
 
-      if (this.queryVal === q && this.queryField == field) {
-        console.log("Page query not changed.");
-      } else {
+      if (this.queryVal != q || this.queryField != field) {
         this.queryField = field;
         this.queryVal = q;
         this.photosCache = [];
@@ -61,27 +59,25 @@ export class PhotoDisplayComponent implements OnInit {
     this.photosCache = this.photosCache.slice(loadedIndex);
   }
 
-  loadPhotos(from: number, callack) {
+  loadPhotos(from: number, callback) {
     const q = this.queryField && this.queryVal ? this.queryField + ":" + this.queryVal : "";
     this.photoService.search(from, this.pageSize * 3, q).subscribe(resp => {
       this.from += resp.length;
       resp.forEach(val => {
         this.photosCache.push(val);
       });
-      if (callack && typeof callack == "function") {
-        callack();
+      if (callback && typeof callback == "function") {
+        callback();
       }
     });
   }
 
   onScrollDown() {
     if (this.photosCache.length == 0) {
-      console.log("There is no more photos.");
       return;
     }
     let hasMorePage = true;
     if (this.photosCache.length < this.pageSize) {
-      console.log("There is no more pages...");
       hasMorePage = false;
     }
 
