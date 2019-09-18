@@ -1,3 +1,6 @@
+/**
+ * 地理位置元数据
+ */
 export interface Location {
   nation?: string,
   province?: string,
@@ -5,6 +8,17 @@ export interface Location {
   district?: string,
   street?: string,
   address?: string
+}
+
+/**
+ * 相机元数据
+ */
+export interface Camera {
+  maker?: string,
+  aperture?: string,
+  shutter?: string,
+  hyperfocal?: string,
+  iso: string,
 }
 
 export interface Photo {
@@ -24,5 +38,6 @@ export interface Photo {
   tags?: string[],
   timestamp?: number,
   type?: string,
-  locationInfo?: Location
+  locationInfo?: Location,
+  camera?: Camera,
 }

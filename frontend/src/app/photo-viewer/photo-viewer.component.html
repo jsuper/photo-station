@@ -97,7 +97,7 @@
     <div style="padding: 20px;">
       <mat-form-field style="width: 100%;">
         <textarea matInput type="text" placeholder="照片描述..." [(ngModel)]="currentPhoto.note"
-               (keyup)="onInputChanged($event,'note')" style="resize: none;min-height: 80px;"></textarea>
+                  (keyup)="onInputChanged($event,'note')" style="resize: none;min-height: 80px;"></textarea>
         <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('note')">
           <mat-icon>close</mat-icon>
         </button>
@@ -114,9 +114,9 @@
             <mat-icon>event_outline</mat-icon>
           </dt>
           <dd>
-            <div class="headline">2019年9月18日</div>
+            <div class="headline">{{currentPhoto.shootingDate|date:'yyyy-MMMM-dd'}}</div>
             <div class="subline">
-              <span class="sprMub">周三，下午14:32</span>
+              <span class="sprMub">{{currentPhoto.shootingDate|date:'EEE, aaa HH:mm'}}</span>
             </div>
           </dd>
         </div>

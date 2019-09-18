@@ -25,11 +25,15 @@ export class PhotoViewerComponent implements OnInit {
 
   currentPhoto: Photo;
   dataChanged: boolean;
+  readonly currentPhotoTitle: string;
+  readonly currentPhotoNote: string;
 
   constructor(public dialogRef: MatDialogRef<PhotoViewerComponent>,
     @Inject(MAT_DIALOG_DATA) public data: object) {
 
     this.currentPhoto = data['photo'];
+    this.currentPhotoTitle = this.currentPhoto.title;
+    this.currentPhotoNote = this.currentPhoto.note;
     this.dataChanged = false;
     this.index = data['index'];
     this.photoReader = data['photoReader'];
@@ -73,11 +77,20 @@ export class PhotoViewerComponent implements OnInit {
   ngOnInit() {
   }
 
+  checkAndSaveChangedData(): void {
+    if (this.dataChanged) {
+      console.log("Data has been changed.");
+    }
+    this.dataChanged = false;
+  }
+
   closeDialog() {
+    this.checkAndSaveChangedData();
     this.dialogRef.close('Done');
   }
 
   showPreviousPhoto() {
+    this.checkAndSaveChangedData();
     this.index--;
     let photo: Photo = this.photoReader(this.index);
     if (photo) {
@@ -87,6 +100,7 @@ export class PhotoViewerComponent implements OnInit {
   }
 
   showNextPhoto() {
+    this.checkAndSaveChangedData();
     this.index++;
     let photo = this.photoReader(this.index);
     if (photo) {
@@ -121,22 +135,6 @@ export class PhotoViewerComponent implements OnInit {
     if ((value || '').trim()) {
       this.currentPhoto[target].push(value);
       this.dataChanged = true;
-      // switch (target) {
-      //   case 'album':
-      //     if (this.currentPhoto.album && this.currentPhoto.album.length) {
-      //       this.currentPhoto.album.push(value);
-      //     } else {
-      //       this.currentPhoto.album = [value];
-      //     }
-      //     break;
-      //   case 'tags':
-      //     if (this.currentPhoto.tags && this.currentPhoto.tags.length) {
-      //       this.currentPhoto.tags.push(value);
-      //     } else {
-      //       this.currentPhoto.tags = [value];
-      //     }
-      //     break;
-      // }
     }
     input.value = '';
   }
@@ -147,26 +145,18 @@ export class PhotoViewerComponent implements OnInit {
       this.currentPhoto[target].splice(index, 1);
       this.dataChanged = true;
     }
-    // switch (target) {
-    //   case 'album':
-    //     const albumIndex = this.currentPhoto.album.indexOf(ele);
-    //     if (albumIndex >= 0) {
-    //       this.currentPhoto.album.splice(albumIndex, 1);
-    //     }
-    //     break;
-    //   case 'tags':
-    //     const index = this.currentPhoto.tags.indexOf(ele);
-    //     if (index >= 0) {
-    //       this.currentPhoto.tags.splice(index, 1);
-    //     }
-    //     break;
-    // }
   }
 
   onInputChanged(event: KeyboardEvent, field: string): void {
     const input = event.target;
     const value: string = input['value'];
-    if (value != this.currentPhoto[field]) {
+    let old: string;
+    switch (field) {
+      case 'title': old = this.currentPhotoTitle; break;
+      case 'note': old = this.currentPhotoNote; break;
+    }
+
+    if (value != old) {
       this.dataChanged = true;
     }
   }
