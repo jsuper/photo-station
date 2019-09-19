@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import io.tony.photo.pojo.LocationInfo;
+import io.tony.photo.pojo.Location;
 import io.tony.photo.service.LbsService;
 import io.tony.photo.utils.Http;
 import io.tony.photo.utils.Json;
@@ -34,7 +34,7 @@ public class TxLbsService implements LbsService {
   }
 
   @Override
-  public Optional<LocationInfo> getLocation(double latitude, double longitude) {
+  public Optional<Location> getLocation(double latitude, double longitude) {
     StringBuilder request = new StringBuilder(api).append("?")
       .append("location=").append(latitude).append("%2C").append(longitude).append("&")
       .append("get_poi=0").append("&").append("key=").append(key)
@@ -48,7 +48,7 @@ public class TxLbsService implements LbsService {
           Map<String, Object> jsonMap = Json.from(location, Map.class);
           if (jsonMap != null && jsonMap.containsKey("result")) {
             Map<String, Object> result = (Map<String, Object>) jsonMap.get("result");
-            LocationInfo li = new LocationInfo();
+            Location li = new Location();
             String address = (String) result.getOrDefault("address", "");
             Map<String, String> addressMap = (Map<String, String>) result.getOrDefault("address_component", Collections.emptyMap());
             String nation = addressMap.get("nation");

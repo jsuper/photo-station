@@ -6,7 +6,7 @@ import lombok.Data;
  * 地理信息
  */
 @Data
-public class LocationInfo {
+public class Location {
 
   //国家
   private String nation;

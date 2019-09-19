@@ -1,6 +1,6 @@
 package io.tony.photo.service;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 import lombok.Getter;
 
 /**
@@ -17,11 +17,11 @@ public interface PhotoChangedListener {
   @Getter
   class PhotoChangedEvent {
 
-    private PhotoMetadata photo;
+    private Photo photo;
 
     private EventType eventType;
 
-    public PhotoChangedEvent(PhotoMetadata photo, EventType eventType) {
+    public PhotoChangedEvent(Photo photo, EventType eventType) {
       this.photo = photo;
       this.eventType = eventType;
     }

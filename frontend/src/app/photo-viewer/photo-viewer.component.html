@@ -58,8 +58,9 @@
     <div style="padding: 20px;">
       <mat-form-field style="width: 100%;">
         <input matInput type="text" placeholder="照片标题..." [(ngModel)]="currentPhoto.title"
-               (keyup)="onInputChanged($event,'title')">
-        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('title')">
+               (keyup)="onInputChanged($event,'title')" maxLength="15">
+        <button mat-button matSuffix mat-icon-button aria-label="Clear" *ngIf="currentPhoto.title"
+                (click)="clearInputValue('title')">
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
@@ -69,13 +70,13 @@
     <div style="padding: 20px">
       <mat-form-field class="example-chip-list" style="width: 100%">
         <mat-chip-list #albumList aria-label="Albums selection">
-          <mat-chip *ngFor="let alb of currentPhoto.album" removable="true" (removed)="removeElement(alb,'album')">
+          <mat-chip *ngFor="let alb of currentPhoto.albums" removable="true" (removed)="removeElement(alb,'albums')">
             {{alb}}
             <mat-icon matChipRemove>cancel</mat-icon>
           </mat-chip>
           <input placeholder="Albums..." matChipInputAddOnBlur="true"
                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputFor]="albumList"
-                 (matChipInputTokenEnd)="addElement($event,'album')">
+                 (matChipInputTokenEnd)="addElement($event,'albums')">
         </mat-chip-list>
       </mat-form-field>
     </div>
@@ -97,8 +98,10 @@
     <div style="padding: 20px;">
       <mat-form-field style="width: 100%;">
         <textarea matInput type="text" placeholder="照片描述..." [(ngModel)]="currentPhoto.note"
-                  (keyup)="onInputChanged($event,'note')" style="resize: none;min-height: 80px;"></textarea>
-        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('note')">
+                  (keyup)="onInputChanged($event,'note')" style="resize: none;min-height: 80px;"
+                  maxLength="150"></textarea>
+        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="clearInputValue('note')"
+                *ngIf="currentPhoto.note">
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
@@ -114,9 +117,9 @@
             <mat-icon>event_outline</mat-icon>
           </dt>
           <dd>
-            <div class="headline">{{currentPhoto.shootingDate|date:'yyyy-MMMM-dd'}}</div>
+            <div class="headline">{{currentPhoto.date|date:'yyyy年M月dd日'}}</div>
             <div class="subline">
-              <span class="sprMub">{{currentPhoto.shootingDate|date:'EEE, aaa HH:mm'}}</span>
+              <span class="sprMub">{{currentPhoto.date|date:'EEE, aaa HH:mm'}}</span>
             </div>
           </dd>
         </div>
@@ -125,11 +128,11 @@
             <mat-icon>image_outline</mat-icon>
           </dt>
           <dd>
-            <div class="headline">IMG_4235.JPG</div>
+            <div class="headline">{{currentPhoto.name}}</div>
             <div class="subline">
-              <span class="sprMUb">11.1MP</span>
-              <span class="sprMUb">4080 x 2700</span>
-              <span class="sprMUb"> 1.7MB</span>
+              <span class="sprMUb">{{(currentPhoto.width*currentPhoto.height/1000000).toFixed(1)}}MP</span>
+              <span class="sprMUb">{{currentPhoto.width}} x {{currentPhoto.height}}</span>
+              <span class="sprMUb"> {{(currentPhoto.size/(1024*1024)).toFixed(2)}}MB</span>
             </div>
           </dd>
         </div>
@@ -137,14 +140,30 @@
           <dt>
             <mat-icon>camera_outline</mat-icon>
           </dt>
-          <dd>
-            <div class="headline">Canon Canon EOS 5D Mark II</div>
-            <div class="subline">
-              <span class="sprMUb" aria-label="光圈：ƒ/8">ƒ/8</span>
-              <span class="sprMUb" aria-label="曝光时间：1/125">1/125</span>
-              <span class="sprMUb" aria-label="焦距：35 毫米">35毫米</span>
-              <span class="sprMUb" aria-label="">ISO640</span></div>
-          </dd>
+          <ng-container *ngIf="(currentPhoto.camera && currentPhoto.camera.maker); then hasCamera;else noCamera">
+          </ng-container>
+          <ng-template #hasCamera>
+            <dd>
+              <div class="headline">
+                {{currentPhoto.camera.maker+'/'+currentPhoto.camera.model}}
+              </div>
+              <div class="subline">
+                <span class="sprMUb">ƒ/{{currentPhoto.camera.aperture}}</span>
+                <span class="sprMUb">{{currentPhoto.camera.shutter}}</span>
+                <span class="sprMUb">{{currentPhoto.camera.focalLength}}毫米</span>
+                <span class="sprMUb">ISO{{currentPhoto.camera.iso}}</span></div>
+            </dd>
+          </ng-template>
+          <ng-template #noCamera>
+            <dd>
+              <div class="headline">
+                Unknown
+              </div>
+              <div class="subline">
+                <span class="sprMUb">unknown</span>
+              </div>
+            </dd>
+          </ng-template>
         </div>
       </dl>
     </div>

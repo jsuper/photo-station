@@ -7,11 +7,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,14 +33,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import io.tony.photo.exception.PhotoDuplicateException;
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.IndexBatcher;
 import io.tony.photo.service.PhotoChangedListener;
 import io.tony.photo.service.PhotoChangedListener.EventType;
 import io.tony.photo.service.PhotoChangedListener.PhotoChangedEvent;
 import io.tony.photo.service.PhotoIndexStore;
 import io.tony.photo.service.MetadataService;
-import io.tony.photo.service.PhotoListener;
 import io.tony.photo.service.PhotoStore;
 import io.tony.photo.utils.FileOp;
 import io.tony.photo.utils.Json;
@@ -86,7 +83,7 @@ public class PhotoStoreImpl implements PhotoStore {
   private List<PhotoChangedListener> beforeChangedListeners = new LinkedList<>();
   private List<PhotoChangedListener> afterChangedListeners = new LinkedList<>();
 
-  private IndexBatcher<PhotoMetadata> indexBatcher;
+  private IndexBatcher<Photo> indexBatcher;
 
   @Getter
   private PhotoIndexStore indexStore;
@@ -108,11 +105,11 @@ public class PhotoStoreImpl implements PhotoStore {
 
     this.metadataService = new MetadataServiceImpl();
     this.indexStore = new LucenePhotoIndexStore(this.indexPath);
-    this.indexBatcher = new IndexBatcher<>(p -> indexStore.index(p), new PhotoMetadata());
+    this.indexBatcher = new IndexBatcher<>(p -> indexStore.index(p), new Photo());
 
     this.beforeChangedListeners.add(event -> {
       if (event.getEventType() == EventType.META_CREATED) {
-        PhotoMetadata photo = event.getPhoto();
+        Photo photo = event.getPhoto();
         long start = System.currentTimeMillis();
         try {
           //create thumbnail for current photo
@@ -149,7 +146,7 @@ public class PhotoStoreImpl implements PhotoStore {
       String photoId = DigestUtils.sha1Hex(fis);
       Path metaFile = metaData.resolve(photoId);
       if (Files.exists(metaFile)) {
-        PhotoMetadata from = Json.from(metaFile, PhotoMetadata.class);
+        Photo from = Json.from(metaFile, Photo.class);
         if (from != null && Files.exists(Paths.get(from.getPath())) && photoId.equals(from.getId())) {
           throw new PhotoDuplicateException("The photo was duplicated.");
         }
@@ -158,12 +155,12 @@ public class PhotoStoreImpl implements PhotoStore {
       throw new IllegalStateException("Check file duplication failed.", e);
     }
 
-    final PhotoMetadata photoMetadata = metadataService.readMetadata(photo);
+    final Photo photoMetadata = metadataService.readMetadata(photo);
     if (photoMetadata == null) {
       return false;
     }
     fireBeforeChangeListener(photoMetadata);
-    final Date shootingDate = photoMetadata.getShootingDate();
+    final Date shootingDate = photoMetadata.getDate();
     Calendar c = Calendar.getInstance();
     c.setTime(shootingDate);
 
@@ -193,17 +190,17 @@ public class PhotoStoreImpl implements PhotoStore {
     return false;
   }
 
-  private void firePostChangeListener(PhotoMetadata photoMetadata) {
+  private void firePostChangeListener(Photo photoMetadata) {
     PhotoChangedEvent after = new PhotoChangedEvent(photoMetadata, EventType.ADD);
     this.afterChangedListeners.forEach(l -> l.onChanged(after));
   }
 
-  private void fireBeforeChangeListener(PhotoMetadata photoMetadata) {
+  private void fireBeforeChangeListener(Photo photoMetadata) {
     PhotoChangedEvent before = new PhotoChangedEvent(photoMetadata, EventType.META_CREATED);
     this.beforeChangedListeners.forEach(l -> l.onChanged(before));
   }
 
-  private void writeMetaData(PhotoMetadata metadata) {
+  private void writeMetaData(Photo metadata) {
     Object lockMe = new Object();
     Object prevLock;
     while ((prevLock = metaDataLock.put(metadata.getId(), lockMe)) != null && (prevLock != lockMe)) {
@@ -245,7 +242,7 @@ public class PhotoStoreImpl implements PhotoStore {
   @Override
   public Set<String> addTag(String id, String... tags) {
     final Path resolve = metaData.resolve(id);
-    final PhotoMetadata from = Json.from(resolve, PhotoMetadata.class);
+    final Photo from = Json.from(resolve, Photo.class);
     if (from == null) {
       return Collections.emptySet();
     }
@@ -281,11 +278,11 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   @Override
-  public PhotoMetadata getMetadataFromDisk(String metadataId) {
+  public Photo getMetadataFromDisk(String metadataId) {
     Path metadataPath = metaData.resolve(metadataId);
     if (Files.exists(metadataPath)) {
       try {
-        return Json.from(metadataPath, PhotoMetadata.class);
+        return Json.from(metadataPath, Photo.class);
       } catch (Exception e) {
         log.error("Reading data failed: {}", metadataId, e);
       }
@@ -319,17 +316,17 @@ public class PhotoStoreImpl implements PhotoStore {
               String fileExtension = fileName.substring(lastDotIndex);
               if (acceptFileType.containsKey(fileExtension.toLowerCase())) {
                 log.info("Refresh metadata and index: {}", file.toFile().getCanonicalFile());
-                PhotoMetadata metadata = metadataService.readMetadata(file);
+                Photo metadata = metadataService.readMetadata(file);
                 metadata.setPath(file.toFile().getCanonicalPath());
 
                 Path previousMeta = metaData.resolve(metadata.getId());
                 if (Files.exists(previousMeta)) {
-                  PhotoMetadata origin = Json.from(previousMeta, PhotoMetadata.class);
+                  Photo origin = Json.from(previousMeta, Photo.class);
                   if (origin.getTags() != null) {
                     metadata.setTags(origin.getTags());
                   }
-                  if (origin.getAlbum() != null) {
-                    metadata.setAlbum(origin.getAlbum());
+                  if (origin.getAlbums() != null) {
+                    metadata.setAlbums(origin.getAlbums());
                   }
                 }
                 counter.incrementAndGet();
@@ -357,6 +354,33 @@ public class PhotoStoreImpl implements PhotoStore {
     return this.thumbnails.resolve(photoId + ".jpg");
   }
 
+  @Override
+  public Photo getPhotoById(String id) {
+    Path metadataPath = this.metaData.resolve(id);
+    if (Files.exists(metadataPath)) {
+      return Json.from(metadataPath, Photo.class);
+    }
+    return null;
+  }
+
+  @Override
+  public Photo update(Photo photo) {
+    if (photo != null) {
+      Photo metadataFromDisk = getMetadataFromDisk(photo.getId());
+      metadataFromDisk.setTitle(photo.getTitle());
+      metadataFromDisk.setNote(photo.getNote());
+
+      metadataFromDisk.setAlbums(photo.getAlbums());
+      metadataFromDisk.setTags(photo.getTags());
+      metadataFromDisk.setFavorite(photo.getFavorite());
+
+      writeMetaData(metadataFromDisk);
+      indexStore.index(metadataFromDisk);
+      return metadataFromDisk;
+    }
+    return null;
+  }
+
 
   @Override
   public void close() throws IOException {
@@ -367,25 +391,6 @@ public class PhotoStoreImpl implements PhotoStore {
   public static void main(String[] args) {
     Random r = new Random();
     PhotoStoreImpl ps = new PhotoStoreImpl(args[0]);
-    String[] testTags = {"猪八戒", "团建", "人物"};
-    String[] testAlbums = {"猪八戒", "铁山坪"};
-    ps.beforeChangedListeners.add(event -> {
-      Set<String> tags = new HashSet<>();
-      if (event.getPhoto().getTags() != null) {
-        tags.addAll(event.getPhoto().getTags());
-      }
-      tags.add(testTags[r.nextInt(testTags.length)]);
-      event.getPhoto().setTags(tags);
-
-      if (r.nextInt(10) % 2 == 0) {
-        Set<String> albums = new HashSet<>();
-        if (event.getPhoto().getAlbum() != null) {
-          albums.addAll(event.getPhoto().getAlbum());
-        }
-        albums.add(testAlbums[r.nextInt(testAlbums.length)]);
-        event.getPhoto().setAlbum(albums);
-      }
-    });
     ps.refresh();
   }
 }

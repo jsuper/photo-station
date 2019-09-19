@@ -16,19 +16,40 @@
   margin: 10px;
 }
 
-.photo-thumbnail-container{
+.photo-thumbnail-container {
   height: calc(100% - 16px);
-  width: calc(100% - 16px) ;
-  padding:0px;
+  width: calc(100% - 16px);
+  padding: 0px;
   margin-bottom: 16px !important;
 }
-.caption{
+
+.caption {
   font-weight: 400;
   font-size: 12px !important;
 }
-.caption .material-icons{
-  font-size:14px !important;
+
+.caption .material-icons {
+  font-size: 14px !important;
   margin-right: 2px;
   height: 14px;
   width: 14px;
+}
+
+.btn-list {
+  height: 56px;
+}
+
+.btn-list>button {
+  color: #fff;
+  margin: 15px;
+  bottom: 5px;
+}
+
+.enter {
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+}
+
+.out {
+  background: transparent;
+
 }

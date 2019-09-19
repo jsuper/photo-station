@@ -7,8 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
-import io.tony.photo.pojo.LocationInfo;
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.LbsService;
 import io.tony.photo.service.MetadataHandler;
 
@@ -39,7 +38,7 @@ public class LocationHandler implements MetadataHandler {
   }
 
   @Override
-  public void handle(PhotoMetadata metadata) {
+  public void handle(Photo metadata) {
     if (lbsService != null) {
       if (metadata.getLatitude() > 0 && metadata.getLongitude() > 0) {
 
@@ -47,7 +46,7 @@ public class LocationHandler implements MetadataHandler {
           log.debug("Got location({},{}) from tecent api.", metadata.getLatitude(), metadata.getLongitude());
         }
         lbsService.getLocation(metadata.getLatitude(), metadata.getLongitude())
-          .ifPresent(metadata::setLocationInfo);
+          .ifPresent(metadata::setLocation);
       }
     }
   }

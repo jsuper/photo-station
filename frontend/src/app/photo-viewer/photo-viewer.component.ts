@@ -4,6 +4,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { Observable, Subscription, fromEvent } from 'rxjs';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Photo } from 'app/photo.model';
+import { PhotoService } from 'app/photo.service';
 
 @Component({
   selector: 'app-photo-viewer',
@@ -29,8 +30,11 @@ export class PhotoViewerComponent implements OnInit {
   readonly currentPhotoNote: string;
 
   constructor(public dialogRef: MatDialogRef<PhotoViewerComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: object) {
-
+    @Inject(MAT_DIALOG_DATA) public data: object,
+    private photoService: PhotoService) {
+    dialogRef.afterClosed().subscribe(close => {
+      this.checkAndSaveChangedData();
+    });
     this.currentPhoto = data['photo'];
     this.currentPhotoTitle = this.currentPhoto.title;
     this.currentPhotoNote = this.currentPhoto.note;
@@ -80,12 +84,13 @@ export class PhotoViewerComponent implements OnInit {
   checkAndSaveChangedData(): void {
     if (this.dataChanged) {
       console.log("Data has been changed.");
+      this.photoService.update(this.currentPhoto)
+        .subscribe(resp => console.log(resp));
     }
     this.dataChanged = false;
   }
 
   closeDialog() {
-    this.checkAndSaveChangedData();
     this.dialogRef.close('Done');
   }
 
@@ -111,9 +116,11 @@ export class PhotoViewerComponent implements OnInit {
 
   showPhotoInformation() {
     this.hiddenInformation = !this.hiddenInformation;
-    console.log(this.currentPhoto);
     if (!this.hiddenInformation) {
       this.reloadPhoto(this.currentPhoto);
+    } else {
+      console.log("Close information panel, check and save snapshot metadata: " + this.dataChanged);
+      this.checkAndSaveChangedData();
     }
   }
 
@@ -133,6 +140,9 @@ export class PhotoViewerComponent implements OnInit {
     const value = event.value;
 
     if ((value || '').trim()) {
+      if (!this.currentPhoto[target]) {
+        this.currentPhoto[target] = [];
+      }
       this.currentPhoto[target].push(value);
       this.dataChanged = true;
     }

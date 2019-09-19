@@ -8,10 +8,15 @@ import { HttpClient } from '@angular/common/http';
 })
 export class PhotoService {
   private photoApi = "api/photos";
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-  search(from:number,size:number,query:string):Observable<Photo[]> {
-    const apiWithParam = this.photoApi+"?from="+from+'&size='+size+"&q="+query;
-    return this.http.get<Photo[]>(apiWithParam) ;
+  search(from: number, size: number, query: string): Observable<Photo[]> {
+    const apiWithParam = this.photoApi + "?from=" + from + '&size=' + size + "&q=" + query;
+    return this.http.get<Photo[]>(apiWithParam);
+  }
+
+  update(photo: Photo): Observable<Photo> {
+    const updateApi = "api/photo/" + photo.id;
+    return this.http.put<Photo>(updateApi, photo);
   }
 }

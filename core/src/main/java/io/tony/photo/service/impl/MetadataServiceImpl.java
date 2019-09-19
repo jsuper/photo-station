@@ -13,9 +13,6 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.file.FileTypeDirectory;
-import com.drew.metadata.gif.GifImageDirectory;
-import com.drew.metadata.jpeg.JpegDirectory;
-import com.drew.metadata.png.PngDirectory;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -31,8 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -46,14 +41,17 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Camera;
+import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.MetadataHandler;
 import io.tony.photo.service.MetadataService;
+
+import static java.math.RoundingMode.HALF_UP;
 
 public class MetadataServiceImpl implements MetadataService {
   private static final Logger log = LoggerFactory.getLogger(MetadataServiceImpl.class);
 
-  private List<Consumer<PhotoMetadata>> metadataApplier = new LinkedList<>();
+  private List<Consumer<Photo>> metadataApplier = new LinkedList<>();
   private static final List<Class<? extends MetadataHandler>> handlers = Arrays.asList(
     PhotoTagHandler.class, LocationHandler.class);
 
@@ -142,14 +140,16 @@ public class MetadataServiceImpl implements MetadataService {
     return null;
   }
 
-  private PhotoMetadata createMetadataFromExif(Path file) {
-    PhotoMetadata pm = new PhotoMetadata();
+  private Photo createMetadataFromExif(Path file) {
+    Photo pm = new Photo();
     pm.setTimestamp(System.currentTimeMillis());
     try (InputStream fis = Files.newInputStream(file)) {
       String photoId = DigestUtils.sha1Hex(fis);
       pm.setId(photoId);
       pm.setPath(file.toFile().getCanonicalPath());
       pm.setSize(Files.size(file));
+      pm.setName(file.getFileName().toString());
+
       String suffix = file.getFileName().toString();
       suffix = suffix.substring(suffix.lastIndexOf('.') + 1);
       pm.setType(suffix.toLowerCase());
@@ -168,16 +168,31 @@ public class MetadataServiceImpl implements MetadataService {
         }
         ExifSubIFDDirectory exifSub = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
         if (exifSub != null) {
+          Camera camera = pm.getOrCreateCamera();
           Date shootDate = exifSub.getDateDigitized();
-          pm.setShootingDate(shootDate);
+          String iso = exifSub.getString(ExifSubIFDDirectory.TAG_ISO_EQUIVALENT);
+          String focalLength = exifSub.getString(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
+          Integer aperture = exifSub.getInteger(ExifSubIFDDirectory.TAG_APERTURE);
+          Integer shutter = exifSub.getInteger(ExifSubIFDDirectory.TAG_SHUTTER_SPEED);
+          pm.setDate(shootDate);
+          camera.setIso(iso);
+          camera.setFocalLength(focalLength);
+
+          if (aperture != null) {
+            camera.setAperture(String.valueOf(BigDecimal.valueOf(aperture * 1.4142).setScale(1, HALF_UP).doubleValue()));
+          }
+          if (shutter != null) {
+            camera.setShutter(1 + "/" + ((int) Math.pow(2, shutter)));
+          }
+
         }
 
         GpsDirectory gps = metadata.getFirstDirectoryOfType(GpsDirectory.class);
         if (gps != null) {
           GeoLocation geo = gps.getGeoLocation();
           if (geo != null) {
-            pm.setLatitude(BigDecimal.valueOf(geo.getLatitude()).setScale(6, RoundingMode.HALF_UP).doubleValue());
-            pm.setLongitude(BigDecimal.valueOf(geo.getLongitude()).setScale(6, RoundingMode.HALF_UP).doubleValue());
+            pm.setLatitude(BigDecimal.valueOf(geo.getLatitude()).setScale(6, HALF_UP).doubleValue());
+            pm.setLongitude(BigDecimal.valueOf(geo.getLongitude()).setScale(6, HALF_UP).doubleValue());
           } else {
             pm.setLatitude(-1d);
             pm.setLongitude(-1d);
@@ -188,7 +203,8 @@ public class MetadataServiceImpl implements MetadataService {
         if (exifIfd0 != null) {
           String make = exifIfd0.getString(ExifDirectoryBase.TAG_MAKE);
           String model = exifIfd0.getString(ExifDirectoryBase.TAG_MODEL);
-          pm.setDevice(make + "/" + model);
+          pm.getOrCreateCamera().setMaker(make);
+          pm.getOrCreateCamera().setModel(model);
         }
 
       }
@@ -212,10 +228,10 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     try {
-      if (pm.getShootingDate() == null) {
+      if (pm.getDate() == null) {
         BasicFileAttributes basicFileAttributes = Files.readAttributes(file, BasicFileAttributes.class);
         FileTime fileTime = basicFileAttributes.creationTime();
-        pm.setShootingDate(new Date(fileTime.toMillis()));
+        pm.setDate(new Date(fileTime.toMillis()));
       }
     } catch (IOException e) {
       log.error("Reading file attribute failed.", e);
@@ -224,8 +240,8 @@ public class MetadataServiceImpl implements MetadataService {
   }
 
   @Override
-  public PhotoMetadata readMetadata(Path photo) {
-    final PhotoMetadata metadata = createMetadataFromExif(photo);
+  public Photo readMetadata(Path photo) {
+    final Photo metadata = createMetadataFromExif(photo);
     if (metadata != null) {
       metadataApplier.forEach(c -> c.accept(metadata));
       return metadata;

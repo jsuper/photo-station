@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 
 /**
  * Store photo
@@ -38,7 +38,7 @@ public interface PhotoStore extends Closeable {
    */
   void importPhoto(Path sourceDirectory);
 
-  PhotoMetadata getMetadataFromDisk(String metadataId);
+  Photo getMetadataFromDisk(String metadataId);
 
   /**
    * 刷新当前存储，重新生成照片元数据、重新索引。
@@ -48,4 +48,8 @@ public interface PhotoStore extends Closeable {
   Path getThumbnail(String photoId);
 
   PhotoIndexStore getIndexStore();
+
+  Photo getPhotoById(String id) ;
+
+  Photo update(Photo photo);
 }

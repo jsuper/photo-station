@@ -1,6 +1,6 @@
 package io.tony.photo.service;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 
 public interface PhotoListener {
 
@@ -8,7 +8,7 @@ public interface PhotoListener {
     ADD, UPDATE, DELETE, META_CREATE;
   }
 
-  void before(PhotoMetadata metadata, OpType type);
+  void before(Photo metadata, OpType type);
 
-  void after(PhotoMetadata metadata, OpType type);
+  void after(Photo metadata, OpType type);
 }

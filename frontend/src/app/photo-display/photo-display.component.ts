@@ -112,4 +112,12 @@ export class PhotoDisplayComponent implements OnInit {
     });
   }
 
+  likePhoto(photo: Photo): void {
+    console.log(photo.favorite) ;
+    photo.favorite = photo.favorite? 0 : 1;
+    this.photoService.update(photo).subscribe(resp => {
+      console.log("Update photo favorite state: " + resp);
+    });
+  }
+
 }

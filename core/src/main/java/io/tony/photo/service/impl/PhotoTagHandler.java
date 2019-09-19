@@ -1,6 +1,6 @@
 package io.tony.photo.service.impl;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.MetadataHandler;
 
 /**
@@ -8,7 +8,7 @@ import io.tony.photo.service.MetadataHandler;
  */
 public class PhotoTagHandler implements MetadataHandler {
   @Override
-  public void handle(PhotoMetadata metadata) {
+  public void handle(Photo metadata) {
 
   }
 }

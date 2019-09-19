@@ -1,6 +1,6 @@
 package io.tony.photo.service;
 
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 
 /**
  * Post handler for metadata
@@ -10,5 +10,5 @@ public interface MetadataHandler {
   /**
    *
    */
-  void handle(PhotoMetadata metadata);
+  void handle(Photo metadata);
 }

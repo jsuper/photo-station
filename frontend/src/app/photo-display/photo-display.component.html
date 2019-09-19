@@ -1,24 +1,41 @@
 <div class="flex-container">
-    <div class="flex-photo-container" fxLayout="row wrap" fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.main-container'" [fromRoot]="true" [scrollWindow]="false" (scrolled)="onScrollDown()">
-        <div fxflex="auto" class="photo-box" *ngFor="let p of photos;let i = index" [attr.data-index]="i" [fxFlex.lg]="25" [fxFlex.sm]="50" [fxFlex.md]="33.33" [fxFlex.xs]="100">
-            <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
-                <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer(i)">
-                    <div [ngStyle]="{ 'background-image': 'url(/api/photo/' + p.id + '?t=true)' }" class="photo-thumbnail">
-                    </div>
-                </div>
-                <mat-card-content>
-                    <div style="padding: 16px;">
-                        <div>
-                            <h3 title="Package / 2019">Package / 2019</h3>
-                        </div>
-                        <div class="caption">
-                            <mat-icon>calendar_today</mat-icon>{{p.shootingDate}}<br>
-                            <mat-icon>camera_alt</mat-icon>{{p.device}}<br>
-                            <mat-icon>room</mat-icon>{{p.locationInfo.nation && p.locationInfo.province ? p.locationInfo.nation+','+p.locationInfo.province:'Unknown'}}<br>
-                        </div>
-                    </div>
-                </mat-card-content>
-            </mat-card>
+  <div class="flex-photo-container" fxLayout="row wrap" fxFlex="basis" infiniteScroll [infiniteScrollDistance]="1"
+       [infiniteScrollThrottle]="50" [infiniteScrollContainer]="'.main-container'" [fromRoot]="true"
+       [scrollWindow]="false" (scrolled)="onScrollDown()">
+    <div fxflex="auto" class="photo-box" *ngFor="let p of photos;let i = index" [attr.data-index]="i" [fxFlex.lg]="25"
+         [fxFlex.sm]="50" [fxFlex.md]="33.33" [fxFlex.xs]="100">
+      <mat-card class="photo-thumbnail-container" fxlayoutalign="center center">
+        <div style="padding-bottom: 100%;position:relative;cursor: pointer;" (click)="openImageViewer(i)" #mouseState
+             (mouseover)="mouseState.in=true" (mouseleave)="mouseState.in=false">
+          <div [ngStyle]="{ 'background-image': 'url(/api/photo/' + p.id + '?t=true)' }" class="photo-thumbnail">
+          </div>
+          <div style="position: absolute;bottom: 0;left: 0;width: 100%;z-index: 10000;" class="btn-list"
+               [ngClass]="mouseState.in?'enter':'out'">
+
+            <button mat-icon-button *ngIf="mouseState.in" (click)="likePhoto(p);$event.stopPropagation();">
+              <mat-icon>{{p.favorite?'favorite':'favorite_border'}}</mat-icon>
+            </button>
+
+            <button mat-icon-button *ngIf="mouseState.in" style="float: right" (click)="$event.stopPropagation();">
+              <mat-icon>check_circle_outline</mat-icon>
+            </button>
+          </div>
         </div>
+        <mat-card-content>
+          <div style="padding: 16px;">
+            <div>
+              <h3>{{p.title||'Photo '+(p.date|date: 'yyyy')}}</h3>
+            </div>
+            <div class="caption">
+              <mat-icon>calendar_today</mat-icon>{{p.date}}<br>
+              <mat-icon>camera_alt</mat-icon>
+              {{p.camera && p.camera.maker?p.camera.maker+'/'+p.camera.model:'Unknown'}}<br>
+              <mat-icon>room</mat-icon>
+              {{p.location && p.location.nation && p.location.province ? p.location.nation+','+p.location.province:'Unknown'}}<br>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
+  </div>
 </div>

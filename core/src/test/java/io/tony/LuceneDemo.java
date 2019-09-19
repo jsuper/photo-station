@@ -1,23 +1,19 @@
 package io.tony;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.search.Collector;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.LeafCollector;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Scorable;
-import org.apache.lucene.search.ScoreMode;
+import org.apache.lucene.search.SearcherFactory;
+import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.FSDirectory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.tony.photo.service.impl.agg.AggregateTerm;
+import io.tony.photo.service.impl.agg.Aggregation;
+import io.tony.photo.service.impl.agg.AggregatorCache;
 
 public class LuceneDemo {
 
@@ -26,39 +22,15 @@ public class LuceneDemo {
     FSDirectory directory = FSDirectory.open(indexes);
 
     IndexReader reader = DirectoryReader.open(directory);
+    SearcherManager sm = new SearcherManager(directory, new SearcherFactory());
+    AggregatorCache ac = new AggregatorCache(sm);
 
-    IndexSearcher searcher = new IndexSearcher(reader);
-    Map<String, Integer> counter = new HashMap<>();
-    searcher.search(new MatchAllDocsQuery(), new Collector() {
-      @Override
-      public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
-        return new LeafCollector() {
-          @Override
-          public void setScorer(Scorable scorer) throws IOException {
-
-          }
-
-          @Override
-          public void collect(int doc) throws IOException {
-            int docId = context.docBase + doc;
-            Document document = reader.document(docId);
-            IndexableField[] tags = document.getFields("tags");
-            if (tags != null && tags.length > 0) {
-              for (IndexableField tag : tags) {
-                String value = tag.stringValue();
-                counter.compute(value, (key, old) -> old == null ? 1 : old.intValue() + 1);
-              }
-            }
-          }
-        };
-      }
-
-      @Override
-      public ScoreMode scoreMode() {
-        return ScoreMode.COMPLETE;
-      }
+    Map<String, Aggregation> aggregations = ac.getAggregations();
+    aggregations.forEach((k, v) -> {
+      System.out.println(k + ":");
+      List<AggregateTerm> terms = v.terms();
+      terms.forEach(t -> System.out.println("\t" + t.getValue() + ":" + t.getCounter()));
     });
 
-    System.out.println(counter);
   }
 }

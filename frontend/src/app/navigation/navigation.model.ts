@@ -4,7 +4,8 @@ export interface NavigationNode {
   tooltip?: string;
   hidden?: boolean;
   children?: NavigationNode[];
-  params?:object;
+  params?: object;
+  field?: string;
 }
 
 export interface CurrentNode {

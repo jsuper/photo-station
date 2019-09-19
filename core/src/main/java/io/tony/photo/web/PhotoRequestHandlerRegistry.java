@@ -1,13 +1,14 @@
 package io.tony.photo.web;
 
 
+import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.file.Files;
@@ -18,11 +19,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.tony.photo.exception.PhotoDuplicateException;
-import io.tony.photo.pojo.PhotoMetadata;
+import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.PhotoIndexStore;
 import io.tony.photo.service.PhotoStore;
 import io.tony.photo.utils.FileOp;
@@ -30,6 +32,7 @@ import io.tony.photo.utils.Json;
 import io.tony.photo.utils.Strings;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.FileUpload;
@@ -44,7 +47,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   private PhotoStore photoStore;
   private PhotoIndexStore photoIndexStore;
 
-  private static final String[] AGG_FIELD = new String[]{"tags", "albums", "shoot_date"};
+  private static final String[] AGG_FIELD = new String[]{"tags", "albums", "date"};
 
   private Path uploadDir;
   private Vertx vertx;
@@ -67,7 +70,9 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   public void buildRequestRegistry(Router router) {
     router.route("/api/nav-agg").handler(this::navigationHandler);
     router.route("/api/photos").handler(this::handlePhotoLists);
-    router.route("/api/photo/:photo").handler(this::handlePhotoImage);
+    router.route(HttpMethod.GET, "/api/photo/:photo").handler(this::handlePhotoImage);
+    router.route(HttpMethod.PUT, "/api/photo/:photo").handler(BodyHandler.create());
+    router.route(HttpMethod.PUT, "/api/photo/:photo").handler(this::handleUpdatePhotoMeta);
 
     router.route(API_PHOTO_UPLOAD).handler(BodyHandler.create()
       .setMergeFormAttributes(true));
@@ -87,9 +92,8 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     } else {
       aggregation = aggFields.split(",");
     }
-    Map<String, Map<String, Long>> aggregate = this.photoIndexStore.aggregate(10, aggregation);
     ctx.response().putHeader("Content-Type", "application/json");
-    ctx.response().end(Json.toJson(aggregate));
+    ctx.response().end(Json.toJson(this.photoIndexStore.aggregate(10, aggregation)));
   }
 
   /**
@@ -99,7 +103,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     HttpServerRequest request = ctx.request();
     String fromParam = request.getParam("from");
     String size = request.getParam("size");
-    Map<String, Object> fq = Collections.emptyMap();
+    Map<String, String> fq = Collections.emptyMap();
     int from = 0;
     if (fromParam != null && !fromParam.isBlank()) {
       from = Integer.parseInt(fromParam);
@@ -107,21 +111,17 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     String query = request.getParam("q");
     if (query != null && !query.isBlank()) {
       fq = Arrays.stream(query.split(",")).map(qf -> qf.split(":"))
-        .collect(Collectors.toMap(qf -> qf[0], qf -> qf[1]));
-
+        .collect(Collectors.toMap(qf -> "date".equals(qf[0]) ? "year" : qf[0], qf -> qf[1]));
     }
 
     try {
       int pageSize = size == null || size.isBlank() ? PAGE_SIZE : Integer.parseInt(size);
-      List<PhotoMetadata> data = photoIndexStore.list(from, pageSize, fq);
-      data.forEach(meta -> {
-        String path = "//" + request.host() + "/photo/" + meta.getId();
-        meta.setPath(path);
-      });
-
+      List<String> data = photoIndexStore.list(from, pageSize, fq);
+      List<Photo> photos = data.parallelStream().map(pid -> photoStore.getPhotoById(pid))
+        .filter(Objects::nonNull).collect(Collectors.toList());
       HttpServerResponse response = ctx.response();
       response.putHeader("content-type", "application/json");
-      String chunk = Json.toJson(data);
+      String chunk = Json.toJson(photos);
       response.end(chunk);
     } catch (Exception e) {
       e.printStackTrace();
@@ -143,7 +143,7 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
         imagePath = photoStore.getThumbnail(photoId).toFile();
         type = "jpg";
       } else {
-        PhotoMetadata metadataFromDisk = photoStore.getMetadataFromDisk(photoId);
+        Photo metadataFromDisk = photoStore.getMetadataFromDisk(photoId);
         type = metadataFromDisk.getType();
         if (metadataFromDisk != null && !Strings.isBlank(metadataFromDisk.getPath())) {
           try {
@@ -166,6 +166,25 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
       return;
     }
     ctx.fail(404);
+  }
+
+  /**
+   * 更新照片元数据
+   */
+  private void handleUpdatePhotoMeta(RoutingContext ctx) {
+    int status = 0;
+    String message;
+    try {
+      String photoUpdated = ctx.getBodyAsString();
+      Photo from = Json.from(photoUpdated, Photo.class);
+      Photo update = photoStore.update(from);
+      log.info("Got updated: {}", update);
+      message = "Success updated";
+    } catch (Exception e) {
+      status = 1;
+      message = "Update error";
+    }
+    ctx.response().end(Json.toJson(ImmutableMap.of("status", status, "message", message)));
   }
 
   private void handlePhotoUpload(RoutingContext ctx) {
@@ -204,6 +223,9 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
           errorFile.put(fileUpload.fileName(), "Process error");
         }
       }
+    }
+    if (succeed > 0) {
+      photoIndexStore.refreshSearcher();
     }
     ctx.response().putHeader("Content-Type", "application/json");
     Map<String, Object> data = new LinkedHashMap<>();

@@ -15,9 +15,10 @@ export interface Location {
  */
 export interface Camera {
   maker?: string,
+  model?: string,
   aperture?: string,
   shutter?: string,
-  hyperfocal?: string,
+  focalLength?: string,
   iso: string,
 }
 
@@ -26,18 +27,19 @@ export interface Photo {
   title?: string,
   note?: string,
   name?: string,
-  album?: string[],
+  albums?: string[],
   device?: string,
   height?: number,
   width?: number
   latitude?: number,
   longitude?: number,
   path?: string,
-  shootingDate?: string,
+  date?: string,
   size?: number,
   tags?: string[],
   timestamp?: number,
   type?: string,
-  locationInfo?: Location,
+  location?: Location,
   camera?: Camera,
+  favorite?:number,
 }

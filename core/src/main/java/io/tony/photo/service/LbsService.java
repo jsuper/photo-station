@@ -2,7 +2,7 @@ package io.tony.photo.service;
 
 import java.util.Optional;
 
-import io.tony.photo.pojo.LocationInfo;
+import io.tony.photo.pojo.Location;
 
 /**
  * 地理位置服务
@@ -16,5 +16,5 @@ public interface LbsService {
    * @param longitude 经度十进制
    * @return 地理位置信息
    */
-  Optional<LocationInfo> getLocation(double latitude, double longitude);
+  Optional<Location> getLocation(double latitude, double longitude);
 }

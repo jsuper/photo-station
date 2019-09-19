@@ -17,6 +17,13 @@ export class NavigationService {
     hidden: false,
     params: { 'q': '' }
   };
+  private favoriteNode: NavigationNode = {
+    url: '/photos/favorite',
+    title: 'Favorite',
+    tooltip: 'Show all photos',
+    hidden: false,
+    params: { 'q': '1' }
+  };
 
   private aggMenus = {
     'albums': {
@@ -29,10 +36,11 @@ export class NavigationService {
       tooltip: 'All tags in photos',
       hidden: false,
     },
-    "shoot_date":{
-      title:'Date & Time',
+    "date": {
+      title: 'Date & Time',
       tooltip: 'Shooting date',
-      hidden: false
+      hidden: false,
+      field: 'year'
     }
   };
   private aggregations: Object;
@@ -54,19 +62,21 @@ export class NavigationService {
           let children: NavigationNode[] = [];
           let aggregation = val[agg];
 
-          for (let name in aggregation) {
+          for (let idx in aggregation) {
+            let item = aggregation[idx];
             children.push({
-              url: '/photos/' + agg,
-              title: name + '(' + aggregation[name] + ')',
-              tooltip: name,
+              url: '/photos/' + (node.field || agg),
+              title: item['value'] + '(' + item['counter'] + ')',
+              tooltip: item['value'],
               hidden: false,
-              params: { "q": name }
+              params: { "q": item['value'] }
             })
           }
           node.children = children;
           dynamicNodes.push(node);
         }
       }
+      dynamicNodes.push(this.favoriteNode);
       return dynamicNodes;
     }));
     return menu;
