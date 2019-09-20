@@ -57,6 +57,7 @@ export class PhotoDisplayComponent implements OnInit {
       loadedIndex++;
     }
     this.photosCache = this.photosCache.slice(loadedIndex);
+
   }
 
   loadPhotos(from: number, callback) {
@@ -113,8 +114,8 @@ export class PhotoDisplayComponent implements OnInit {
   }
 
   likePhoto(photo: Photo): void {
-    console.log(photo.favorite) ;
-    photo.favorite = photo.favorite? 0 : 1;
+    console.log(photo.favorite);
+    photo.favorite = photo.favorite ? 0 : 1;
     this.photoService.update(photo).subscribe(resp => {
       console.log("Update photo favorite state: " + resp);
     });

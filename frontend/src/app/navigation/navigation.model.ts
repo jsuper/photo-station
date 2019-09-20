@@ -17,3 +17,8 @@ export interface CurrentNode {
 export interface CurrentNodes {
   [view: string]: CurrentNode;
 }
+
+export interface AggregationItem {
+  value?: string,
+  counter?: number,
+}

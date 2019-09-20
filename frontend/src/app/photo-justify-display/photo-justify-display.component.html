@@ -1,0 +1,6 @@
+<div class="container" style="position: relative">
+  <div class="block" *ngFor="let box of boxes"
+       [ngStyle]="{'width': box.width+'px','height':box.height+'px','top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
+       [id]="box['id']" >
+  </div>
+</div>

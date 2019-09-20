@@ -1,5 +1,5 @@
 <div style="height: 100%">
-  <mat-toolbar color="primary">
+  <mat-toolbar>
     <mat-toolbar-row>
       <button mat-icon-button>
         <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
@@ -15,7 +15,7 @@
     <mat-sidenav #sidenav mode="over" role="navigation">
       <app-nav-menu [nodes]="currentNavNode"></app-nav-menu>
     </mat-sidenav>
-    <mat-sidenav-content role="main" class="main-container">
+    <mat-sidenav-content #container role="main" class="main-container" (scroll)="onScroll(container)">
       <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
