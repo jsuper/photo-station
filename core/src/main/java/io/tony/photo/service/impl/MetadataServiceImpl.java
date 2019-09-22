@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -116,6 +117,23 @@ public class MetadataServiceImpl implements MetadataService {
     return FileType.Unknown;
   }
 
+  private String getShutterSpeedFromApex(Float apexValue,DecimalFormat format) {
+    if(apexValue == null) {
+      return null ;
+    }
+    String shutterSpeed ;
+    if (apexValue <= 1) {
+      float apexPower = (float)(1 / (Math.exp(apexValue * Math.log(2))));
+      long apexPower10 = Math.round((double)apexPower * 10.0);
+      float fApexPower = (float)apexPower10 / 10.0f;
+      shutterSpeed = format.format(fApexPower) ;
+    } else {
+      int apexPower = (int)((Math.exp(apexValue * Math.log(2))));
+      shutterSpeed = format.format(apexPower) ;
+    }
+    return shutterSpeed ;
+  }
+
   private int[] readImageWidthHeightFromMetadata(Metadata metadata) {
     try {
       int width = -1;
@@ -168,21 +186,23 @@ public class MetadataServiceImpl implements MetadataService {
         }
         ExifSubIFDDirectory exifSub = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
         if (exifSub != null) {
+
+          DecimalFormat format = new DecimalFormat("0.#");
+          format.setRoundingMode(RoundingMode.HALF_UP);
+
           Camera camera = pm.getOrCreateCamera();
           Date shootDate = exifSub.getDateDigitized();
           String iso = exifSub.getString(ExifSubIFDDirectory.TAG_ISO_EQUIVALENT);
-          String focalLength = exifSub.getString(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
-          Integer aperture = exifSub.getInteger(ExifSubIFDDirectory.TAG_APERTURE);
-          Integer shutter = exifSub.getInteger(ExifSubIFDDirectory.TAG_SHUTTER_SPEED);
+          Float focalLength = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
+          Float aperture = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_APERTURE);
+          Float shutter = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_SHUTTER_SPEED);
           pm.setDate(shootDate);
           camera.setIso(iso);
-          camera.setFocalLength(focalLength);
+          camera.setFocalLength(focalLength==null?null:format.format(focalLength));
+          camera.setShutter(getShutterSpeedFromApex(shutter,format));
 
           if (aperture != null) {
-            camera.setAperture(String.valueOf(BigDecimal.valueOf(aperture * 1.4142).setScale(1, HALF_UP).doubleValue()));
-          }
-          if (shutter != null) {
-            camera.setShutter(1 + "/" + ((int) Math.pow(2, shutter)));
+            camera.setAperture(String.valueOf(BigDecimal.valueOf(aperture * 1.4142).setScale(1, HALF_UP).floatValue()));
           }
 
         }

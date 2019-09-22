@@ -25,10 +25,10 @@ export class NavigationService {
     params: { 'q': '1' }
   };
 
-  private justify: NavigationNode = {
-    url: '/justify',
-    title: 'Justify',
-    tooltip: 'All your favorite photos',
+  private groupList: NavigationNode = {
+    url: '/groups',
+    title: 'Group List',
+    tooltip: 'Show photos group by day',
     hidden: false,
     params: { 'q': '1' }
   };
@@ -65,8 +65,8 @@ export class NavigationService {
         aggregations.forEach(aggregation => {
           children.push({
             url: '/photos/' + (aggNode.field || aggName),
-            title: aggregation.value + '(' + aggregation.value + ')',
-            tooltip: aggNode.tooltip + ' of ' + aggregation.value,
+            title: aggregation.value + '(' + aggregation.counter + ')',
+            tooltip: aggNode.tooltip + ' of ' + aggregation.counter,
             hidden: false,
             params: { "q": aggregation.value }
           });
@@ -75,7 +75,7 @@ export class NavigationService {
         dynamicNodes.push(aggNode);
       });
       dynamicNodes.push(this.favoriteNode);
-      dynamicNodes.push(this.justify);
+      dynamicNodes.push(this.groupList);
       return dynamicNodes;
     }));
     return menu;

@@ -1,6 +1,22 @@
 <div class="container" style="position: relative">
-  <div class="block" *ngFor="let box of boxes"
-       [ngStyle]="{'width': box.width+'px','height':box.height+'px','top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
-       [id]="box['id']" >
+  <div #mouseState class="block" *ngFor="let box of boxes;let i=index" [ngStyle]="{'width': box.width+'px','height':box.height+'px',
+       'top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
+       [id]="box['id']" (mouseover)="mouseState.in=true" (mouseleave)="mouseState.in=false"
+       (click)="openImageViewer(i,box['id'])">
+
+    <div style="position: absolute;bottom: 0;left: 0;width: 100%;z-index: 100;" class="btn-list"
+         [ngClass]="mouseState.in?'enter':'out'">
+
+      <button mat-icon-button *ngIf="mouseState.in" (click)="likePhoto(i,box['id']);$event.stopPropagation();">
+        <mat-icon>{{photos[i].favorite?'favorite':'favorite_border'}}</mat-icon>
+      </button>
+
+      <button mat-icon-button *ngIf="mouseState.in" style="float: right" (click)="$event.stopPropagation();">
+        <mat-icon>check_circle_outline</mat-icon>
+      </button>
+    </div>
   </div>
+  <div style="position:absolute;left:0;height: 10px;width: 90%"
+       [ngStyle]="{'top': (boxes[boxes.length-1].top+boxes[boxes.length-1].height)+'px'}" 
+       *ngIf="!hasMorePage && boxes && boxes.length"></div>
 </div>

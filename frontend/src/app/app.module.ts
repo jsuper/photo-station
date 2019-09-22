@@ -17,6 +17,7 @@ import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.component';
 import { FormsModule } from '@angular/forms';
 import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
+import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.component';
 
 registerLocaleData(localeZhHans, 'zh-Hans');
 
@@ -28,7 +29,8 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     NavItemComponent,
     PhotoViewerComponent,
     PhotoUploaderComponent,
-    PhotoJustifyDisplayComponent
+    PhotoJustifyDisplayComponent,
+    PhotoGroupListComponent
   ],
   imports: [
     BrowserModule,

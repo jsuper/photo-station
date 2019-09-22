@@ -3,4 +3,24 @@
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.btn-list {
+  height: 56px;
+}
+
+.btn-list>button {
+  color: #fff;
+  margin: 15px;
+  bottom: 5px;
+}
+
+.enter {
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+}
+
+.out {
+  background: transparent;
+
 }
