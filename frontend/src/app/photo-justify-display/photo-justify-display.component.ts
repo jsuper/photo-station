@@ -67,16 +67,16 @@ export class PhotoJustifyDisplayComponent implements OnInit {
       let q = qp['q'] || '';
       let field = this.activedRoute.snapshot.params['field'];
 
-      
-      console.log('field: ' + field + ', val: ' + q);
+
+      console.log('qf:' + this.qf + ', query: ' + this.query + ',field: ' + field + ', val: ' + q);
+      let loadPage = q != this.query && field == this.qf && this.qf;
 
       if (this.qf != field || this.query != q) {
         this.reset();
         this.qf = field;
         this.query = q;
       }
-      if(!(!this.qf && !this.query)) {
-        //console.log("First loaded...");
+      if (loadPage) {
         this.loadNextPage();
       }
     });
@@ -85,7 +85,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
   private reset(): void {
     console.log('reset values');
-    
+
     this.photos = [];
     this.boxes = [];
     this.lastMaxScrollTop = 0;
