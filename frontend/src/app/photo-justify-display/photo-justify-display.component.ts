@@ -39,7 +39,7 @@ class BoxModel {
   styleUrls: ['./photo-justify-display.component.css']
 })
 export class PhotoJustifyDisplayComponent implements OnInit {
-  readonly pageSize: number = 15;
+  pageSize: number = 15;
 
   photos: Photo[] = [];
   boxes: BoxModel[] = [];
@@ -51,7 +51,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
   loaded: number = 0;
   justifyOption = {
     containerWidth: window.innerWidth - 10,
-    targetRowHeight: 220
+    targetRowHeight: 220,
   };
   loading: boolean = false;
 
@@ -62,6 +62,10 @@ export class PhotoJustifyDisplayComponent implements OnInit {
     private routeStateService: RouteStateService,
     private dialog: MatDialog,
     private activedRoute: ActivatedRoute) {
+
+    let maxRows = Math.ceil(window.innerHeight / 240);
+    let cols = Math.floor(window.innerWidth / 300);
+    this.pageSize = cols * maxRows + 1;
 
     this.activedRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';

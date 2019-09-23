@@ -117,21 +117,21 @@ public class MetadataServiceImpl implements MetadataService {
     return FileType.Unknown;
   }
 
-  private String getShutterSpeedFromApex(Float apexValue,DecimalFormat format) {
-    if(apexValue == null) {
-      return null ;
+  private String getShutterSpeedFromApex(Float apexValue, DecimalFormat format) {
+    if (apexValue == null) {
+      return null;
     }
-    String shutterSpeed ;
+    String shutterSpeed;
     if (apexValue <= 1) {
-      float apexPower = (float)(1 / (Math.exp(apexValue * Math.log(2))));
-      long apexPower10 = Math.round((double)apexPower * 10.0);
-      float fApexPower = (float)apexPower10 / 10.0f;
-      shutterSpeed = format.format(fApexPower) ;
+      float apexPower = (float) (1 / (Math.exp(apexValue * Math.log(2))));
+      long apexPower10 = Math.round((double) apexPower * 10.0);
+      float fApexPower = (float) apexPower10 / 10.0f;
+      shutterSpeed = format.format(fApexPower);
     } else {
-      int apexPower = (int)((Math.exp(apexValue * Math.log(2))));
-      shutterSpeed = format.format(apexPower) ;
+      int apexPower = (int) ((Math.exp(apexValue * Math.log(2))));
+      shutterSpeed = format.format(apexPower);
     }
-    return shutterSpeed ;
+    return shutterSpeed;
   }
 
   private int[] readImageWidthHeightFromMetadata(Metadata metadata) {
@@ -196,11 +196,14 @@ public class MetadataServiceImpl implements MetadataService {
           Float focalLength = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
           Float aperture = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_APERTURE);
           Float shutter = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_SHUTTER_SPEED);
+          Float exposureTime = exifSub.getFloatObject(ExifSubIFDDirectory.TAG_EXPOSURE_TIME);
+
+
           pm.setDate(shootDate);
           camera.setIso(iso);
-          camera.setFocalLength(focalLength==null?null:format.format(focalLength));
-          camera.setShutter(getShutterSpeedFromApex(shutter,format));
-
+          camera.setFocalLength(focalLength == null ? null : format.format(focalLength));
+          camera.setShutter(getShutterSpeedFromApex(shutter, format));
+          camera.setExposure(String.valueOf(exposureTime));
           if (aperture != null) {
             camera.setAperture(String.valueOf(BigDecimal.valueOf(aperture * 1.4142).setScale(1, HALF_UP).floatValue()));
           }

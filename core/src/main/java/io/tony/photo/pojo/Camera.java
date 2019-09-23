@@ -17,4 +17,6 @@ public class Camera {
   private String focalLength;
   //感光度
   private String iso;
+
+  private String exposure;
 }

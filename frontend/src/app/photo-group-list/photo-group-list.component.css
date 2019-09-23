@@ -1,0 +1,14 @@
+.container {
+  position: relative;
+
+}
+
+.container .box {
+  position: absolute;
+}
+
+span.title {
+  position: absolute;
+  left: 10px;
+  top: -10px;
+}

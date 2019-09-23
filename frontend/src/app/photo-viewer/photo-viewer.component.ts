@@ -178,4 +178,12 @@ export class PhotoViewerComponent implements OnInit {
       this.dataChanged = true;
     }
   }
+
+  renderExposureTime(exposure: string): string {
+    if (exposure && exposure.length) {
+      let ep = parseFloat(exposure);
+      return '1/' + (Math.ceil(1 / ep));
+    }
+    return '';
+  }
 }

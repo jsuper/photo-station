@@ -1,1 +1,10 @@
-<p>photo-group-list works!</p>
+<div class="container" [hidden]="!loaded">
+  <div *ngFor="let sec of sections" class="box"
+       [ngStyle]="{'top': sec.top+'px','left':sec.left+'px','width':sec.width+'px','height':sec.height+'px'}">
+    <span class="title">{{sec.date}}</span>
+    <div *ngFor="let box of sec.boxes"
+         [ngStyle]="{'top': box.top+'px','left':box.left+'px','height':box.height+'px','width':box.width+'px'}"
+         style="position: absolute;background-color: #e8eaed;">
+    </div>
+  </div>
+</div>

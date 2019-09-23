@@ -19,7 +19,8 @@ export interface Camera {
   aperture?: string,
   shutter?: string,
   focalLength?: string,
-  iso: string,
+  iso?: string,
+  exposure?:string,
 }
 
 export interface Photo {
