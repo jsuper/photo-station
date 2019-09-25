@@ -1,10 +1,25 @@
-<div class="container" [hidden]="!loaded">
-  <div *ngFor="let sec of sections" class="box"
-       [ngStyle]="{'top': sec.top+'px','left':sec.left+'px','width':sec.width+'px','height':sec.height+'px'}">
-    <span class="title">{{sec.date}}</span>
-    <div *ngFor="let box of sec.boxes"
-         [ngStyle]="{'top': box.top+'px','left':box.left+'px','height':box.height+'px','width':box.width+'px'}"
-         style="position: absolute;background-color: #e8eaed;">
+<div class="group-list">
+  <div class="container" #container>
+    <div *ngFor="let sec of sections" class="box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
+         'width':pixel(sec.width),'height':pixel(sec.height)}" [attr.data-rows]="sec.rows">
+      <div class="section-info">
+        <div class="info-wrapper">
+          <h2 class="info-h2">
+            <div class="info">
+              <div class="title">{{sec.title}}</div>
+              <div class="location">中国重庆市</div>
+            </div>
+          </h2>
+        </div>
+      </div>
+      <div *ngFor="let block of sec.blocks" [ngStyle]="{'top': pixel(block.top),'left':pixel(block.left),
+           'height':pixel(block.height),'width':pixel(block.width)}"
+           style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);">
+        <a class="photo-thumbnail">
+          <div class="thumbnail-loaded" [ngStyle]="{'background-image':'url('+block.url()+')'}">
+          </div>
+        </a>
+      </div>
     </div>
   </div>
 </div>

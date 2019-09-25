@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import * as justifiedLayout from 'justified-layout'
 import { PhotoService } from 'app/photo.service';
 import { RouteStateService } from 'app/route-state.service';
@@ -57,6 +57,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
   private qf: string;
   private query: string;
+
 
   constructor(private photoService: PhotoService,
     private routeStateService: RouteStateService,
