@@ -6,6 +6,7 @@ import { Photo } from 'app/photo.model';
 import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import { Scrollable } from 'app/scrollable';
 
 class BoxModel {
   width: number;
@@ -38,7 +39,14 @@ class BoxModel {
   templateUrl: './photo-justify-display.component.html',
   styleUrls: ['./photo-justify-display.component.css']
 })
-export class PhotoJustifyDisplayComponent implements OnInit {
+export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
+  scrollUp(scrollEl: ElementRef<any>) {
+    throw new Error("Method not implemented.");
+  }
+  scrollDown(scrollEl: ElementRef<any>) {
+    throw new Error("Method not implemented.");
+  }
+ 
   pageSize: number = 15;
 
   photos: Photo[] = [];
@@ -103,6 +111,10 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
   ngOnInit() {
     console.log("Called on init...");
+    console.log(this.activedRoute.snapshot.params);
+    console.log(this.activedRoute.snapshot.queryParams);
+
+
 
     this.routeStateService.setComponent(this);
     this.loadNextPage();

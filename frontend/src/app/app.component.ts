@@ -5,6 +5,7 @@ import { NavigationNode } from './navigation/navigation.model';
 import { PhotoDisplayComponent } from './photo-display/photo-display.component';
 import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
 import { RouteStateService } from './route-state.service';
+import { Scrollable } from './scrollable';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { RouteStateService } from './route-state.service';
 export class AppComponent {
   title = 'photo-station';
 
+  private lastScrollTop: number = 0;
   currentNavNode: NavigationNode[];
 
   constructor(private navigationService: NavigationService,
@@ -23,23 +25,16 @@ export class AppComponent {
   }
 
   onScroll(container: any): void {
-    let scrollElementRef:ElementRef = container.elementRef;
-
-    // let scrollTop = navContent.scrollTop;
-    // let scrollHeight = navContent.scrollHeight;
-    // let offsetHeight = navContent.offsetHeight;
-
-    // console.log(scrollHeight - scrollTop);
-
-    // console.log(Math.ceil(offsetHeight / (scrollHeight - scrollTop) * 100));
-
-
-
-    let componentInstance = this.routeStateService.getComponent();
-    if (componentInstance) {
-      let onParentScroll = componentInstance['onParentScroll'];
-      if (typeof onParentScroll === 'function') {
-        componentInstance['onParentScroll'](scrollElementRef);
+    let scrollElementRef: ElementRef = container.elementRef;
+    let scrollTop: number = scrollElementRef.nativeElement.scrollTop;
+    let direction: string = scrollTop > this.lastScrollTop ? 'DOWN' : 'UP';
+    this.lastScrollTop = scrollTop;
+    let scrollable: Scrollable = this.routeStateService.getComponent();
+    if (scrollable) {
+      if (direction === 'DOWN') {
+        scrollable.scrollDown(scrollElementRef);
+      } else {
+        scrollable.scrollUp(scrollElementRef);
       }
     }
   }

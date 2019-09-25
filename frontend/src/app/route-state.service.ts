@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
+import { Scrollable } from './scrollable';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RouteStateService {
 
-  private component: object;
+  private component: Scrollable;
   constructor() { }
 
-  setComponent(component: object): void {
+  setComponent(component: Scrollable): void {
     this.component = component;
   }
 
-  getComponent(): object {
+  getComponent(): Scrollable {
     return this.component;
   }
 }

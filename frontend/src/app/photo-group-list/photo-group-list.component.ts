@@ -4,6 +4,8 @@ import * as justifiedLayout from 'justified-layout'
 import { Photo } from 'app/photo.model';
 import { Section, Block } from './photo-group.model';
 import { ActivatedRoute, Params } from '@angular/router';
+import { Scrollable } from 'app/scrollable';
+import { RouteStateService } from 'app/route-state.service';
 
 class Box {
   width: number;
@@ -37,7 +39,7 @@ class Query {
   templateUrl: './photo-group-list.component.html',
   styleUrls: ['./photo-group-list.component.css']
 })
-export class PhotoGroupListComponent implements OnInit {
+export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   readonly blockSpacing: number = 10;
 
@@ -50,10 +52,14 @@ export class PhotoGroupListComponent implements OnInit {
   lastMergedIndex = 0;
 
   private query: Query;
+  private maxScrollTop: number;
+
+  private scrollState: Map<Number, Number> = new Map();
 
   constructor(private photoService: PhotoService,
     private activeRoute: ActivatedRoute,
-    private el: ElementRef) {
+    private el: ElementRef,
+    private routeStateService: RouteStateService) {
 
     this.activeRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';
@@ -72,13 +78,6 @@ export class PhotoGroupListComponent implements OnInit {
     });
   }
 
-  private reset(): void {
-    this.hasMore = true;
-    this.total = 0;
-    this.lastMergedIndex = 0;
-    this.sections = [];
-  }
-
   /**
    * 基于Segment的图片展示
    *
@@ -90,23 +89,43 @@ export class PhotoGroupListComponent implements OnInit {
    * 分页加载的时候，将当前元素归到对应的段，如果当前元素的段已经加载，则直接将元素插入段的最后一行，并重新计算其布局
    */
   ngOnInit() {
-
-    console.log(this.query);
-
-
+    this.routeStateService.setComponent(this);
     let container = this.el.nativeElement.getElementsByClassName('container');
     this.containerWidth = container[0].offsetWidth - 20;
+    console.log(`Container width is : ${this.containerWidth}`);
+
 
     let maxRows: number = Math.ceil((window.innerHeight - 72) / this.targetHeight);
     let rowCols: number = Math.ceil(this.containerWidth / 300);
     this.pageSize = maxRows * rowCols;
 
-    console.log('Page size: ' + this.pageSize);
     this.loadNextPagePhotos();
   }
 
-  pixelRender(pixel: number): string {
-    return pixel + 'px';
+  scrollUp(scrollEl: ElementRef) {
+    // console.log();
+  }
+  scrollDown(scrollEl: ElementRef) {
+
+    let currentScrollTop: number = scrollEl.nativeElement.scrollTop; //滚动条位置
+    let clientHeight: number = scrollEl.nativeElement.clientHeight; //元素实际高度
+    let scrollHeight: number = scrollEl.nativeElement.scrollHeight; // 滚动条高度
+
+    const scrollPercent: number = Math.ceil((clientHeight + currentScrollTop) / scrollHeight * 100);
+
+    if (scrollPercent >= 80 && this.hasMore && !this.scrollState.has(scrollHeight)) {
+      this.scrollState.set(scrollHeight, 1);
+      console.log(`Load next page: ${scrollPercent}, state: ${JSON.stringify(this.scrollState)}`);
+      this.loadNextPagePhotos();
+    }
+  }
+
+  private reset(): void {
+    this.hasMore = true;
+    this.total = 0;
+    this.lastMergedIndex = 0;
+    this.sections = [];
+    this.scrollState.clear();
   }
 
   private loadNextPagePhotos() {
@@ -120,6 +139,7 @@ export class PhotoGroupListComponent implements OnInit {
   }
 
   private handlePageResult(photos: Photo[]): void {
+    this.total += photos.length;
     let newSections: Section[] = [];
     let adjustExistsSection: boolean;
     photos.forEach((photo, index) => {
@@ -156,7 +176,7 @@ export class PhotoGroupListComponent implements OnInit {
           //make 10 to global variable
         }
       }
-      let previousHeight: number = blocks[lastItemIndex].height;
+      let previousHeight: number = lastItemIndex ? blocks[lastItemIndex].height : 0;
       let jl = justifiedLayout(calc, { containerWidth: this.containerWidth, targetRowHeight: this.targetHeight });
       let boxes = jl.boxes;
       let nh: number = jl.containerHeight;
@@ -166,10 +186,10 @@ export class PhotoGroupListComponent implements OnInit {
       for (let i = lastItemIndex; i < blocks.length; i++) {
         let cur: Block = blocks[i];
         let boxIndex: number = i % calc.length;
-        cur.top = baseHeight + boxes[boxIndex].top;
-        cur.left = boxes[boxIndex].left;
-        cur.width = boxes[boxIndex].width;
-        cur.height = boxes[boxIndex].height;
+        cur.top = baseHeight + Math.floor(boxes[boxIndex].top);
+        cur.left = Math.floor(boxes[boxIndex].left);
+        cur.width = Math.floor(boxes[boxIndex].width);
+        cur.height = Math.floor(boxes[boxIndex].height);
       }
       lastSection.updateRows(this.blockSpacing);
     }

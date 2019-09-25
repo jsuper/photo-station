@@ -47,8 +47,7 @@ export class Block {
   }
 
   url(): string {
-    console.log(`t=${this.height < this.photo.height}`);
-
-    return '/api/photo/' + this.photo.id + '?t=true&w=' + this.width + '&h=' + this.height;
+    let loadOrigin: boolean = this.photo.size / 1024 <= 64;
+    return `/api/photo/${this.photo.id}?t=${!loadOrigin}&w=${this.width}&h=${this.height}`;
   }
 }
