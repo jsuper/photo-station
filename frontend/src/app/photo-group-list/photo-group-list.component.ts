@@ -205,7 +205,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     if (adjustExistsSection && this.sections.length) {
       let lastSection: Section = this.sections[this.sections.length - 1];
       let boxes = lastSection.boxes();
-      let flexLayout = justifiedLayout(boxes, { containerWidth: this.containerWidth, targetRowHeight: this.targetHeight });
+      let flexLayout = justifiedLayout(boxes, {
+        containerWidth: this.containerWidth,
+        targetRowHeight: this.targetHeight,
+        boxSpacing: this.blockSpacing
+      });
       lastSection.height = Math.floor(flexLayout.containerHeight);
       lastSection.blocks.forEach((block, index) => {
         this.updateBlock(block, flexLayout.boxes[index]);
@@ -218,7 +222,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         return new Box(block.photo.width, block.photo.height);
       });
 
-      let layout = justifiedLayout(calc, { containerWidth: this.containerWidth, targetRowHeight: this.targetHeight })
+      let layout = justifiedLayout(calc, {
+        containerWidth: this.containerWidth,
+        targetRowHeight: this.targetHeight,
+        boxSpacing: this.blockSpacing
+      })
       let boxes = layout.boxes;
       let baseTop = 0;
       if (this.sections.length > 0) {
