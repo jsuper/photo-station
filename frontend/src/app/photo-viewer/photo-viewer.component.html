@@ -35,12 +35,12 @@
           <img [src]="src" style="height: auto;width:100%;" />
         </div>
       </div>
-      <span class="previous" [hidden]="index == 0" (click)="showPreviousPhoto()">
+      <span class="previous" [hidden]="!canMovePrevious" (click)="showPreviousPhoto()">
         <button mat-fab>
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
       </span>
-      <span class="next" [hidden]="index == max - 1" (click)="showNextPhoto()">
+      <span class="next" [hidden]="!canMoveNext" (click)="showNextPhoto()">
         <button mat-fab>
           <mat-icon>keyboard_arrow_right</mat-icon>
         </button>

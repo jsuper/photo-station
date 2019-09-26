@@ -1,20 +1,27 @@
 <div class="group-list">
   <div class="container" #container>
-    <div *ngFor="let sec of sections" class="box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
+    <div *ngFor="let sec of sections;let si=index;" class="box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
          'width':pixel(sec.width),'height':pixel(sec.height)}" [attr.data-rows]="sec.rows">
       <div class="section-info">
+        <div class="check-all" *ngIf="sec.length()>1">
+          <button mat-icon-button  (click)="$event.stopPropagation();">
+            <mat-icon>check_circle</mat-icon>
+          </button>
+        </div>
         <div class="info-wrapper">
           <h2 class="info-h2">
             <div class="info">
-              <div class="title">{{sec.title}}</div>
-              <div class="location">中国重庆市</div>
+              <div class="title">{{titleRender(sec.title)}}</div>
+              <div class="location" [attr.data-loc]="sec.location" *ngIf="sec.location && sec.location.length">
+                {{sec.location}}</div>
             </div>
           </h2>
         </div>
       </div>
-      <div *ngFor="let block of sec.blocks" [ngStyle]="{'top': pixel(block.top),'left':pixel(block.left),
+      <div *ngFor="let block of sec.blocks;let bi=index;" [ngStyle]="{'top': pixel(block.top),'left':pixel(block.left),
            'height':pixel(block.height),'width':pixel(block.width)}"
-           style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);">
+           style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);cursor: pointer;"
+           (click)="openImageViewer(si,bi)">
         <a class="photo-thumbnail">
           <div class="thumbnail-loaded" [ngStyle]="{'background-image':'url('+block.url()+')'}">
           </div>

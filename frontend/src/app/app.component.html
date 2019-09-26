@@ -1,6 +1,7 @@
 <div style="height: 100%">
-  <mat-toolbar>
-    <mat-toolbar-row>
+  <mat-toolbar class="top-bar">
+    <div class="toolbar-shadow" [ngClass]="container.elementRef.nativeElement.scrollTop>0?'toolbar-shadow-shown':''"></div>
+    <mat-toolbar-row class="toolbar-rows">
       <button mat-icon-button>
         <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
       </button>
@@ -12,7 +13,8 @@
     </mat-toolbar-row>
   </mat-toolbar>
   <mat-sidenav-container style="height: calc(100vh - 64px)">
-    <mat-sidenav #sidenav mode="over" role="navigation">
+    <mat-sidenav #sidenav mode="over" role="navigation" [fixedInViewport]="true"
+                 [fixedTopGap]="0" [fixedBottomGap]="0">
       <app-nav-menu [nodes]="currentNavNode"></app-nav-menu>
     </mat-sidenav>
     <mat-sidenav-content #container role="main" class="main-container" (scroll)="onScroll(container)">

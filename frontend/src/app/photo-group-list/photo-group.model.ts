@@ -1,4 +1,4 @@
-import { Photo } from 'app/photo.model';
+import { Photo, Location } from 'app/photo.model';
 /**
  * Grouped sections
  */
@@ -15,12 +15,20 @@ export class Section {
   show: boolean;
 
   rows: number = 0;
+  location: string;
   constructor(key: string) {
     this.key = key;
     this.title = key;
   }
 
   addBlock(block: Block): number {
+    if (!this.location || !this.location.length) {
+      if (block.photo.location && block.photo.location.address) {
+        this.location = block.photo.location.province == block.photo.location.city ?
+          block.photo.location.nation + block.photo.location.province + block.photo.location.district :
+          block.photo.location.nation + block.photo.location.province + block.photo.location.city + block.photo.location.district;
+      }
+    }
     return this.blocks.push(block);
   }
 
@@ -31,6 +39,14 @@ export class Section {
 
   updateRows(blockSpacing: number): void {
     this.rows = this.blocks.filter(val => val.left == blockSpacing).length;
+  }
+
+  boxes(): Array<Object> {
+    return this.blocks.map(block => block.box());
+  }
+
+  length(): number {
+    return this.blocks.length;
   }
 }
 
@@ -49,5 +65,9 @@ export class Block {
   url(): string {
     let loadOrigin: boolean = this.photo.size / 1024 <= 64;
     return `/api/photo/${this.photo.id}?t=${!loadOrigin}&w=${this.width}&h=${this.height}`;
+  }
+
+  box(): object {
+    return { width: this.photo.width, height: this.photo.height };
   }
 }

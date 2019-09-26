@@ -19,8 +19,6 @@ export class PhotoViewerComponent implements OnInit {
   imageWidth: number;
   src: string;
 
-  index: number;
-  max: number;
   photoReader;
   hiddenInformation = true;
 
@@ -28,6 +26,15 @@ export class PhotoViewerComponent implements OnInit {
   dataChanged: boolean;
   readonly currentPhotoTitle: string;
   readonly currentPhotoNote: string;
+
+  private totalSections: number = 0;
+  private totalPhotos: number = 0;
+  private sectionIndex: number = 0;
+  private blockIndex: number = 0;
+
+  private sectionLengthReader;
+  private canMoveNext: boolean;
+  private canMovePrevious: boolean;
 
   constructor(public dialogRef: MatDialogRef<PhotoViewerComponent>,
     @Inject(MAT_DIALOG_DATA) public data: object,
@@ -39,10 +46,17 @@ export class PhotoViewerComponent implements OnInit {
     this.currentPhotoTitle = this.currentPhoto.title;
     this.currentPhotoNote = this.currentPhoto.note;
     this.dataChanged = false;
-    this.index = data['index'];
+    this.totalSections = data['sections'];
+    this.totalPhotos = data['photos'];
     this.photoReader = data['photoReader'];
-    this.max = data['max']
+    let indexes: number[] = data['indexes'];
+
+    this.sectionIndex = indexes[0];
+    this.blockIndex = indexes[1];
+
+    this.sectionLengthReader = data['blocksOfSection'];
     this.reloadPhoto(this.currentPhoto);
+
   }
 
   reloadPhoto(photo: Photo) {
@@ -79,6 +93,10 @@ export class PhotoViewerComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.canMovePrevious = this.blockIndex <= 0 && this.sectionIndex <= 0;
+    let sb: number = this.sectionLengthReader(this.sectionIndex);
+    this.canMoveNext = (this.sectionIndex < this.totalSections - 1) ||
+      (this.sectionIndex == this.totalSections - 1 && this.blockIndex < sb - 1);
   }
 
   checkAndSaveChangedData(): void {
@@ -93,24 +111,54 @@ export class PhotoViewerComponent implements OnInit {
   closeDialog() {
     this.dialogRef.close('Done');
   }
-
   showPreviousPhoto() {
     this.checkAndSaveChangedData();
-    this.index--;
-    let photo: Photo = this.photoReader(this.index);
+    if (this.blockIndex <= 0 && this.sectionIndex <= 0) {
+      this.canMovePrevious = false;
+      return;
+    }
+
+    if (this.blockIndex == 0) {
+      this.sectionIndex--;
+      this.blockIndex = this.sectionLengthReader(this.sectionIndex);
+      console.log(`Switch to previous section: ${this.sectionIndex}: ${this.blockIndex}`);
+    }
+
+    this.blockIndex--;
+    let photo: Photo = this.photoReader(this.sectionIndex, this.blockIndex);
     if (photo) {
       this.currentPhoto = photo;
       this.reloadPhoto(photo);
+    }
+    this.canMoveNext = true;
+    if (this.blockIndex <= 0 && this.sectionIndex <= 0) {
+      this.canMovePrevious = false;
     }
   }
 
   showNextPhoto() {
     this.checkAndSaveChangedData();
-    this.index++;
-    let photo = this.photoReader(this.index);
+    let sectionBlocks: number = this.sectionLengthReader(this.sectionIndex);
+    if (this.blockIndex == sectionBlocks - 1 && this.sectionIndex == this.totalSections - 1) {
+      console.log(`No more photos: ${this.sectionIndex}:${sectionBlocks},${this.totalSections},${this.blockIndex}`);
+      return;
+    }
+
+    this.canMovePrevious = true;
+    if (this.blockIndex == sectionBlocks - 1) {
+      this.sectionIndex++;
+      this.blockIndex = -1;
+      console.log(`Move to next sections: ${this.sectionIndex}`);
+    }
+
+    this.blockIndex++;
+    let photo = this.photoReader(this.sectionIndex, this.blockIndex);
     if (photo) {
       this.currentPhoto = photo;
       this.reloadPhoto(photo);
+    }
+    if (this.blockIndex == this.sectionLengthReader(this.sectionIndex) - 1 && this.sectionIndex == this.totalSections - 1) {
+      this.canMoveNext = false;
     }
   }
 
@@ -126,10 +174,10 @@ export class PhotoViewerComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    if (event.keyCode == 37 && this.index > 0) {
+    if (event.keyCode == 37) {
       //arrow left
       this.showPreviousPhoto();
-    } else if (event.keyCode == 39 && this.index < this.max - 1) {
+    } else if (event.keyCode == 39) {
       //arrow right
       this.showNextPhoto();
     }

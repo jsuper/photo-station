@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, Inject, LOCALE_ID } from '@angular/core';
 import { PhotoService } from 'app/photo.service';
 import * as justifiedLayout from 'justified-layout'
 import { Photo } from 'app/photo.model';
@@ -6,6 +6,9 @@ import { Section, Block } from './photo-group.model';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
 import { RouteStateService } from 'app/route-state.service';
+import { formatDate } from '@angular/common';
+import { PhotoViewerComponent } from 'app/photo-viewer/photo-viewer.component';
+import { MatDialog } from '@angular/material/dialog';
 
 class Box {
   width: number;
@@ -41,6 +44,7 @@ class Query {
 })
 export class PhotoGroupListComponent implements OnInit, Scrollable {
 
+  readonly today: Date = new Date();
   readonly blockSpacing: number = 10;
 
   sections: Section[] = [];
@@ -59,7 +63,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   constructor(private photoService: PhotoService,
     private activeRoute: ActivatedRoute,
     private el: ElementRef,
-    private routeStateService: RouteStateService) {
+    private routeStateService: RouteStateService,
+    @Inject(LOCALE_ID) private locale: string,
+    private dialog: MatDialog, ) {
+    console.log(`Current locale: ${this.locale}`);
+
 
     this.activeRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';
@@ -71,6 +79,9 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         this.query = temp;
       } else {
         if (!this.query.equals(temp)) {
+          console.log("Query changed...");
+
+          this.query = temp;
           this.reset();
           this.loadNextPagePhotos();
         }
@@ -120,6 +131,30 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     }
   }
 
+  openImageViewer(sectionIndex: number, photoIndex: number): void {
+    if (sectionIndex < this.sections.length && photoIndex < this.sections[sectionIndex].blocks.length) {
+      let photo: Photo = this.sections[sectionIndex].blocks[photoIndex].photo;
+      this.dialog.open(PhotoViewerComponent, {
+        minWidth: '100%',
+        minHeight: '100%',
+        height: '100%',
+        width: '100%',
+        panelClass: 'photo-viewer-dialog',
+        data: {
+          sections: this.sections.length,
+          photos: this.total,
+          photo: photo,
+          indexes: [sectionIndex, photoIndex],
+          photoReader: (section, block) => {
+            return this.sections[section].blocks[block].photo;
+          },
+          blocksOfSection: sectionIndex => { return this.sections[sectionIndex].blocks.length }
+        }
+      });
+    }
+
+  }
+
   private reset(): void {
     this.hasMore = true;
     this.total = 0;
@@ -136,6 +171,13 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
           this.handlePageResult(resp);
         });
     }
+  }
+
+  private updateBlock(block: Block, box) {
+    block.top = Math.floor(box.top);
+    block.left = Math.floor(box.left);
+    block.width = Math.floor(box.width);
+    block.height = Math.floor(box.height);
   }
 
   private handlePageResult(photos: Photo[]): void {
@@ -160,37 +202,14 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       section.addBlock(block);
     });
 
-    //调整最后一个section的最后一行
-    let sectionSize: number = this.sections.length;
-    let lastSection: Section = sectionSize ? this.sections[sectionSize - 1] : null;
-    if (adjustExistsSection) {
-      let blocks: Block[] = lastSection.blocks;
-      let calc: Box[] = [];
-      let lastItemIndex: number;
-      for (let i = blocks.length - 1; i > 0; i--) {
-        let current: Block = blocks[i];
-        calc.unshift(new Box(current.photo.width, current.photo.height));
-        if (current.left == this.blockSpacing) {
-          lastItemIndex = i;
-          break;
-          //make 10 to global variable
-        }
-      }
-      let previousHeight: number = lastItemIndex ? blocks[lastItemIndex].height : 0;
-      let jl = justifiedLayout(calc, { containerWidth: this.containerWidth, targetRowHeight: this.targetHeight });
-      let boxes = jl.boxes;
-      let nh: number = jl.containerHeight;
-      let baseHeight: number = lastSection.height - previousHeight;
-      lastSection.height = baseHeight + nh;
-
-      for (let i = lastItemIndex; i < blocks.length; i++) {
-        let cur: Block = blocks[i];
-        let boxIndex: number = i % calc.length;
-        cur.top = baseHeight + Math.floor(boxes[boxIndex].top);
-        cur.left = Math.floor(boxes[boxIndex].left);
-        cur.width = Math.floor(boxes[boxIndex].width);
-        cur.height = Math.floor(boxes[boxIndex].height);
-      }
+    if (adjustExistsSection && this.sections.length) {
+      let lastSection: Section = this.sections[this.sections.length - 1];
+      let boxes = lastSection.boxes();
+      let flexLayout = justifiedLayout(boxes, { containerWidth: this.containerWidth, targetRowHeight: this.targetHeight });
+      lastSection.height = Math.floor(flexLayout.containerHeight);
+      lastSection.blocks.forEach((block, index) => {
+        this.updateBlock(block, flexLayout.boxes[index]);
+      });
       lastSection.updateRows(this.blockSpacing);
     }
     //calc new sections
@@ -231,9 +250,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       section.updateRows(this.blockSpacing);
       this.sections.push(section);
     });
-
     this.mergeSection();
-
   }
 
   private mergeSection(): void {
@@ -295,6 +312,13 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
    */
   public pixel(pixel: number): string {
     return pixel + 'px';
+  }
+
+  public titleRender(date: string): string {
+    let todayYear: number = this.today.getFullYear();
+    let curYear: number = new Date(date).getFullYear();
+    let fmt: string = todayYear == curYear ? 'M月d日EEE' : 'yyyy年M月d日EEE';
+    return formatDate(date, fmt, this.locale);
   }
 
 }

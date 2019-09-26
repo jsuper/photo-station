@@ -7,8 +7,8 @@ import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.com
 
 const routes: Routes = [
   { path: '', redirectTo: '/photos', pathMatch: 'full', data: { 'q': '' } },
-  { path: 'photos', component: PhotoJustifyDisplayComponent },
-  { path: 'photos/:field', component: PhotoJustifyDisplayComponent },
+  { path: 'photos', component: PhotoGroupListComponent },
+  { path: 'photos/:field', component: PhotoGroupListComponent },
   { path: 'groups', component: PhotoGroupListComponent }
 ];
 
