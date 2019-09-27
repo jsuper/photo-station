@@ -1,12 +1,51 @@
+<div class="selected-bar" [ngStyle]="{'opacity': checkedBlocks>0?'1':'','visibility':checkedBlocks>0?'visible':''}">
+  <div style="align-items: center;display: flex;">
+    <button mat-icon-button (click)="$event.stopPropagation();" style="width: 48px;height: 48px;"
+            (click)="unselectAll();">
+      <mat-icon>clear</mat-icon>
+    </button>
+    <span style="color: #202124;
+    font: 400 1.125rem/1.5rem 'Google Sans',Roboto,Arial,sans-serif;
+    line-height: 64px;
+    padding-left: 12px;
+    vertical-align: bottom;">选择了{{checkedBlocks}}张照片</span>
+  </div>
+  <div class="bar-options">
+    <button mat-icon-button [matMenuTriggerFor]="addOptions" style="width: 48px;height: 48px;">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="deleteOptions" style="width: 48px;height: 48px;">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <button mat-icon-button style="width: 48px;height: 48px;" [matMenuTriggerFor]="moreOptions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #addOptions="matMenu" yPosition="above">
+      <button mat-menu-item>添加到相册</button>
+      <button mat-menu-item>添加标签</button>
+    </mat-menu>
+    <mat-menu #deleteOptions="matMenu" yPosition="above">
+      <button mat-menu-item>移动到回收站</button>
+      <button mat-menu-item>永久删除</button>
+    </mat-menu>
+    <mat-menu #moreOptions="matMenu" yPosition="above">
+      <button mat-menu-item>下载</button>
+      <button mat-menu-item>收藏</button>
+      <button mat-menu-item>修改日期和时间</button>
+      <button mat-menu-item>修改位置信息</button>
+    </mat-menu>
+  </div>
+</div>
 <div class="group-list">
   <div class="container" #container>
-    <div *ngFor="let sec of sections;let si=index;" class="box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
-         'width':pixel(sec.width),'height':pixel(sec.height)}" [attr.data-rows]="sec.rows">
-      <div class="section-info">
-        <div class="check-all" *ngIf="sec.length()>1">
-          <button mat-icon-button  (click)="$event.stopPropagation();">
-            <mat-icon>check_circle</mat-icon>
-          </button>
+    <div *ngFor="let sec of sections;let si=index;" class="box section-box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
+         'width':pixel(sec.width),'height':pixel(sec.height)}" [attr.data-rows]="sec.rows" #sectionState>
+      <div class="section-info" [ngStyle]="{'left': blockSpacing+'px'}">
+        <div class="check-all" [ngClass]="sectionState.enterBlock||checkedSections>0?'block-enter':''"
+             *ngIf="sec.length()>1">
+          <mat-icon [ngStyle]="{'color':checkedSections>0 && sec.hasChecked()?'#4285f4':'rgba(0,0,0,0.54)'}"
+                    (click)="$event.stopPropagation();checkSection(si);">check_circle
+          </mat-icon>
         </div>
         <div class="info-wrapper">
           <h2 class="info-h2">
@@ -19,13 +58,26 @@
         </div>
       </div>
       <div *ngFor="let block of sec.blocks;let bi=index;" [ngStyle]="{'top': pixel(block.top),'left':pixel(block.left),
-           'height':pixel(block.height),'width':pixel(block.width)}"
+           'height':pixel(block.height),'width':pixel(block.width),'background-color':checkedSections>0?'#e8f0fe':''}"
            style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);cursor: pointer;"
-           (click)="openImageViewer(si,bi)">
-        <a class="photo-thumbnail">
+           (click)="openImageViewer(si,bi)" class="photo-block" (mouseover)="sectionState.enterBlock=true"
+           (mouseleave)="sectionState.enterBlock=false">
+        <a class="photo-thumbnail"
+           [ngStyle]="{'transform': sec.hasChecked()||block.checked?getTransform(block.width,block.height):''}">
           <div class="thumbnail-loaded" [ngStyle]="{'background-image':'url('+block.url()+')'}">
           </div>
         </a>
+        <div class="operation" [ngStyle]="{'visibility': checkedSections>0?'visible':'hidden'}">
+          <div class="check-photo">
+            <mat-icon class="check" [ngStyle]="{'color': block.checked?'#4285f4':'',
+          'opacity':block.checked?'1':''}" (click)="$event.stopPropagation();checkBlock(si,bi);">
+              {{block.checked?'check_circle':'radio_button_unchecked_outline'}}</mat-icon>
+          </div>
+          <!-- <div style="flex:1 1 auto"></div>
+          <div class="like-it">
+            <mat-icon class="check" (click)="$event.stopPropagation();">favorite_border_outline</mat-icon>
+          </div> -->
+        </div>
       </div>
     </div>
   </div>

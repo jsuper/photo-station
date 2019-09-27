@@ -12,14 +12,14 @@ export class NavigationService {
   private nav_agg = 'api/nav-agg';
   private homeNode: NavigationNode = {
     url: '/photos',
-    title: 'Photos',
+    title: '全部照片',
     tooltip: 'Show all photos',
     hidden: false,
     params: { 'q': '' }
   };
   private favoriteNode: NavigationNode = {
     url: '/photos/favorite',
-    title: 'Favorites',
+    title: '收藏',
     tooltip: 'All your favorite photos',
     hidden: false,
     params: { 'q': '1' }
@@ -35,17 +35,17 @@ export class NavigationService {
 
   private aggMenus: Map<String, NavigationNode> = new Map([
     ['albums', {
-      title: 'Albums',
+      title: '相册',
       tooltip: 'Photo albums',
       hidden: false,
     }], [
       'tags', {
-        title: 'Tags',
+        title: '标签',
         tooltip: 'All tags in photos',
         hidden: false,
       }], [
       "date", {
-        title: 'Date & Time',
+        title: '日期和时间',
         tooltip: 'Shooting date',
         hidden: false,
         field: 'year'
@@ -75,7 +75,7 @@ export class NavigationService {
         dynamicNodes.push(aggNode);
       });
       dynamicNodes.push(this.favoriteNode);
-      dynamicNodes.push(this.groupList);
+      // dynamicNodes.push(this.groupList);
       return dynamicNodes;
     }));
     return menu;

@@ -17,6 +17,7 @@ export class AppComponent {
 
   private lastScrollTop: number = 0;
   currentNavNode: NavigationNode[];
+  selectedBlocks: number = 0;
 
   constructor(private navigationService: NavigationService,
     private routeStateService: RouteStateService,
@@ -37,5 +38,9 @@ export class AppComponent {
         scrollable.scrollUp(scrollElementRef);
       }
     }
+  }
+
+  setSelectedBlocks(count: number) {
+    this.selectedBlocks = count;
   }
 }

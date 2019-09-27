@@ -9,6 +9,7 @@ import { RouteStateService } from 'app/route-state.service';
 import { formatDate } from '@angular/common';
 import { PhotoViewerComponent } from 'app/photo-viewer/photo-viewer.component';
 import { MatDialog } from '@angular/material/dialog';
+import { AppComponent } from 'app/app.component';
 
 class Box {
   width: number;
@@ -45,27 +46,32 @@ class Query {
 export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   readonly today: Date = new Date();
-  readonly blockSpacing: number = 10;
+  readonly blockSpacing: number = 4;
 
   sections: Section[] = [];
   total: number = 0;
   pageSize: number = 15;
   hasMore: boolean = true;
-  targetHeight: number = 240;
-  containerWidth: number = window.innerWidth - 40;
+  targetHeight: number = 200;
+  containerWidth: number;
   lastMergedIndex = 0;
+  checkedSections = 0;
+  checkedBlocks = 0;
 
   private query: Query;
   private maxScrollTop: number;
 
   private scrollState: Map<Number, Number> = new Map();
 
+
   constructor(private photoService: PhotoService,
     private activeRoute: ActivatedRoute,
     private el: ElementRef,
     private routeStateService: RouteStateService,
     @Inject(LOCALE_ID) private locale: string,
-    private dialog: MatDialog, ) {
+    private dialog: MatDialog,
+    @Inject(AppComponent) private app: AppComponent) {
+
     console.log(`Current locale: ${this.locale}`);
 
 
@@ -79,8 +85,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         this.query = temp;
       } else {
         if (!this.query.equals(temp)) {
-          console.log("Query changed...");
-
           this.query = temp;
           this.reset();
           this.loadNextPagePhotos();
@@ -101,9 +105,10 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
    */
   ngOnInit() {
     this.routeStateService.setComponent(this);
-    let container = this.el.nativeElement.getElementsByClassName('container');
-    this.containerWidth = container[0].offsetWidth - 20;
-    console.log(`Container width is : ${this.containerWidth}`);
+    let container = this.el.nativeElement.getElementsByClassName('group-list')[0];
+    this.containerWidth = container.clientWidth;
+    console.log(this.containerWidth);
+
 
 
     let maxRows: number = Math.ceil((window.innerHeight - 72) / this.targetHeight);
@@ -132,8 +137,17 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   }
 
   openImageViewer(sectionIndex: number, photoIndex: number): void {
-    if (sectionIndex < this.sections.length && photoIndex < this.sections[sectionIndex].blocks.length) {
-      let photo: Photo = this.sections[sectionIndex].blocks[photoIndex].photo;
+    let sec: Section = this.sections[sectionIndex];
+    let block: Block = sec.blocks[photoIndex];
+
+    if (this.checkedBlocks > 0 || block.checked) {
+      this.checkBlock(sectionIndex, photoIndex);
+      console.log(`There are ${this.checkedBlocks} blocks were checked.`);
+      return;
+    }
+
+    if (sec && block) {
+      let photo: Photo = block.photo;
       this.dialog.open(PhotoViewerComponent, {
         minWidth: '100%',
         minHeight: '100%',
@@ -153,6 +167,41 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       });
     }
 
+  }
+
+  checkSection(sectionIndex: number): void {
+    let section: Section = this.sections[sectionIndex];
+    if (section.checked) {
+      this.checkedSections--;
+      section.checkAll(false);
+      this.checkedBlocks -= section.blocks.length;
+    } else {
+      this.checkedSections++;
+      section.checkAll(true);
+      this.checkedBlocks += section.blocks.length;
+    }
+    this.app.setSelectedBlocks(this.checkedBlocks);
+    console.log(`There are ${this.checkedSections} sections were checked.`);
+
+  }
+
+  checkBlock(sectionIndex: number, blockIndex: number): void {
+    let sec: Section = this.sections[sectionIndex];
+    if (sec.checkBlock(blockIndex)) {
+      this.checkedBlocks++;
+    } else {
+      this.checkedBlocks--;
+    }
+    this.app.setSelectedBlocks(this.checkedBlocks);
+  }
+
+  unselectAll(): void {
+    this.checkedSections = 0;
+    this.checkedBlocks = 0;
+    this.sections.forEach(sec => {
+      sec.checkAll(false);
+    });
+    this.app.setSelectedBlocks(this.checkedBlocks);
   }
 
   private reset(): void {
@@ -208,7 +257,8 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       let flexLayout = justifiedLayout(boxes, {
         containerWidth: this.containerWidth,
         targetRowHeight: this.targetHeight,
-        boxSpacing: this.blockSpacing
+        boxSpacing: this.blockSpacing,
+        containerPadding: this.blockSpacing,
       });
       lastSection.height = Math.floor(flexLayout.containerHeight);
       lastSection.blocks.forEach((block, index) => {
@@ -225,9 +275,12 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       let layout = justifiedLayout(calc, {
         containerWidth: this.containerWidth,
         targetRowHeight: this.targetHeight,
-        boxSpacing: this.blockSpacing
+        boxSpacing: this.blockSpacing,
+        containerPadding: this.blockSpacing,
       })
       let boxes = layout.boxes;
+      console.log(`Section [${section.title}] boxes: ${JSON.stringify(boxes)}`);
+
       let baseTop = 0;
       if (this.sections.length > 0) {
         baseTop = this.sections[this.sections.length - 1].top + this.sections[this.sections.length - 1].height;
@@ -263,18 +316,23 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   private mergeSection(): void {
     if (this.lastMergedIndex < this.sections.length) {
-      let maxContainer = this.containerWidth - 30;
+      let maxContainer = this.containerWidth - (this.blockSpacing * 4);
       for (let i = this.lastMergedIndex; i < this.sections.length - 2; i++) {
         let startSection: Section = this.sections[i];
-        if (startSection.width < maxContainer) {
-          let tempWidth = startSection.width;
-          let nextSection: Section = this.sections[i + 1];
-          if (nextSection.width < maxContainer && (tempWidth + nextSection.width) < maxContainer &&
-            (tempWidth + this.getScaledSectionWidth(startSection, nextSection, false)) < maxContainer) {
+        let nextSection: Section = this.sections[i + 1];
+        if (startSection.width < maxContainer && nextSection.width < maxContainer &&
+          (startSection.width + nextSection.width + 48 - this.blockSpacing) < maxContainer) {
+
+          let scaledWidth: number = this.getScaledSectionWidth(startSection, nextSection, false);
+          let newRowWidth: number = startSection.width + scaledWidth + 48 - this.blockSpacing;
+          if (newRowWidth <= maxContainer) {
+            console.log(`Section ${nextSection.title} can be moved up, section width: ${nextSection.width}`);
+            let moveUpHeight: number = nextSection.height;
+            let left = startSection.left + startSection.width + 48 - this.blockSpacing;
             nextSection.top = startSection.top;
-            nextSection.left = startSection.left + startSection.width + 28;
+            nextSection.left = left;
             this.getScaledSectionWidth(startSection, nextSection, true);
-            this.moveUpNextSections(i + 2, startSection.height + 28);
+            this.moveUpNextSections(i + 2, moveUpHeight);
           }
         }
       }
@@ -327,6 +385,12 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     let curYear: number = new Date(date).getFullYear();
     let fmt: string = todayYear == curYear ? 'M月d日EEE' : 'yyyy年M月d日EEE';
     return formatDate(date, fmt, this.locale);
+  }
+
+  getTransform(width: number, height: number): string {
+    let widthScale = Math.ceil((width - 42) / width * 100) / 100;
+    let heightScale = Math.ceil((height - 42) / height * 100) / 100;
+    return `translateZ(0px) scale3d(${widthScale}, ${heightScale}, 1)`
   }
 
 }

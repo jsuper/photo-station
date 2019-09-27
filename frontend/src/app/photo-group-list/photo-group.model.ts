@@ -1,4 +1,5 @@
 import { Photo, Location } from 'app/photo.model';
+
 /**
  * Grouped sections
  */
@@ -16,6 +17,8 @@ export class Section {
 
   rows: number = 0;
   location: string;
+  checked: number;
+
   constructor(key: string) {
     this.key = key;
     this.title = key;
@@ -48,6 +51,31 @@ export class Section {
   length(): number {
     return this.blocks.length;
   }
+
+  checkAll(state: boolean): void {
+    if (state) {
+      this.checked = this.blocks.length;
+    } else {
+      this.checked = 0;
+    }
+    this.blocks.forEach(b => b.check(state));
+  }
+
+  checkBlock(index: number): boolean {
+    let block: Block = this.blocks[index];
+    if (block.checked) {
+      this.checked--;
+      block.check(false);
+    } else {
+      this.checked++;
+      block.check(true);
+    }
+    return block.checked;
+  }
+
+  public hasChecked(): boolean {
+    return this.checked == this.blocks.length;
+  }
 }
 
 export class Block {
@@ -57,6 +85,7 @@ export class Block {
   width: number = 0;
   height: number = 0;
 
+  checked: boolean;
   photo: Photo;
   constructor(photo: Photo) {
     this.photo = photo;
@@ -69,5 +98,9 @@ export class Block {
 
   box(): object {
     return { width: this.photo.width, height: this.photo.height };
+  }
+
+  check(state: boolean): void {
+    this.checked = state;
   }
 }
