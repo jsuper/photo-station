@@ -3,7 +3,11 @@ import { Section, Block } from './section.model';
 import { Photo } from 'app/photo.model';
 import { FlexLayoutService } from 'app/flex-layout/flex-layout.service';
 import { FlexLayout, Box } from 'app/flex-layout/flex-layout.model';
+import { merge } from 'rxjs/operators';
 
+@Injectable({
+    providedIn: 'root'
+})
 export class SectionService {
 
     private selected: Map<number, Map<number, string>> = new Map();
@@ -17,21 +21,33 @@ export class SectionService {
 
     private sections: Section[] = [];//all sections
     private totalPhotos: number = 0;//loaded photo size
+    private lastMergeIndex: number = 0;
+    private layoutService: FlexLayoutService = new FlexLayoutService({});
+    constructor() { }
 
-    private layoutService: FlexLayoutService;
-
-    constructor(containerWidth: number, targetRowHeight: number, blockSpace: number) {
+    public setLayoutConfig(containerWidth: number, targetRowHeight: number, blockSpace: number): void {
         this.containerWidth = containerWidth;
         this.targetRowHeight = targetRowHeight;
         this.blockSpace = blockSpace;
-
-        this.layoutService = new FlexLayoutService({
+        this.layoutService.updateConfig({
             containerWidth: this.containerWidth,
             targetRowHeight: this.targetRowHeight,
             boxSpacing: this.blockSpace,
             containerPadding: this.blockSpace,
         });
     }
+    // constructor(containerWidth: number, targetRowHeight: number, blockSpace: number) {
+    // this.containerWidth = containerWidth;
+    // this.targetRowHeight = targetRowHeight;
+    // this.blockSpace = blockSpace;
+
+    //     this.layoutService = new FlexLayoutService({
+    //         containerWidth: this.containerWidth,
+    //         targetRowHeight: this.targetRowHeight,
+    //         boxSpacing: this.blockSpace,
+    //         containerPadding: this.blockSpace,
+    //     });
+    // }
 
     /**
      * 将新加载的图片添加到块中, 并返回当前已加载的图片的数量
@@ -94,10 +110,11 @@ export class SectionService {
         return this.totalPhotos;
     }
 
-    public mergeSections(startIndex: number, endIndex: number): void {
-        if (startIndex < endIndex && endIndex < this.sections.length) {
+    public mergeSections(hasMore: boolean): void {
+        if (this.lastMergeIndex < this.sections.length) {
+            let mergeSize: number = hasMore ? this.sections.length - 2 : this.sections.length - 1;
             let maxContainer = this.containerWidth;
-            for (let i = startIndex; i < endIndex; i++) {
+            for (let i = this.lastMergeIndex; i < mergeSize; i++) {
                 let startSection: Section = this.sections[i];
                 let nextSection: Section = this.sections[i + 1];
                 // let logMessage: string = 'Merge section from ' + startSection.title + ', check next section: ' + nextSection.title + ' can be merged -> ';
@@ -119,7 +136,7 @@ export class SectionService {
                     }
                 }
             }
-            // this.lastMergedIndex = mergeSize;
+            this.lastMergeIndex = mergeSize;
         }
     }
 
@@ -149,5 +166,13 @@ export class SectionService {
 
         }
         return this.selectedSections;
+    }
+
+    public getSections(): Section[] {
+        return this.sections;
+    }
+
+    public sectionLength(): number {
+        return this.sections.length;
     }
 }

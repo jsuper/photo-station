@@ -38,9 +38,9 @@
 </div>
 <div class="group-list">
   <div class="container" #container>
-    <div *ngFor="let sec of sections;let si=index;" class="box section-box"
+    <div *ngFor="let sec of sections();let si=index;" class="box section-box"
          [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
-         'width':pixel(sec.width),'height':pixel(sec.height),'margin-bottom':(si==sections.length-1)?'28px':''}" [attr.data-rows]="sec.rows" #sectionState>
+         'width':pixel(sec.width),'height':pixel(sec.height),'margin-bottom':(si==sections().length-1)?'28px':''}" [attr.data-rows]="sec.rows" #sectionState>
       <div class="section-info" [ngStyle]="{'left': blockSpacing+'px'}">
         <div class="check-all" [ngClass]="sectionState.enterBlock||checkedSections>0?'block-enter':''"
              *ngIf="sec.length()>1">
