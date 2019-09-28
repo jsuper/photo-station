@@ -2,7 +2,7 @@ import { Component, OnInit, ElementRef, Inject, LOCALE_ID } from '@angular/core'
 import { PhotoService } from 'app/photo.service';
 import * as justifiedLayout from 'justified-layout'
 import { Photo } from 'app/photo.model';
-import { Section, Block } from './photo-group.model';
+import { Section, Block } from 'app/sections/section.model';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
 import { RouteStateService } from 'app/route-state.service';
@@ -59,7 +59,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   checkedBlocks = 0;
 
   private query: Query;
-  private maxScrollTop: number;
 
   private scrollState: Map<Number, Number> = new Map();
 
@@ -72,16 +71,12 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     private dialog: MatDialog,
     @Inject(AppComponent) private app: AppComponent) {
 
-    console.log(`Current locale: ${this.locale}`);
-
-
     this.activeRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';
       let field = this.activeRoute.snapshot.params['field'];
 
       let temp: Query = new Query(field, q);
       if (this.query == null) {
-        //first loaded.
         this.query = temp;
       } else {
         if (!this.query.equals(temp)) {
@@ -93,16 +88,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     });
   }
 
-  /**
-   * 基于Segment的图片展示
-   *
-   * 基于日期进行分段，先按每个段一行来展示
-   * 段内使用justified layout来进行布局。
-   * 当展示完成后，重新遍历所有的段，判断当前段和下一个段是否可以合并，（从当前段开始找所有可以合并的段）
-   * 可以合并的段找到后，向上移动该段（段内元素使用上一个段的高度进行等比缩放），剩余的段依次想上移动当前段的height高度像素。
-   *
-   * 分页加载的时候，将当前元素归到对应的段，如果当前元素的段已经加载，则直接将元素插入段的最后一行，并重新计算其布局
-   */
+
   ngOnInit() {
     this.routeStateService.setComponent(this);
     let container = this.el.nativeElement.getElementsByClassName('group-list')[0];
@@ -131,7 +117,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
     if (scrollPercent >= 80 && this.hasMore && !this.scrollState.has(scrollHeight)) {
       this.scrollState.set(scrollHeight, 1);
-      console.log(`Load next page: ${scrollPercent}, state: ${JSON.stringify(this.scrollState)}`);
+      // console.log(`Load next page: ${scrollPercent}, state: ${JSON.stringify(this.scrollState)}`);
       this.loadNextPagePhotos();
     }
   }
@@ -181,7 +167,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
       this.checkedBlocks += section.blocks.length;
     }
     this.app.setSelectedBlocks(this.checkedBlocks);
-    console.log(`There are ${this.checkedSections} sections were checked.`);
 
   }
 
@@ -261,9 +246,8 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         containerPadding: this.blockSpacing,
       });
       lastSection.height = Math.floor(flexLayout.containerHeight);
-      lastSection.blocks.forEach((block, index) => {
-        this.updateBlock(block, flexLayout.boxes[index]);
-      });
+      lastSection.updateBlockBox(flexLayout.boxes);
+      lastSection.calculateWidth(this.blockSpacing);
       lastSection.updateRows(this.blockSpacing);
     }
     //calc new sections
@@ -279,36 +263,20 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         containerPadding: this.blockSpacing,
       })
       let boxes = layout.boxes;
-      console.log(`Section [${section.title}] boxes: ${JSON.stringify(boxes)}`);
 
       let baseTop = 0;
       if (this.sections.length > 0) {
         baseTop = this.sections[this.sections.length - 1].top + this.sections[this.sections.length - 1].height;
       }
-      section.height = Math.floor(layout.containerHeight);
+      section.height = Math.ceil(layout.containerHeight);
       section.top = baseTop + 28;
       section.left = this.blockSpacing;
       section.show = true;
 
-      let firstBreakRowIndex: number = -1;
-      let foundFirstBreakRowIndex = false;
-      section.blocks.forEach((block, i) => {
-        block.width = Math.floor(boxes[i].width);
-        block.height = Math.floor(boxes[i].height);
-        block.top = Math.floor(boxes[i].top);
-        block.left = Math.floor(boxes[i].left);
-        if (i != 0 && block.left == this.blockSpacing && !foundFirstBreakRowIndex) {
-          firstBreakRowIndex = i - 1;
-          foundFirstBreakRowIndex = true;
-        }
-      });
-
-      if (firstBreakRowIndex < 0) {
-        firstBreakRowIndex = section.blocks.length - 1;
-      }
-      let sb: Block = section.blocks[firstBreakRowIndex];
-      section.width = sb.left + sb.width + this.blockSpacing;
+      section.updateBlockBox(boxes);
+      section.calculateWidth(this.blockSpacing);
       section.updateRows(this.blockSpacing);
+
       this.sections.push(section);
     });
     this.mergeSection();
@@ -316,27 +284,31 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   private mergeSection(): void {
     if (this.lastMergedIndex < this.sections.length) {
-      let maxContainer = this.containerWidth - (this.blockSpacing * 4);
-      for (let i = this.lastMergedIndex; i < this.sections.length - 2; i++) {
+      let maxContainer = this.containerWidth;
+      let mergeSize: number = this.hasMore ? this.sections.length - 2 : this.sections.length - 1;
+      for (let i = this.lastMergedIndex; i < mergeSize; i++) {
         let startSection: Section = this.sections[i];
         let nextSection: Section = this.sections[i + 1];
+        // let logMessage: string = 'Merge section from ' + startSection.title + ', check next section: ' + nextSection.title + ' can be merged -> ';
         if (startSection.width < maxContainer && nextSection.width < maxContainer &&
           (startSection.width + nextSection.width + 48 - this.blockSpacing) < maxContainer) {
 
-          let scaledWidth: number = this.getScaledSectionWidth(startSection, nextSection, false);
-          let newRowWidth: number = startSection.width + scaledWidth + 48 - this.blockSpacing;
+          // let scaledWidth: number = this.getScaledSectionWidth(startSection, nextSection, false);
+          let scaledWidth: number = nextSection.scaling(startSection.height, this.blockSpacing, false);
+          let newRowWidth: number = startSection.left + startSection.width + scaledWidth + 48 - this.blockSpacing;
           if (newRowWidth <= maxContainer) {
-            console.log(`Section ${nextSection.title} can be moved up, section width: ${nextSection.width}`);
+            // logMessage += ' Section ' + nextSection.title + ' can be merge up, it\'s width is: ' + nextSection.width;
             let moveUpHeight: number = nextSection.height;
             let left = startSection.left + startSection.width + 48 - this.blockSpacing;
             nextSection.top = startSection.top;
             nextSection.left = left;
-            this.getScaledSectionWidth(startSection, nextSection, true);
-            this.moveUpNextSections(i + 2, moveUpHeight);
+            // this.getScaledSectionWidth(startSection, nextSection, true);
+            nextSection.scaling(startSection.height, this.blockSpacing, true);
+            this.moveUpNextSections(i + 2, moveUpHeight + 24);
           }
         }
       }
-      this.lastMergedIndex = this.sections.length - 2;
+      this.lastMergedIndex = mergeSize;
     }
   }
 
@@ -344,32 +316,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     for (let i = index; i < this.sections.length; i++) {
       this.sections[i].top -= height;
     }
-  }
-
-  // (20,10)->(?,5)
-  private getScaledSectionWidth(startSection: Section, mayMergeSection: Section, changeWidth: boolean): number {
-    let scaleToHeight: number = startSection.lastBlock().height;
-    let newWidth: number = 0;
-    mayMergeSection.blocks.forEach((bl, index) => {
-      let ratio = scaleToHeight / bl.height;
-      let width = Math.floor(ratio * bl.width);
-      newWidth += width;
-      if (changeWidth) {
-        bl.width = width;
-        bl.height = scaleToHeight;
-        if (index == 0) {
-          bl.left = this.blockSpacing;
-        } else {
-          let pre: Block = mayMergeSection.blocks[index - 1];
-          bl.left = pre.left + pre.width + this.blockSpacing;
-        }
-      }
-    });
-    newWidth += ((mayMergeSection.blocks.length - 1) * this.blockSpacing);
-    if (changeWidth) {
-      mayMergeSection.width = newWidth + 20;
-    }
-    return newWidth;
   }
 
   /**

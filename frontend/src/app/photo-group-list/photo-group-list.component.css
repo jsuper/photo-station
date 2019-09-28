@@ -193,7 +193,7 @@ div.thumbnail-loaded {
 }
 
 .photo-block:hover .operation {
-  visibility: visible;
+  visibility: visible !important;
   transition: all .135s cubic-bezier(0.0, 0.0, 0.2, 1), opacity linear .15s .15s;
 }
 

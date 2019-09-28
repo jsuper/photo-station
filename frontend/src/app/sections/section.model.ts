@@ -1,4 +1,5 @@
 import { Photo, Location } from 'app/photo.model';
+import { Box } from 'app/flex-layout/flex-layout.model';
 
 /**
  * Grouped sections
@@ -44,7 +45,7 @@ export class Section {
     this.rows = this.blocks.filter(val => val.left == blockSpacing).length;
   }
 
-  boxes(): Array<Object> {
+  boxes(): Box[] {
     return this.blocks.map(block => block.box());
   }
 
@@ -73,6 +74,65 @@ export class Section {
     return block.checked;
   }
 
+  updateBlockBox(boxes: Array<any>): void {
+    this.blocks.forEach((block, i) => {
+      block.width = Math.floor(boxes[i].width);
+      block.height = Math.floor(boxes[i].height);
+      block.top = Math.floor(boxes[i].top);
+      block.left = Math.floor(boxes[i].left);
+    });
+  }
+
+  calculateWidth(blockSpacing: number): number {
+    let firstBreakRowIndex: number = -1;
+    let foundFirstBreakRowIndex = false;
+    this.blocks.forEach((block, i) => {
+      if (i != 0 && block.left == blockSpacing && !foundFirstBreakRowIndex) {
+        firstBreakRowIndex = i - 1;
+        foundFirstBreakRowIndex = true;
+      }
+    });
+
+    if (firstBreakRowIndex < 0) {
+      firstBreakRowIndex = this.blocks.length - 1;
+    }
+    let sb: Block = this.blocks[firstBreakRowIndex];
+    this.width = sb.left + sb.width + blockSpacing;
+    return this.width;
+  }
+
+  /**
+   * 缩放section内部块的高度到目标高度，宽度按比例缩放
+   * @param targetHeight 缩放的目标高度
+   * @param blockSpace 块之间的间隔宽度
+   * @param applyScale 是否更新自身、子模块的宽高度
+   */
+  scaling(targetHeight: number, blockSpace: number, applyScale: boolean): number {
+    let newWidth: number = 0;
+    this.blocks.forEach((bl, index) => {
+      let ratio = targetHeight / bl.height;
+      let width = Math.ceil(ratio * bl.width);
+      newWidth += width;
+      if (applyScale) {
+        bl.width = width;
+        bl.height = targetHeight;
+        if (index == 0) {
+          bl.left = blockSpace;
+        } else {
+          let pre: Block = this.blocks[index - 1];
+          bl.left = pre.left + pre.width + blockSpace;
+        }
+      }
+    });
+
+    newWidth += ((this.blocks.length - 1) * blockSpace) + (2 * blockSpace);
+    if (applyScale) {
+      this.width = newWidth;
+    }
+    return newWidth;
+  }
+
+
   public hasChecked(): boolean {
     return this.checked == this.blocks.length;
   }
@@ -96,8 +156,11 @@ export class Block {
     return `/api/photo/${this.photo.id}?t=${!loadOrigin}&w=${this.width}&h=${this.height}`;
   }
 
-  box(): object {
-    return { width: this.photo.width, height: this.photo.height };
+  box(): Box {
+    let box: Box = new Box();
+    box.width = this.photo.width;
+    box.height = this.photo.height;
+    return box;
   }
 
   check(state: boolean): void {

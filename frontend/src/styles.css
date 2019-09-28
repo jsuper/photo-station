@@ -85,6 +85,9 @@ mat-sidenav-container .sidenav-content {
   background-color: white;
   z-index: 300 !important;
 }
+mat-sidenav-content.main-container {
+  overflow-x: hidden;
+}
 
 mat-sidenav-container div.mat-sidenav-content {
   height: auto;
