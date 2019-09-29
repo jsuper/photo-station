@@ -26,6 +26,7 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopFieldCollector;
+import org.apache.lucene.search.TopFieldDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -52,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -258,6 +257,65 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     } catch (IOException e) {
       log.error("Refresh search failed.", e);
     }
+  }
+
+  @Override
+  public List<Document> search(Query query, SortField sort, int size) {
+    if (query == null) {
+      return Collections.emptyList();
+    }
+    Sort sortBy = sort == null ? null : new Sort(sort);
+    TopFieldCollector collector = TopFieldCollector.create(sortBy, Math.max(1, size), null, size);
+    final IndexSearcher searcher = getSearcher();
+    try {
+      if (searcher != null) {
+        searcher.search(query, collector);
+        TopDocs topDocs = collector.topDocs(0, Math.max(1, size));
+        return Optional.ofNullable(topDocs.scoreDocs)
+          .map(sc -> Stream.of(sc).map(doc -> {
+            try {
+              return searcher.doc(doc.doc);
+            } catch (IOException e) {
+              return null;
+            }
+          }).filter(Objects::nonNull).collect(Collectors.toList()))
+          .orElse(Collections.emptyList());
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      release(searcher);
+    }
+
+    return Collections.emptyList();
+  }
+
+  @Override
+  public int deleteAlbums(String albumId) {
+    return 0;
+  }
+
+  @Override
+  public int getTotalDocs(String field, String value) {
+    IndexSearcher searcher = getSearcher();
+    try {
+      BooleanQuery.Builder builder = new BooleanQuery.Builder();
+      builder.add(new TermQuery(new Term(field, value)), SHOULD);
+      //TODO add delete filter
+      BooleanQuery query = builder.build();
+      SortField timestamp = new SortField("timestamp", SortField.Type.LONG);
+      TopFieldCollector collector = TopFieldCollector.create(new Sort(timestamp), 1, Integer.MAX_VALUE);
+      searcher.search(query, collector);
+
+      int totalHits = collector.getTotalHits();
+
+      return totalHits;
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      release(searcher);
+    }
+    return 0;
   }
 
   private Set<String> getSetField(Document doc, String field) {

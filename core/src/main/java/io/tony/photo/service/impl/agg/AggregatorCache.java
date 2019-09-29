@@ -17,6 +17,7 @@ import org.apache.lucene.search.Scorable;
 import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.CollectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +91,14 @@ public class AggregatorCache {
       }
     }
     return Collections.emptyMap();
+  }
+
+  public int getTotalDocs(String field, String value) {
+    Aggregation aggregation = getAggregations().get(field);
+    if (aggregation != null && aggregation.terms() != null) {
+      return aggregation.total(value);
+    }
+    return 0;
   }
 
   public Map<String, Aggregation> getAggregations() {

@@ -4,6 +4,13 @@ package io.tony.photo.web;
 import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TermQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +31,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 import io.tony.photo.exception.PhotoDuplicateException;
+import io.tony.photo.pojo.Albums;
 import io.tony.photo.pojo.Photo;
 import io.tony.photo.service.PhotoIndexStore;
 import io.tony.photo.service.PhotoStore;
+import io.tony.photo.service.impl.agg.AggregateTerm;
 import io.tony.photo.utils.FileOp;
 import io.tony.photo.utils.Json;
 import io.tony.photo.utils.Strings;
@@ -242,4 +253,5 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     }
     ctx.response().end(Json.toJson(data));
   }
+
 }

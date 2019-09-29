@@ -1,0 +1,25 @@
+<h1 mat-dialog-title>添加到</h1>
+<mat-dialog-content class="albums-container" [ngStyle]="{'border-top': scrolled?'1px solid #dadce0;':''}"
+                    (scroll)="onScroll()">
+  <ul class="album-list">
+    <li class="album-info">
+      <div class="album-cover" style="height: 40px;min-width: 40px;width: 40px;background-size: cover;display: flex;
+      justify-content: center;align-items: center">
+        <mat-icon>add</mat-icon>
+      </div>
+      <div class="album-title">
+        <div class="title">新建影集</div>
+      </div>
+    </li>
+    <li class="album-info" *ngFor="let album of albums">
+      <div class="album-cover" style="height: 40px;min-width: 40px;width: 40px;background-size: cover;display: flex;
+      justify-content: center;align-items: center;background-color: #bdc1c6;border-radius: 4px;">
+
+      </div>
+      <div class="album-title">
+        <div class="title">{{album.name}}</div>
+        <div class="info">{{album.photos==0?'没有内容':'9月19日 . '+album.photos+' 项'}}</div>
+      </div>
+    </li>
+  </ul>
+</mat-dialog-content>

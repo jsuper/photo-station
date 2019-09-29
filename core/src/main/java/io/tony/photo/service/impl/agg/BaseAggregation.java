@@ -35,6 +35,15 @@ public abstract class BaseAggregation<T> implements Aggregation<T> {
     terms.compute(mappedTerm, (t, o) -> o == null ? new AggregateTerm(mappedTerm) : o.incr());
   }
 
+  @Override
+  public int total(String val) {
+    AggregateTerm aggregateTerm = terms.get(val);
+    if (aggregateTerm != null) {
+      return aggregateTerm.getCounter();
+    }
+    return 0;
+  }
+
   public List<AggregateTerm> terms() {
     return new ArrayList<>(terms.values());
   }

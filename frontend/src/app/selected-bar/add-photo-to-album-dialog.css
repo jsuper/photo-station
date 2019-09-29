@@ -1,0 +1,74 @@
+.albums-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.album-list {
+  outline: none;
+  width: 100%;
+  max-width: 100%;
+  font-family: Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: .009375em;
+  text-decoration: inherit;
+  text-transform: inherit;
+  color: var(--mdc-theme-text-primary-on-background, rgba(0, 0, 0, 0.87));
+  margin: 0;
+  padding: 8px 0;
+  line-height: 1.5rem;
+  list-style-type: none;
+}
+
+.album-info {
+  cursor: pointer;
+  padding: 8px 24px;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  height: 48px;
+  overflow: hidden;
+}
+
+.albums-container {
+  margin: 0;
+  padding: 0;
+  height: calc(100% - 56px);
+}
+
+.album-title {
+  margin-left: 16px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+}
+
+.album-title .title {
+  color: #3c4043;
+  max-width: 276px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: .00625em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+.album-title .info {
+  color: #5f6368;
+  display: flex;
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+  margin-top: 0;
+  letter-spacing: .01428571em;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: .875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+}

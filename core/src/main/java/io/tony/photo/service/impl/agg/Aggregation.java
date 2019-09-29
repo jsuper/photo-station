@@ -14,4 +14,6 @@ public interface Aggregation<T> {
   boolean allowAggregate(T val);
 
   List<AggregateTerm> terms();
+
+  int total(String val) ;
 }

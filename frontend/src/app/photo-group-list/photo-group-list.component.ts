@@ -118,7 +118,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   }
 
   openImageViewer(sectionIndex: number, photoIndex: number): void {
-    let sec: Section = this.allSections[sectionIndex];
+    let sec: Section = this.sections()[sectionIndex];
     let block: Block = sec.blocks[photoIndex];
 
     if (block.selected || this.selectedBlocks() > 0) {
@@ -135,14 +135,15 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         width: '100%',
         panelClass: 'photo-viewer-dialog',
         data: {
-          sections: this.allSections.length,
+          sections: this.sections().length,
           photos: this.total,
           photo: photo,
           indexes: [sectionIndex, photoIndex],
           photoReader: (section, block) => {
-            return this.allSections[section].blocks[block].photo;
+            return this.sections()[section].blocks[block].photo;
+            // return this.allSections[section].blocks[block].photo;
           },
-          blocksOfSection: sectionIndex => { return this.allSections[sectionIndex].blocks.length }
+          blocksOfSection: sectionIndex => { return this.sections()[sectionIndex].blocks.length }
         }
       });
     }

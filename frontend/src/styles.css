@@ -10,11 +10,6 @@ body {
   overflow: hidden;
 }
 
-html,
-body {
-  height: 100%;
-}
-
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -85,6 +80,7 @@ mat-sidenav-container .sidenav-content {
   background-color: white;
   z-index: 300 !important;
 }
+
 mat-sidenav-content.main-container {
   overflow-x: hidden;
 }
@@ -311,4 +307,14 @@ mat-sidenav .doc-version select option {
 .toolbar-rows {
   background-color: white;
   z-index: 200;
+}
+
+.cdk-global-scrollblock {
+  overflow-y: hidden !important;
+}
+
+.add-to-album mat-dialog-container {
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
 }
