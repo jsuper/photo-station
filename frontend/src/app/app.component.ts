@@ -2,10 +2,9 @@ import { Component, ElementRef } from '@angular/core';
 
 import { NavigationService } from "app/navigation/navigation.service";
 import { NavigationNode } from './navigation/navigation.model';
-import { PhotoDisplayComponent } from './photo-display/photo-display.component';
-import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
+import { SectionService } from './sections/section.service';
 
 @Component({
   selector: 'app-root',
@@ -17,11 +16,11 @@ export class AppComponent {
 
   private lastScrollTop: number = 0;
   currentNavNode: NavigationNode[];
-  selectedBlocks: number = 0;
 
   constructor(private navigationService: NavigationService,
     private routeStateService: RouteStateService,
-    private el: ElementRef) {
+    private el: ElementRef,
+    private sectionService: SectionService) {
     navigationService.getNavMenus().subscribe(nodes => this.currentNavNode = nodes);
   }
 
@@ -40,7 +39,7 @@ export class AppComponent {
     }
   }
 
-  setSelectedBlocks(count: number) {
-    this.selectedBlocks = count;
+  hasBlockSelected(): boolean {
+    return this.sectionService.numberOfSelectedBlocks() > 0;
   }
 }

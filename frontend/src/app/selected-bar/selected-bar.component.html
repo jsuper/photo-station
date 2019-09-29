@@ -1,0 +1,38 @@
+<div class="selected-bar" [ngStyle]="{'opacity': hasSelectedBlocks()?'1':'','visibility':hasSelectedBlocks()?'visible':''}">
+  <div style="align-items: center;display: flex;">
+    <button mat-icon-button (click)="$event.stopPropagation();" style="width: 48px;height: 48px;"
+            (click)="clearSelections();">
+      <mat-icon>clear</mat-icon>
+    </button>
+    <span style="color: #202124;
+    font: 400 1.125rem/1.5rem 'Google Sans',Roboto,Arial,sans-serif;
+    line-height: 64px;
+    padding-left: 12px;
+    vertical-align: bottom;">选择了{{selectedBlocks()}}张照片</span>
+  </div>
+  <div class="bar-options">
+    <button mat-icon-button [matMenuTriggerFor]="addOptions" style="width: 48px;height: 48px;">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="deleteOptions" style="width: 48px;height: 48px;">
+      <mat-icon>delete</mat-icon>
+    </button>
+    <button mat-icon-button style="width: 48px;height: 48px;" [matMenuTriggerFor]="moreOptions">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #addOptions="matMenu" yPosition="above">
+      <button mat-menu-item>影集</button>
+    </mat-menu>
+    <mat-menu #deleteOptions="matMenu" yPosition="above">
+      <button mat-menu-item>移动到回收站</button>
+      <button mat-menu-item>永久删除</button>
+    </mat-menu>
+    <mat-menu #moreOptions="matMenu" yPosition="above">
+      <button mat-menu-item>下载</button>
+      <button mat-menu-item>收藏</button>
+      <button mat-menu-item>修改日期和时间</button>
+      <button mat-menu-item>修改位置信息</button>
+      <button mat-menu-item>仅登陆可见</button>
+    </mat-menu>
+  </div>
+</div>

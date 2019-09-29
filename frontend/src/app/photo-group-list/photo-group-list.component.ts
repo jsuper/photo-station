@@ -55,9 +55,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   hasMore: boolean = true;
   targetHeight: number = 200;
   containerWidth: number;
-  lastMergedIndex = 0;
-  checkedSections = 0;
-  checkedBlocks = 0;
 
   private query: Query;
 
@@ -70,7 +67,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     private routeStateService: RouteStateService,
     @Inject(LOCALE_ID) private locale: string,
     private dialog: MatDialog,
-    @Inject(AppComponent) private app: AppComponent,
     private sectionService: SectionService) {
 
     this.activeRoute.queryParams.subscribe(qp => {
@@ -117,7 +113,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
     if (scrollPercent >= 80 && this.hasMore && !this.scrollState.has(scrollHeight)) {
       this.scrollState.set(scrollHeight, 1);
-      // console.log(`Load next page: ${scrollPercent}, state: ${JSON.stringify(this.scrollState)}`);
       this.loadNextPagePhotos();
     }
   }
@@ -126,9 +121,8 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     let sec: Section = this.allSections[sectionIndex];
     let block: Block = sec.blocks[photoIndex];
 
-    if (this.checkedBlocks > 0 || block.checked) {
+    if (block.selected || this.selectedBlocks() > 0) {
       this.checkBlock(sectionIndex, photoIndex);
-      console.log(`There are ${this.checkedBlocks} blocks were checked.`);
       return;
     }
 
@@ -156,49 +150,30 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   }
 
   checkSection(sectionIndex: number): void {
-    let section: Section = this.allSections[sectionIndex];
-    if (section.checked) {
-      this.checkedSections--;
-      section.checkAll(false);
-      this.checkedBlocks -= section.blocks.length;
-    } else {
-      this.checkedSections++;
-      section.checkAll(true);
-      this.checkedBlocks += section.blocks.length;
-    }
-    this.app.setSelectedBlocks(this.checkedBlocks);
+    this.sectionService.selectSection(sectionIndex);
 
   }
 
   checkBlock(sectionIndex: number, blockIndex: number): void {
-    let sec: Section = this.allSections[sectionIndex];
-    if (sec.checkBlock(blockIndex)) {
-      this.checkedBlocks++;
-    } else {
-      this.checkedBlocks--;
-    }
-    this.app.setSelectedBlocks(this.checkedBlocks);
-  }
-
-  unselectAll(): void {
-    this.checkedSections = 0;
-    this.checkedBlocks = 0;
-    this.allSections.forEach(sec => {
-      sec.checkAll(false);
-    });
-    this.app.setSelectedBlocks(this.checkedBlocks);
+    this.sectionService.selectBlock(sectionIndex, blockIndex);
   }
 
   sections(): Section[] {
     return this.sectionService.getSections();
   }
+  selectedSections(): number {
+    return this.sectionService.numberOfSelectedSections();
+  }
+
+  selectedBlocks(): number {
+    return this.sectionService.numberOfSelectedBlocks();
+  }
 
   private reset(): void {
     this.hasMore = true;
     this.total = 0;
-    this.lastMergedIndex = 0;
-    this.allSections = [];
     this.scrollState.clear();
+    this.sectionService.reset();
   }
 
   private loadNextPagePhotos() {
@@ -207,7 +182,6 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
         .subscribe(resp => {
           this.hasMore = resp.length == this.pageSize;
           this.total += resp.length;
-          // this.handlePageResult(resp);
           this.sectionService.addNewLoadedPhotos(resp);
           this.sectionService.mergeSections(this.hasMore);
         });
@@ -232,7 +206,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
   getTransform(width: number, height: number): string {
     let widthScale = Math.ceil((width - 42) / width * 100) / 100;
     let heightScale = Math.ceil((height - 42) / height * 100) / 100;
-    return `translateZ(0px) scale3d(${widthScale}, ${heightScale}, 1)`
+    return 'translateZ(0px) scale3d(' + widthScale + ',' + heightScale + ', 1)';
   }
 
 }

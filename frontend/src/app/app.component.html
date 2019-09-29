@@ -1,7 +1,7 @@
 <div style="height: 100%">
   <mat-toolbar class="top-bar">
     <div class="toolbar-shadow" [ngClass]="container.elementRef.nativeElement.scrollTop>0
-      ||selectedBlocks>0?'toolbar-shadow-shown':''">
+      ||hasBlockSelected()?'toolbar-shadow-shown':''">
     </div>
     <mat-toolbar-row class="toolbar-rows">
       <button mat-icon-button>

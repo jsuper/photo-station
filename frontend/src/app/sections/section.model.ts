@@ -18,7 +18,7 @@ export class Section {
 
   rows: number = 0;
   location: string;
-  checked: number;
+  selected: number;
 
   constructor(key: string) {
     this.key = key;
@@ -51,27 +51,6 @@ export class Section {
 
   length(): number {
     return this.blocks.length;
-  }
-
-  checkAll(state: boolean): void {
-    if (state) {
-      this.checked = this.blocks.length;
-    } else {
-      this.checked = 0;
-    }
-    this.blocks.forEach(b => b.check(state));
-  }
-
-  checkBlock(index: number): boolean {
-    let block: Block = this.blocks[index];
-    if (block.checked) {
-      this.checked--;
-      block.check(false);
-    } else {
-      this.checked++;
-      block.check(true);
-    }
-    return block.checked;
   }
 
   updateBlockBox(boxes: Array<any>): void {
@@ -133,8 +112,8 @@ export class Section {
   }
 
 
-  public hasChecked(): boolean {
-    return this.checked == this.blocks.length;
+  public hasSelected(): boolean {
+    return this.selected == this.blocks.length;
   }
 }
 
@@ -145,8 +124,8 @@ export class Block {
   width: number = 0;
   height: number = 0;
 
-  checked: boolean;
   photo: Photo;
+  selected: boolean;
   constructor(photo: Photo) {
     this.photo = photo;
   }
@@ -163,7 +142,4 @@ export class Block {
     return box;
   }
 
-  check(state: boolean): void {
-    this.checked = state;
-  }
 }
