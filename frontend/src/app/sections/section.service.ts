@@ -107,22 +107,24 @@ export class SectionService {
       for (let i = this.lastMergeIndex; i < mergeSize; i++) {
         let startSection: Section = this.sections[i];
         let nextSection: Section = this.sections[i + 1];
-        // let logMessage: string = 'Merge section from ' + startSection.title + ', check next section: ' + nextSection.title + ' can be merged -> ';
-        if (startSection.width < maxContainer && nextSection.width < maxContainer &&
-          (startSection.width + nextSection.width + 48 - this.blockSpace) < maxContainer) {
+        if (startSection && nextSection) {
+          // let logMessage: string = 'Merge section from ' + startSection.title + ', check next section: ' + nextSection.title + ' can be merged -> ';
+          if (startSection.width < maxContainer && nextSection.width < maxContainer &&
+            (startSection.width + nextSection.width + 48 - this.blockSpace) < maxContainer) {
 
-          // let scaledWidth: number = this.getScaledSectionWidth(startSection, nextSection, false);
-          let scaledWidth: number = nextSection.scaling(startSection.height, this.blockSpace, false);
-          let newRowWidth: number = startSection.left + startSection.width + scaledWidth + 48 - this.blockSpace;
-          if (newRowWidth <= maxContainer) {
-            // logMessage += ' Section ' + nextSection.title + ' can be merge up, it\'s width is: ' + nextSection.width;
-            let moveUpHeight: number = nextSection.height;
-            let left = startSection.left + startSection.width + 48 - this.blockSpace;
-            nextSection.top = startSection.top;
-            nextSection.left = left;
-            // this.getScaledSectionWidth(startSection, nextSection, true);
-            nextSection.scaling(startSection.height, this.blockSpace, true);
-            this.moveUpNextSections(i + 2, moveUpHeight + 24);
+            // let scaledWidth: number = this.getScaledSectionWidth(startSection, nextSection, false);
+            let scaledWidth: number = nextSection.scaling(startSection.height, this.blockSpace, false);
+            let newRowWidth: number = startSection.left + startSection.width + scaledWidth + 48 - this.blockSpace;
+            if (newRowWidth <= maxContainer) {
+              // logMessage += ' Section ' + nextSection.title + ' can be merge up, it\'s width is: ' + nextSection.width;
+              let moveUpHeight: number = nextSection.height;
+              let left = startSection.left + startSection.width + 48 - this.blockSpace;
+              nextSection.top = startSection.top;
+              nextSection.left = left;
+              // this.getScaledSectionWidth(startSection, nextSection, true);
+              nextSection.scaling(startSection.height, this.blockSpace, true);
+              this.moveUpNextSections(i + 2, moveUpHeight + 24);
+            }
           }
         }
       }
@@ -224,7 +226,7 @@ export class SectionService {
         if (!block.photo.albums) {
           block.photo.albums = [];
         }
-        if(block.photo.albums.indexOf(albumId)<0){
+        if (block.photo.albums.indexOf(albumId) < 0) {
           block.photo.albums.push(albumId);
         }
 

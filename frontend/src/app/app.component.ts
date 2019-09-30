@@ -1,11 +1,12 @@
 import { Component, ElementRef } from '@angular/core';
 
-import { NavigationService } from "app/navigation/navigation.service";
-import { NavigationNode } from './navigation/navigation.model';
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
 import { SectionService } from './sections/section.service';
 import { AlbumService } from './services/album.service';
+import { Router } from '@angular/router';
+import { MatSidenav } from '@angular/material/sidenav';
+import { MenuGroup, MENUS } from './app.model';
 
 @Component({
   selector: 'app-root',
@@ -16,14 +17,16 @@ export class AppComponent {
   title = 'photo-station';
 
   private lastScrollTop: number = 0;
-  currentNavNode: NavigationNode[];
+  currentUrl: string;
 
-  constructor(private navigationService: NavigationService,
+  menus: MenuGroup[] = MENUS;
+
+  constructor(
     private routeStateService: RouteStateService,
-    private el: ElementRef,
     private sectionService: SectionService,
-    private albumService: AlbumService) {
-    navigationService.getNavMenus().subscribe(nodes => this.currentNavNode = nodes);
+    private albumService: AlbumService,
+    private router: Router,) {
+    this.albumService.loadAllAlbums();
   }
 
   onScroll(container: any): void {
@@ -43,5 +46,15 @@ export class AppComponent {
 
   hasBlockSelected(): boolean {
     return this.sectionService.numberOfSelectedBlocks() > 0;
+  }
+
+  onRouteActivate(event) {
+    this.currentUrl = this.router.url;
+  }
+
+  onToolbarClick(sideNav: MatSidenav) {
+    if (sideNav.opened) {
+      sideNav.toggle();
+    }
   }
 }

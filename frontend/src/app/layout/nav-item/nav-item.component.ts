@@ -1,5 +1,6 @@
 import { Component, OnChanges, Input } from '@angular/core';
 import { NavigationNode } from "app/navigation/navigation.model";
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-nav-item',
@@ -12,6 +13,8 @@ export class NavItemComponent implements OnChanges {
   @Input() node: NavigationNode;
   @Input() isParentExpanded = true;
   @Input() selectedNodes: NavigationNode[];
+
+  @Input() nav: MatSidenav;
 
   isExpanded = false;
   isSelected = false;

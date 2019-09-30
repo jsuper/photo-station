@@ -224,6 +224,11 @@ button.vertical-menu-item {
   padding-left: 40px;
 }
 
+a {
+  text-decoration: none;
+  color: #2962ff;
+}
+
 app-nav-menu.top-menu {
   padding: 24px 0 0;
 }
@@ -316,4 +321,44 @@ mat-sidenav .doc-version select option {
 .add-to-album mat-dialog-container {
   padding: 0;
   overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  line-height: 24px;
+  padding: 12px;
+  padding-left: 26px;
+  align-items: center;
+  border-radius: 0 24px 24px 0;
+  cursor: pointer;
+  margin-right: 8px;
+  color: #000;
+}
+
+.menu-item.selected {
+  background: #e8f0fe;
+  color: #2962ff;
+}
+
+.menu-item:hover {
+  background: #f1f3f4;
+}
+
+.menu-title {
+  color: #3c4043;
+  display: flex;
+  padding-left: 30px;
+  -webkit-box-flex: 1;
+  flex: 1;
+  word-break: break-word;
+  word-wrap: break-word;
+  -webkit-box-align: center;
+  align-items: center;
+  letter-spacing: .01785714em;
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
+  font-size: .875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  justify-content: space-between;
+  -webkit-box-pack: justify;
 }

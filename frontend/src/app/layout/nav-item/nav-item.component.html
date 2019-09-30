@@ -1,6 +1,6 @@
 <div *ngIf="!node.children">
   <a [routerLink]="node.url" routerLinkActive="selected" [ngClass]="classes" [queryParams]="node.params"
-     title="{{node.tooltip}}" class="vertical-menu-item">
+     title="{{node.tooltip}}" class="vertical-menu-item" (click)="nav.toggle()" >
     <span>{{node.title}}</span>
   </a>
 </div>

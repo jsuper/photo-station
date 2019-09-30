@@ -13,8 +13,6 @@ export class AlbumService {
   private album: Album[] = [];
 
   constructor(private http: HttpClient) {
-    console.log('Loading all albums');
-    this.loadAllAlbums();
   }
 
   public addAlbum(name: string): Observable<Album> {
@@ -29,6 +27,8 @@ export class AlbumService {
   }
 
   public loadAllAlbums(): void {
+    console.log('Load all albums.');
+
     this.listAlbums().subscribe(resp => this.album = resp);
   }
 
