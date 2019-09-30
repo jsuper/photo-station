@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
 import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.component';
 import { SelectedBarComponent, AddPhotoToAlbumDialog } from './selected-bar/selected-bar.component';
+import { GroupsComponent } from './groups/groups.component';
 
 registerLocaleData(localeZhHans, 'zh-Hans');
 
@@ -31,7 +32,8 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     PhotoJustifyDisplayComponent,
     PhotoGroupListComponent,
     SelectedBarComponent,
-    AddPhotoToAlbumDialog
+    AddPhotoToAlbumDialog,
+    GroupsComponent
   ],
   imports: [
     BrowserModule,

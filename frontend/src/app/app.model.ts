@@ -20,7 +20,7 @@ export const MENUS: MenuGroup[] = [
     name: '基本菜单', items: [
       { 'title': '照片', 'link': '/photos', 'icon': 'photo' },
       { 'title': '相册', 'link': '/albums', 'icon': 'photo_library' },
-      { 'title': '日期', 'link': '/dates', 'icon': 'date_range' },
+      { 'title': '日期', 'link': '/photos/year?q=2015', 'icon': 'date_range' },
       { 'title': '地点', 'link': '/places', 'icon': 'room' },
     ]
   }, {

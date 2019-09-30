@@ -3,7 +3,7 @@ import { PhotoService } from 'app/photo.service';
 import * as justifiedLayout from 'justified-layout'
 import { Photo } from 'app/photo.model';
 import { Section, Block } from 'app/sections/section.model';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
 import { RouteStateService } from 'app/route-state.service';
 import { formatDate } from '@angular/common';
@@ -67,7 +67,8 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     private routeStateService: RouteStateService,
     @Inject(LOCALE_ID) private locale: string,
     private dialog: MatDialog,
-    private sectionService: SectionService) {
+    private sectionService: SectionService,
+    private router: Router) {
 
     this.activeRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';
@@ -88,6 +89,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
 
   ngOnInit() {
+    let currentUrl: string = decodeURIComponent(this.router.url);
+    let uriIndex = currentUrl.indexOf('?');
+    let uri = uriIndex > 0 ? currentUrl.substring(0, uriIndex) : currentUrl;
+    console.log('Called:' + uri);
+
     this.routeStateService.setComponent(this);
     let container = this.el.nativeElement.getElementsByClassName('group-list')[0];
     this.containerWidth = container.clientWidth;

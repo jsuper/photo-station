@@ -25,7 +25,7 @@ export class AppComponent {
     private routeStateService: RouteStateService,
     private sectionService: SectionService,
     private albumService: AlbumService,
-    private router: Router,) {
+    private router: Router, ) {
     this.albumService.loadAllAlbums();
   }
 
@@ -49,7 +49,7 @@ export class AppComponent {
   }
 
   onRouteActivate(event) {
-    this.currentUrl = this.router.url;
+    this.currentUrl = decodeURIComponent(this.router.url);
   }
 
   onToolbarClick(sideNav: MatSidenav) {
