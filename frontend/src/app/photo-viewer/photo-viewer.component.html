@@ -57,13 +57,40 @@
     </div>
     <div style="padding: 20px;">
       <mat-form-field style="width: 100%;">
-        <input matInput type="text" placeholder="照片标题..." [(ngModel)]="currentPhoto.title"
+        <input matInput type="text" placeholder="添加说明" [(ngModel)]="currentPhoto.title"
                (keyup)="onInputChanged($event,'title')" maxLength="15">
         <button mat-button matSuffix mat-icon-button aria-label="Clear" *ngIf="currentPhoto.title"
                 (click)="clearInputValue('title')">
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
+    </div>
+    <div *ngIf="currentPhoto.albums">
+      <div style="display: flex; padding: 14px 24px; letter-spacing: .07272727em; font-family: Roboto,Arial,sans-serif;
+       font-size: .6875rem; font-weight: 500; line-height: 1rem; text-transform: uppercase;    color: #80868b;">
+        影集</div>
+      <ul style="list-style-type: none; margin-bottom: 8px;margin: 0; padding: 0;">
+        <li *ngFor="let album of allAlbums(currentPhoto)" style="padding: 18px 24px;">
+          <a style="flex-direction: row; overflow: hidden; outline: none;
+             display: flex;text-decoration: none; color: #2962ff; ">
+            <div style="border-radius: 4px; height: 36px; width: 36px; background-color: #e8eaed;background-size:100% 100%;
+             margin-right: 28px;flex: 0 0 auto;"
+                 [ngStyle]="{'background-image': album.cover?'url(/api/photo/'+album.cover+'?t=true&w=40&h=40':''}">
+            </div>
+            <div style="display: flex;flex-direction: column;
+                 flex: 1 1 auto;justify-content: space-between;overflow: hidden;">
+              <div style="color: #3c4043; overflow: hidden; white-space: nowrap;
+                   text-overflow: ellipsis; letter-spacing: .00625em; font-family: Roboto,Arial,sans-serif;
+                   font-size: 1rem; font-weight: 400; line-height: 1.5rem;">
+                {{album.name}}</div>
+              <div style="color: #5f6368; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+                    letter-spacing: .01428571em; font-family: Roboto,Arial,sans-serif;
+                    font-size: .875rem; font-weight: 400; line-height: 1.25rem">
+                {{album.photos}}项&nbsp;·&nbsp;{{album.createTime|date:'yyyy年M月dd日'}}</div>
+            </div>
+          </a>
+        </li>
+      </ul>
     </div>
 
 

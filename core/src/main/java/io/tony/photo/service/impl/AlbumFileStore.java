@@ -80,7 +80,6 @@ public class AlbumFileStore implements AlbumStore {
   public Album getAlbum(String id) {
     Album from = Json.from(albumMetaStore.resolve(id), Album.class);
     getAlbumInfo(from);
-
     return from;
   }
 

@@ -32,6 +32,10 @@
   overflow: hidden;
 }
 
+.album-info:hover {
+  background-color: #d4dae2;
+}
+
 .albums-container {
   margin: 0;
   padding: 0;
@@ -71,4 +75,14 @@
   font-size: .875rem;
   font-weight: 400;
   line-height: 1.25rem;
+}
+
+.add-albums {
+  position: absolute;
+  top: 8px;
+  left: 24px;
+  right: 8px;
+  height: 40px;
+  visibility: visible;
+  display: flex;
 }

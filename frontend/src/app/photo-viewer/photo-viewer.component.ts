@@ -5,6 +5,8 @@ import { Observable, Subscription, fromEvent } from 'rxjs';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Photo } from 'app/photo.model';
 import { PhotoService } from 'app/photo.service';
+import { Album } from 'app/model/album.model';
+import { AlbumService } from 'app/services/album.service';
 
 @Component({
   selector: 'app-photo-viewer',
@@ -35,10 +37,12 @@ export class PhotoViewerComponent implements OnInit {
   private sectionLengthReader;
   private canMoveNext: boolean;
   private canMovePrevious: boolean;
+  private albums: Map<string, Album> = new Map();
 
   constructor(public dialogRef: MatDialogRef<PhotoViewerComponent>,
     @Inject(MAT_DIALOG_DATA) public data: object,
-    private photoService: PhotoService) {
+    private photoService: PhotoService,
+    private albumService: AlbumService) {
     dialogRef.afterClosed().subscribe(close => {
       this.checkAndSaveChangedData();
     });
@@ -59,7 +63,17 @@ export class PhotoViewerComponent implements OnInit {
 
   }
 
+  allAlbums(photo: Photo): Album[] {
+    if (photo.albums) {
+      return photo.albums.map(id => this.albumService.getAlbumById(id))
+        .filter(ele => ele && ele.id);
+    }
+    return [];
+  }
+
   reloadPhoto(photo: Photo) {
+    this.albums.clear();
+
     let width = photo.width;
     let height = photo.height;
 

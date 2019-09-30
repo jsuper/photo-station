@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { SectionService } from 'app/sections/section.service';
 import { MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { AlbumService } from 'app/services/album.service';
@@ -13,12 +13,13 @@ import { Album } from 'app/model/album.model';
 })
 export class AddPhotoToAlbumDialog {
 
-  albums: Album[] = [];
   scrolled: boolean = false;
+  showAddDiv: boolean = false;
+  albumName: string;
 
   constructor(public dialogRef: MatDialogRef<AddPhotoToAlbumDialog>,
-    private albumService: AlbumService) {
-    albumService.listAlbums().subscribe(resp => this.albums = resp);
+    private albumService: AlbumService,
+    private sectionService: SectionService) {
   }
 
   onNoClick(): void {
@@ -30,6 +31,42 @@ export class AddPhotoToAlbumDialog {
     this.scrolled = ele.scrollTop > 0;
   }
 
+  onPreAddClick(): void {
+    if (this.showAddDiv) {
+      return;
+    }
+    this.showAddDiv = true;
+  }
+
+  albums():Album[]{
+    return this.albumService.getAlbums();
+  }
+
+  onAddAlbum(): void {
+    console.log(this.albumName);
+    if (!this.albumName || !this.albumName.length) {
+      alert('请输入相册名称');
+      return;
+    }
+    this.albumService.addAlbum(this.albumName).subscribe(resp => {
+      this.albumName = null;
+      this.showAddDiv = false;
+    });
+  }
+
+  addToAlbum(album: Album): void {
+    let photoId: string[] = this.sectionService.getSelectedPhotoId();
+    if (!photoId || !photoId.length) {
+      alert('未选择任何照片');
+      return;
+    }
+    this.albumService.addPhotoToAlbum(album.id, photoId).subscribe(resp => {
+      if (resp.code === 200) {
+        this.sectionService.addAlbumToSelectedPhoto(album.id);
+        this.onNoClick();
+      }
+    });
+  }
 }
 
 

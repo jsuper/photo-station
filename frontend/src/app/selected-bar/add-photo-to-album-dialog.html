@@ -1,17 +1,32 @@
-<h1 mat-dialog-title>添加到</h1>
+<!-- <h1 mat-dialog-title>添加到</h1> -->
+<div style="padding: 22px 24px 18px 24px;letter-spacing: .00625em;
+font-family: 'Google Sans',Roboto,Arial,sans-serif;
+font-size: 1rem;
+font-weight: 500;
+line-height: 1.5rem;">
+  添加到
+</div>
 <mat-dialog-content class="albums-container" [ngStyle]="{'border-top': scrolled?'1px solid #dadce0;':''}"
                     (scroll)="onScroll()">
   <ul class="album-list">
-    <li class="album-info">
+    <li class="album-info" (click)="onPreAddClick();$event.stopPropagation();">
       <div class="album-cover" style="height: 40px;min-width: 40px;width: 40px;background-size: cover;display: flex;
-      justify-content: center;align-items: center">
+      justify-content: center;align-items: center;" *ngIf="!showAddDiv">
         <mat-icon>add</mat-icon>
       </div>
-      <div class="album-title">
+      <div class="album-title" *ngIf="!showAddDiv">
         <div class="title">新建影集</div>
       </div>
+      <div class="add-albums" *ngIf="showAddDiv">
+        <mat-form-field style="flex:1">
+          <input matInput placeholder="相集名称" [(ngModel)]="albumName">
+        </mat-form-field>
+        <button mat-icon-button style="width: 48px;height: 48px;" (click)="onAddAlbum();$event.stopPropagation();">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
     </li>
-    <li class="album-info" *ngFor="let album of albums">
+    <li class="album-info" *ngFor="let album of albums()" (click)="addToAlbum(album);$event.stopPropagation();">
       <div class="album-cover" style="height: 40px;min-width: 40px;width: 40px;background-size: cover;display: flex;
       justify-content: center;align-items: center;background-color: #bdc1c6;border-radius: 4px;">
 

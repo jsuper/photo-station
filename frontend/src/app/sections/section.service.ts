@@ -141,7 +141,7 @@ export class SectionService {
     this.totalPhotos = 0;
     this.selectedSections = 0;
     this.selectedBlocks = 0;
-    this.lastMergeIndex = 0 ;
+    this.lastMergeIndex = 0;
     this.selected.clear();
   }
 
@@ -207,6 +207,33 @@ export class SectionService {
     this.selectedBlocks = 0;
     this.selectedSections = 0;
 
+  }
+
+  public getSelectedPhotoId(): string[] {
+    return Array.from(this.selected.values());
+  }
+
+  public addAlbumToSelectedPhoto(albumId: string): void {
+    if (albumId) {
+      this.selected.forEach((val, key, map) => {
+        let idx = key.split('-');
+        let secIndex = parseInt(idx[0]);
+        let blockIndex = parseInt(idx[1]);
+        let sec: Section = this.sections[secIndex];
+        let block: Block = sec.blocks[blockIndex];
+        if (!block.photo.albums) {
+          block.photo.albums = [];
+        }
+        if(block.photo.albums.indexOf(albumId)<0){
+          block.photo.albums.push(albumId);
+        }
+
+        console.log(block.photo.albums);
+        this.selectBlock(secIndex, blockIndex);
+      });
+      this.selectedBlocks = 0;
+      this.selectedSections = 0;
+    }
   }
 
   public getSections(): Section[] {

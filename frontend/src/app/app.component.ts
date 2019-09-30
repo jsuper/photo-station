@@ -5,6 +5,7 @@ import { NavigationNode } from './navigation/navigation.model';
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
 import { SectionService } from './sections/section.service';
+import { AlbumService } from './services/album.service';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,8 @@ export class AppComponent {
   constructor(private navigationService: NavigationService,
     private routeStateService: RouteStateService,
     private el: ElementRef,
-    private sectionService: SectionService) {
+    private sectionService: SectionService,
+    private albumService: AlbumService) {
     navigationService.getNavMenus().subscribe(nodes => this.currentNavNode = nodes);
   }
 

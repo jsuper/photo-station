@@ -23,6 +23,15 @@ public class AlbumsRequestHandlerRegistry implements RequestRegistry {
   @Override
   public void buildRequestRegistry(Router router) {
 
+    router.route(HttpMethod.GET, "/api/album/:id").handler(ctx -> {
+      String id = ctx.pathParam("id");
+      if (Strings.notBlank(id)) {
+        Album album = albumStore.getAlbum(id);
+        json(ctx, album);
+      } else {
+        ctx.fail(404);
+      }
+    });
     router.route(HttpMethod.PUT, "/api/album/:name").handler(ctx -> {
       try {
         String albumName = ctx.pathParam("name");
@@ -72,19 +81,21 @@ public class AlbumsRequestHandlerRegistry implements RequestRegistry {
   }
 
   private void handleAddPhotoToAlbum(RoutingContext ctx) {
+    OpResult result = null;
     try {
       String photoIdJson = ctx.getBodyAsString();
       List<String> photoId = Json.from(photoIdJson, List.class);
       String albumId = ctx.pathParam("id");
       if (Strings.notBlank(albumId) && photoId != null && photoId.size() > 0) {
         albumStore.addPhotos(albumId, photoId);
-        ctx.response().end("ok");
-        return;
+        result = new OpResult(200, "添加成功");
+      } else {
+        result = new OpResult(400, "请求参数错误");
       }
-      ctx.fail(400);
     } catch (Exception e) {
-      ctx.fail(500, e);
+      result = new OpResult(500, "添加相册失败：" + e.getMessage());
     }
+    json(ctx, result);
   }
 
 }

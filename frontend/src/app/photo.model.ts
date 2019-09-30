@@ -20,7 +20,7 @@ export interface Camera {
   shutter?: string,
   focalLength?: string,
   iso?: string,
-  exposure?:string,
+  exposure?: string,
 }
 
 export interface Photo {
@@ -42,5 +42,5 @@ export interface Photo {
   type?: string,
   location?: Location,
   camera?: Camera,
-  favorite?:number,
+  favorite?: number,
 }
