@@ -10,8 +10,6 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { AppRoutingModule } from 'app/app-routing.module';
 import { AppComponent } from 'app/app.component';
 import { MaterialModule } from "app/material.module";
-import { NavMenuComponent } from "app/layout/nav-menu/nav-menu.component";
-import { NavItemComponent } from "app/layout/nav-item/nav-item.component";
 import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.component';
 import { FormsModule } from '@angular/forms';
@@ -25,8 +23,6 @@ registerLocaleData(localeZhHans, 'zh-Hans');
 @NgModule({
   declarations: [
     AppComponent,
-    NavMenuComponent,
-    NavItemComponent,
     PhotoViewerComponent,
     PhotoUploaderComponent,
     PhotoJustifyDisplayComponent,
