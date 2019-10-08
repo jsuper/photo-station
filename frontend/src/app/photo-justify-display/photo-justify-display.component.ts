@@ -43,6 +43,7 @@ class BoxModel {
   providers: [Location, { provide: LocationStrategy, useClass: PathLocationStrategy }]
 })
 export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
+
   scrollUp(scrollEl: ElementRef<any>) {
     console.log('Scroll up');
 
@@ -68,6 +69,7 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
   private qf: string;
   private query: string;
 
+  showHeaderShadow: boolean = false;
 
   constructor(private photoService: PhotoService,
     private routeStateService: RouteStateService,
@@ -76,7 +78,7 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
     private location: Location) {
     let path: string = location.path();
     let realPath: string = '/' + path.substring(path.indexOf('popup:') + 6, path.length - 1);
-    location.replaceState(realPath);
+    // location.replaceState(realPath);
   }
 
   private reset(): void {
@@ -109,6 +111,11 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
     this.loadNextPage();
   }
 
+  onContentScroll(event): void {
+    let target = event.target;
+    let scrollTop = target.scrollTop;
+    this.showHeaderShadow = scrollTop > 0;
+  }
   getBoxesOfLastRow(): BoxModel[] {
     let calcBoxes: BoxModel[] = [];
     if (this.boxes && this.boxes.length) {

@@ -17,6 +17,7 @@ import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-just
 import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.component';
 import { SelectedBarComponent, AddPhotoToAlbumDialog } from './selected-bar/selected-bar.component';
 import { GroupsComponent } from './groups/groups.component';
+import { HeaderBarComponent } from './common/header-bar/header-bar.component';
 
 registerLocaleData(localeZhHans, 'zh-Hans');
 
@@ -29,7 +30,8 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     PhotoGroupListComponent,
     SelectedBarComponent,
     AddPhotoToAlbumDialog,
-    GroupsComponent
+    GroupsComponent,
+    HeaderBarComponent
   ],
   imports: [
     BrowserModule,

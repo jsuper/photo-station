@@ -1,0 +1,58 @@
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background-color: #fff;
+  display: flex;
+  transition: opacity .2s .1s cubic-bezier(0.4, 0.0, 1, 1);
+  opacity: 0;
+  visibility: hidden;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-box-align: center;
+  -webkit-box-pack: justify;
+  padding: 0 14px;
+  z-index: 200;
+}
+
+.header-bar-shadow {
+  position: absolute;
+  height: 5px;
+  width: 100%;
+  top: 59px;
+  left: 0;
+  -webkit-box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  -webkit-transform: translateY(-10px) translateZ(0);
+  transform: translateY(-10px) translateZ(0);
+  -webkit-transition: -webkit-transform linear 240ms;
+  transition: -webkit-transform linear 240ms;
+  -webkit-transition: transform linear 240ms;
+  transition: transform linear 240ms;
+  opacity: 0;
+}
+
+.header-bar-shadow.shown {
+  -webkit-transform: translateY(0) translateZ(0);
+  transform: translateY(0) translateZ(0);
+  -webkit-transition: -webkit-transform linear 90ms;
+  transition: -webkit-transform linear 90ms;
+  -webkit-transition: transform linear 90ms;
+  transition: transform linear 90ms;
+  opacity: 1;
+  -webkit-box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.header-bar button {
+  width: 48px;
+  height: 48px;
+}
+
+.header-bar .options mat-icon {
+  color: #1a73e8;
+}

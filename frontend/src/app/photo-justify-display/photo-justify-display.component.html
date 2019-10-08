@@ -1,13 +1,21 @@
 <div class="popup-container">
   <div class="popup-header-bar">
-
+    <app-header-bar [show-shadow]="showHeaderShadow">
+      <div style="display:flex;align-items: center;">
+        <button mat-icon-button (click)="$event.stopPropagation();">
+          <mat-icon>keyboard_backspace</mat-icon>
+        </button>
+      </div>
+    </app-header-bar>
   </div>
-  <div class="popup-content">
+  <div class="popup-content" (scroll)="onContentScroll($event);">
     <div style="display: flex;flex-direction: column;min-height: 100%">
       <div style="display: flex;flex-direction: column;max-width: 1552px; margin: 0 auto; width: 100%;">
-        <span
-              style="margin:52px 56px 0 56px;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
-        <span style="color: #80868b; font-size: 14px; padding: 6px 56px 28px 56px;">2015年4月11日至2019年9月19日</span>
+        <div style="margin: 0 auto;display: flex;flex-direction: column;margin:0 10%;">
+          <span
+                style="margin:52px 10px 0 10px;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
+          <span style="color: #80868b; font-size: 14px; padding: 6px 10px 28px 10px;">2015年4月11日至2019年9月19日</span>
+        </div>
       </div>
       <div style="position: relative;">
         <div id="albumListContainer" class="group-container">
