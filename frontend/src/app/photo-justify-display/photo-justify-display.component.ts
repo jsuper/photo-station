@@ -1,4 +1,5 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import * as justifiedLayout from 'justified-layout'
 import { PhotoService } from 'app/photo.service';
 import { RouteStateService } from 'app/route-state.service';
@@ -7,6 +8,7 @@ import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
+
 
 class BoxModel {
   width: number;
@@ -37,7 +39,8 @@ class BoxModel {
 @Component({
   selector: 'app-photo-justify-display',
   templateUrl: './photo-justify-display.component.html',
-  styleUrls: ['./photo-justify-display.component.css']
+  styleUrls: ['./photo-justify-display.component.css'],
+  providers: [Location, { provide: LocationStrategy, useClass: PathLocationStrategy }]
 })
 export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
   scrollUp(scrollEl: ElementRef<any>) {
@@ -69,9 +72,11 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
   constructor(private photoService: PhotoService,
     private routeStateService: RouteStateService,
     private dialog: MatDialog,
-    private activedRoute: ActivatedRoute) {
-
-
+    private activeRoute: ActivatedRoute,
+    private location: Location) {
+    let path: string = location.path();
+    let realPath: string = '/' + path.substring(path.indexOf('popup:') + 6, path.length - 1);
+    location.replaceState(realPath);
   }
 
   private reset(): void {
@@ -99,8 +104,8 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
     let cols = Math.floor(width / 300);
     this.pageSize = cols * maxRows + 1;
 
-    this.qf = "albums" ;
-    this.query = this.activedRoute.snapshot.params['id'];
+    this.qf = "albums";
+    this.query = this.activeRoute.snapshot.params['id'];
     this.loadNextPage();
   }
 
