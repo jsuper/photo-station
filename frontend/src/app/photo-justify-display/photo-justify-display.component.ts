@@ -39,14 +39,16 @@ class BoxModel {
   templateUrl: './photo-justify-display.component.html',
   styleUrls: ['./photo-justify-display.component.css']
 })
-export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
+export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
   scrollUp(scrollEl: ElementRef<any>) {
-    throw new Error("Method not implemented.");
+    console.log('Scroll up');
+
   }
   scrollDown(scrollEl: ElementRef<any>) {
-    throw new Error("Method not implemented.");
+    console.log('Scroll down');
+
   }
- 
+
   pageSize: number = 15;
 
   photos: Photo[] = [];
@@ -57,10 +59,7 @@ export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
   lastScrollHeight: number = 0;
   hasMorePage: boolean = true;
   loaded: number = 0;
-  justifyOption = {
-    containerWidth: window.innerWidth - 10,
-    targetRowHeight: 220,
-  };
+  justifyOption;
   loading: boolean = false;
 
   private qf: string;
@@ -72,27 +71,6 @@ export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
     private dialog: MatDialog,
     private activedRoute: ActivatedRoute) {
 
-    let maxRows = Math.ceil(window.innerHeight / 240);
-    let cols = Math.floor(window.innerWidth / 300);
-    this.pageSize = cols * maxRows + 1;
-
-    this.activedRoute.queryParams.subscribe(qp => {
-      let q = qp['q'] || '';
-      let field = this.activedRoute.snapshot.params['field'];
-
-
-      console.log('qf:' + this.qf + ', query: ' + this.query + ',field: ' + field + ', val: ' + q);
-      let loadPage = q != this.query && field == this.qf && this.qf;
-
-      if (this.qf != field || this.query != q) {
-        this.reset();
-        this.qf = field;
-        this.query = q;
-      }
-      if (loadPage) {
-        this.loadNextPage();
-      }
-    });
 
   }
 
@@ -110,35 +88,20 @@ export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
   }
 
   ngOnInit() {
-    console.log("Called on init...");
-    console.log(this.activedRoute.snapshot.params);
-    console.log(this.activedRoute.snapshot.queryParams);
+    let container = document.getElementById('albumListContainer');
+    let width = container.clientWidth;
 
+    this.justifyOption = {
+      containerWidth: width - 10,
+      targetRowHeight: 220,
+    };
+    let maxRows = Math.ceil(window.innerHeight / 240);
+    let cols = Math.floor(width / 300);
+    this.pageSize = cols * maxRows + 1;
 
-
-    this.routeStateService.setComponent(this);
+    this.qf = "albums" ;
+    this.query = this.activedRoute.snapshot.params['id'];
     this.loadNextPage();
-    // this.loading = true;
-    // this.photoService.search(0, this.pageSize, '').subscribe(resp => {
-    //   this.loading = false;
-    //   this.hasMorePage = resp.length === this.pageSize;
-    //   this.loaded = resp.length;
-    //   let wh = [];
-
-    //   resp.forEach(photo => {
-    //     this.photos.push(photo);
-    //     wh.push({ width: photo.width, height: photo.height });
-    //   });
-    //   let justify = justifiedLayout(wh, this.justifyOption);
-    //   this.boxes = justify.boxes.map(box => {
-    //     return new BoxModel(Math.floor(box.width), Math.floor(box.height), Math.floor(box.top), Math.floor(box.left));
-    //   });
-    //   this.boxes.forEach((val, idx) => {
-    //     val.id = resp[idx].id;
-    //     val.imgWidth = resp[idx].width;
-    //     val.imgHeight = resp[idx].height;
-    //   });
-    // });
   }
 
   getBoxesOfLastRow(): BoxModel[] {
@@ -157,11 +120,9 @@ export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
 
   loadNextPage(): void {
     if (this.hasMorePage) {
-      console.log("Starting loading next pages...");
       this.loading = true;
       let calcBoxes: Array<Object> = [];
       let boxesOfLastRow = this.getBoxesOfLastRow();
-      // console.log(boxesOfLastRow);
 
       boxesOfLastRow.forEach(box => {
         calcBoxes.push({ width: box.imgWidth, height: box.imgHeight });
@@ -181,7 +142,6 @@ export class PhotoJustifyDisplayComponent implements OnInit,Scrollable {
           })
         });
         let justify = justifiedLayout(calcBoxes, this.justifyOption).boxes;
-        // console.log(justify);
 
         let baseTop = this.boxes && this.boxes.length ? this.boxes[this.boxes.length - 1].top : 10;
         let previousBox = [];

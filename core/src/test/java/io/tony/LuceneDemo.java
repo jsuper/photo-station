@@ -2,8 +2,11 @@ package io.tony;
 
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.FSDirectory;
 
 import java.nio.file.Path;
@@ -23,14 +26,22 @@ public class LuceneDemo {
 
     IndexReader reader = DirectoryReader.open(directory);
     SearcherManager sm = new SearcherManager(directory, new SearcherFactory());
-    AggregatorCache ac = new AggregatorCache(sm);
+    /*AggregatorCache ac = new AggregatorCache(sm);
 
     Map<String, Aggregation> aggregations = ac.getAggregations();
     aggregations.forEach((k, v) -> {
       System.out.println(k + ":");
       List<AggregateTerm> terms = v.terms();
       terms.forEach(t -> System.out.println("\t" + t.getValue() + ":" + t.getCounter()));
-    });
+    });*/
+    IndexSearcher acquire = sm.acquire();
+    try {
+
+
+    } finally {
+      sm.release(acquire);
+    }
+    sm.close();
 
   }
 }

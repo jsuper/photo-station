@@ -1,10 +1,11 @@
 <div style="display: flex; flex-wrap: wrap;">
-  <div *ngFor="let album of getAlbums()" style="width: 14%;margin-right: 12px;margin-bottom: 22px;">
+  <a *ngFor="let album of getAlbums()" style="width: 14%;margin-right: 12px;margin-bottom: 22px;cursor: pointer;"
+     [routerLink]="['',{outlets: {popup:['album',album.id]}}]" >
     <div class="album-cover" [ngStyle]="{'background-image': album.cover?'url(/api/photo/'+album.cover+'?t=true)':''}">
     </div>
     <div style="height: 64px;">
       <div class="album-name">{{album.name}}</div>
       <div class="album-photos">{{album.photos?album.photos+'项':'没有内容'}}</div>
     </div>
-  </div>
+  </a>
 </div>

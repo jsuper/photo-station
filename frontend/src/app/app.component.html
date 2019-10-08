@@ -1,4 +1,5 @@
 <div style="height: 100%">
+  <router-outlet name="popup"></router-outlet>
   <mat-toolbar class="top-bar" (click)="onToolbarClick(sidenav)">
     <div class="toolbar-shadow" [ngClass]="container.elementRef.nativeElement.scrollTop>0
       ||hasBlockSelected()?'toolbar-shadow-shown':''">

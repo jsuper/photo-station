@@ -22,5 +22,43 @@
 
 .out {
   background: transparent;
+}
 
+.popup-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: #fff;
+}
+
+.popup-header-bar {
+  position: absolute;
+  height: 72px;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.popup-content {
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  outline: none;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.group-container {
+  position: absolute;
+  width: 80%;
+  top: 72px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
 }

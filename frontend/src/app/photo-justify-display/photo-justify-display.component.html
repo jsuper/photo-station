@@ -1,22 +1,39 @@
-<div class="container" style="position: relative">
-  <div #mouseState class="block" *ngFor="let box of boxes;let i=index" [ngStyle]="{'width': box.width+'px','height':box.height+'px',
-       'top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
-       [id]="box['id']" (mouseover)="mouseState.in=true" (mouseleave)="mouseState.in=false"
-       (click)="openImageViewer(i,box['id'])">
+<div class="popup-container">
+  <div class="popup-header-bar">
 
-    <div style="position: absolute;bottom: 0;left: 0;width: 100%;z-index: 100;" class="btn-list"
-         [ngClass]="mouseState.in?'enter':'out'">
-
-      <button mat-icon-button *ngIf="mouseState.in" (click)="likePhoto(i,box['id']);$event.stopPropagation();">
-        <mat-icon>{{photos[i].favorite?'favorite':'favorite_border'}}</mat-icon>
-      </button>
-
-      <button mat-icon-button *ngIf="mouseState.in" style="float: right" (click)="$event.stopPropagation();">
-        <mat-icon>check_circle_outline</mat-icon>
-      </button>
-    </div>
   </div>
-  <div style="position:absolute;left:0;height: 10px;width: 90%"
-       [ngStyle]="{'top': (boxes[boxes.length-1].top+boxes[boxes.length-1].height)+'px'}" 
-       *ngIf="!hasMorePage && boxes && boxes.length"></div>
+  <div class="popup-content">
+    <div style="display: flex;flex-direction: column;min-height: 100%">
+      <div style="display: flex;flex-direction: column;max-width: 1552px; margin: 0 auto; width: 100%;">
+        <span
+              style="margin:52px 56px 0 56px;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
+        <span style="color: #80868b; font-size: 14px; padding: 6px 56px 28px 56px;">2015年4月11日至2019年9月19日</span>
+      </div>
+      <div style="position: relative;">
+        <div id="albumListContainer" class="group-container">
+          <div #mouseState class="block" *ngFor="let box of boxes;let i=index" [ngStyle]="{'width': box.width+'px','height':box.height+'px',
+              'top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
+               [id]="box['id']" (mouseover)="mouseState.in=true" (mouseleave)="mouseState.in=false"
+               (click)="openImageViewer(i,box['id'])">
+
+            <div style="position: absolute;bottom: 0;left: 0;width: 100%;z-index: 100;" class="btn-list"
+                 [ngClass]="mouseState.in?'enter':'out'">
+
+              <button mat-icon-button *ngIf="mouseState.in" (click)="likePhoto(i,box['id']);$event.stopPropagation();">
+                <mat-icon>{{photos[i].favorite?'favorite':'favorite_border'}}</mat-icon>
+              </button>
+
+              <button mat-icon-button *ngIf="mouseState.in" style="float: right" (click)="$event.stopPropagation();">
+                <mat-icon>check_circle_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;height: 10px;width: 90%"
+               [ngStyle]="{'top': (boxes[boxes.length-1].top+boxes[boxes.length-1].height)+'px'}"
+               *ngIf="!hasMorePage && boxes && boxes.length"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
