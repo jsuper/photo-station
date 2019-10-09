@@ -2,7 +2,7 @@
   <div class="popup-header-bar">
     <app-header-bar [show-shadow]="showHeaderShadow">
       <div style="display:flex;align-items: center;">
-        <button mat-icon-button (click)="$event.stopPropagation();">
+        <button mat-icon-button (click)="goBack();$event.stopPropagation();">
           <mat-icon>keyboard_backspace</mat-icon>
         </button>
       </div>
@@ -10,11 +10,11 @@
   </div>
   <div class="popup-content" (scroll)="onContentScroll($event);">
     <div style="display: flex;flex-direction: column;min-height: 100%">
-      <div style="display: flex;flex-direction: column;max-width: 1552px; margin: 0 auto; width: 100%;">
-        <div style="margin: 0 auto;display: flex;flex-direction: column;margin:0 10%;">
+      <div style="display: flex;flex-direction: column; margin: 0 auto; width: 100%;">
+        <div style="margin: 0 auto;display: flex;flex-direction: column;width:90%;">
           <span
-                style="margin:52px 10px 0 10px;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
-          <span style="color: #80868b; font-size: 14px; padding: 6px 10px 28px 10px;">2015年4月11日至2019年9月19日</span>
+                style="margin:52px 0 0 0;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
+          <span style="color: #80868b; font-size: 14px; padding: 6px 0 28px 0;">2015年4月11日至2019年9月19日</span>
         </div>
       </div>
       <div style="position: relative;">
@@ -22,7 +22,7 @@
           <div #mouseState class="block" *ngFor="let box of boxes;let i=index" [ngStyle]="{'width': box.width+'px','height':box.height+'px',
               'top':box.top+'px','left':box.left+'px','background-image': 'url(/api/photo/' + box['id'] + '?t=true)'}"
                [id]="box['id']" (mouseover)="mouseState.in=true" (mouseleave)="mouseState.in=false"
-               (click)="openImageViewer(i,box['id'])">
+               (click)="openImageViewer(i,box['id'])" [ngClass]="{'lastRow': i==boxes.length-1}">
 
             <div style="position: absolute;bottom: 0;left: 0;width: 100%;z-index: 100;" class="btn-list"
                  [ngClass]="mouseState.in?'enter':'out'">
@@ -36,9 +36,6 @@
               </button>
             </div>
           </div>
-          <div style="position:absolute;left:0;height: 10px;width: 90%"
-               [ngStyle]="{'top': (boxes[boxes.length-1].top+boxes[boxes.length-1].height)+'px'}"
-               *ngIf="!hasMorePage && boxes && boxes.length"></div>
         </div>
       </div>
     </div>

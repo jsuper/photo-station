@@ -18,6 +18,8 @@ import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.com
 import { SelectedBarComponent, AddPhotoToAlbumDialog } from './selected-bar/selected-bar.component';
 import { GroupsComponent } from './groups/groups.component';
 import { HeaderBarComponent } from './common/header-bar/header-bar.component';
+import { FlexPhotoComponent } from './common/flex-photo/flex-photo.component';
+import { FlexBoxComponent } from './common/flex-box/flex-box.component';
 
 registerLocaleData(localeZhHans, 'zh-Hans');
 
@@ -31,7 +33,9 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     SelectedBarComponent,
     AddPhotoToAlbumDialog,
     GroupsComponent,
-    HeaderBarComponent
+    HeaderBarComponent,
+    FlexPhotoComponent,
+    FlexBoxComponent
   ],
   imports: [
     BrowserModule,

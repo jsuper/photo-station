@@ -3,15 +3,18 @@ import { Routes, RouterModule } from '@angular/router';
 import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.component';
 import { GroupsComponent } from './groups/groups.component';
 import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
+import { FlexPhotoComponent } from './common/flex-photo/flex-photo.component';
 
 
 const routes: Routes = [
-  { path: '', redirectTo: '/photos', pathMatch: 'full', data: { 'q': '' } },
   { path: 'photos', component: PhotoGroupListComponent },
   { path: 'photos/:field', component: PhotoGroupListComponent },
   { path: 'groups', component: PhotoGroupListComponent },
   { path: 'albums', component: GroupsComponent, data: { 'field': 'album' } },
-  { path: 'album/:id', component: PhotoJustifyDisplayComponent, outlet: 'popup' }
+  { path: 'album/:id', component: PhotoJustifyDisplayComponent, outlet: 'popup' },
+  { path: 'flex', component: FlexPhotoComponent },
+  { path: '', redirectTo: '/photos', pathMatch: 'full' },
+  { path: '**', redirectTo: '/photos', pathMatch: 'full' }
 ];
 
 @NgModule({

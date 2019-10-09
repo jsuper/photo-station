@@ -5,8 +5,8 @@
       ||hasBlockSelected()?'toolbar-shadow-shown':''">
     </div>
     <mat-toolbar-row class="toolbar-rows">
-      <button mat-icon-button>
-        <mat-icon (click)="sidenav.toggle();$event.stopPropagation();">menu</mat-icon>
+      <button mat-icon-button (click)="toggleSideNav($event);" #menuToggle>
+        <mat-icon>menu</mat-icon>
       </button>
       <span>Photostation</span>
       <div style="flex: 1 1 auto;"></div>
@@ -18,7 +18,6 @@
   <mat-sidenav-container style="height: calc(100vh - 64px)">
     <mat-sidenav #sidenav mode="over" role="navigation" [fixedInViewport]="true" [fixedTopGap]="0" [fixedBottomGap]="0"
                  style="width:280px;">
-      <!-- <app-nav-menu [nodes]="currentNavNode" [nav]="sidenav"></app-nav-menu> -->
       <div style="width: 100%;overflow: hidden;">
         <div class="brand" style="color: #3c4043;height: 64px;line-height: 64px;font-size: 21px;padding-bottom: 1px;
         padding-left: 24px;">
@@ -27,7 +26,8 @@
         <div style="padding:24px 0;" *ngFor="let mg of menus;let i=index;"
              [ngStyle]="{'border': i==0?'none':'','border-top':i>0?'1px #dadce0 solid;':''}">
           <a class="menu-item" *ngFor="let menu of mg.items" [routerLink]="menu.link"
-             [ngClass]="menu.link===currentUrl?'selected':''">
+             [ngClass]="menu.link===currentUrl?'selected':''" routerLinkActive="selected"
+             >
             <mat-icon>{{menu.icon}}</mat-icon>
             <div style="width: 100%;">
               <div class="menu-title">{{menu.title}}</div>

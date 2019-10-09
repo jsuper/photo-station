@@ -8,6 +8,7 @@ import { PhotoViewerComponent } from "app/photo-viewer/photo-viewer.component";
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
+import { FlexLayoutService } from 'app/flex-layout/flex-layout.service';
 
 
 class BoxModel {
@@ -70,6 +71,10 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
   private query: string;
 
   showHeaderShadow: boolean = false;
+  private layout: FlexLayoutService = new FlexLayoutService({});
+  private readonly targetHeight: number = 220;
+  private readonly boxSpace: number = 4;
+  private readonly containerPadding: number = 0;
 
   constructor(private photoService: PhotoService,
     private routeStateService: RouteStateService,
@@ -81,34 +86,32 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
     // location.replaceState(realPath);
   }
 
-  private reset(): void {
-    console.log('reset values');
 
-    this.photos = [];
-    this.boxes = [];
-    this.lastMaxScrollTop = 0;
-    this.lastScrollHeight = 0;
-    this.lastScrollTop = 0;
-    this.loaded = 0;
-    this.hasMorePage = true;
-    this.loading = false;
-  }
 
   ngOnInit() {
     let container = document.getElementById('albumListContainer');
     let width = container.clientWidth;
 
+
+
     this.justifyOption = {
-      containerWidth: width - 10,
-      targetRowHeight: 220,
+      containerWidth: width,
+      targetRowHeight: this.targetHeight,
+      boxSpacing: this.boxSpace,
+      containerPadding: this.containerPadding,
     };
-    let maxRows = Math.ceil(window.innerHeight / 240);
+    this.layout.updateConfig(this.justifyOption);
+    let maxRows = Math.ceil(window.innerHeight / this.targetHeight);
     let cols = Math.floor(width / 300);
     this.pageSize = cols * maxRows + 1;
 
     this.qf = "albums";
     this.query = this.activeRoute.snapshot.params['id'];
     this.loadNextPage();
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   onContentScroll(event): void {
@@ -122,7 +125,7 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
       for (let i = this.boxes.length - 1; i > 0; i--) {
         let box: BoxModel = this.boxes[i];
         calcBoxes.unshift(box.copy());
-        if (this.boxes[i].left == 10) {
+        if (this.boxes[i].left == this.containerPadding) {
           break;
         }
       }
@@ -154,6 +157,7 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
           })
         });
         let justify = justifiedLayout(calcBoxes, this.justifyOption).boxes;
+        console.log(justify);
 
         let baseTop = this.boxes && this.boxes.length ? this.boxes[this.boxes.length - 1].top : 10;
         let previousBox = [];
@@ -180,7 +184,7 @@ export class PhotoJustifyDisplayComponent implements OnInit, Scrollable {
         for (let i = 0; i < newPagebox.length; i++) {
           let jf = newPagebox[i];
           let photo: Photo = resp[i];
-          if (jf.left == 10) {
+          if (jf.left == this.containerPadding) {
             rows++;
           }
           let width = Math.floor(jf.width);

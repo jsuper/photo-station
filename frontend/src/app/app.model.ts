@@ -20,17 +20,17 @@ export const MENUS: MenuGroup[] = [
     name: '基本菜单', items: [
       { 'title': '照片', 'link': '/photos', 'icon': 'photo' },
       { 'title': '相册', 'link': '/albums', 'icon': 'photo_library' },
-      { 'title': '日期', 'link': '/photos/year?q=2015', 'icon': 'date_range' },
+      { 'title': '日期', 'link': '/years', 'icon': 'date_range' },
       { 'title': '地点', 'link': '/places', 'icon': 'room' },
     ]
   }, {
     name: '扩展', items: [
-      { 'title': '收藏', 'link': '/photos/favorite', 'icon': 'favorite' },
+      { 'title': '收藏', 'link': '/favorites', 'icon': 'favorite' },
       { 'title': '回收站', 'link': '/deleted', 'icon': 'delete' },
     ]
   }, {
     name: '应用', items: [
-      { 'title': '设置', 'link': '/settings_application', 'icon': 'settings_application' },
+      { 'title': '设置', 'link': '/settings', 'icon': 'settings_application' },
     ]
   }
 ];

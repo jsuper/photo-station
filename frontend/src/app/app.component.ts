@@ -1,4 +1,4 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
@@ -7,6 +7,7 @@ import { AlbumService } from './services/album.service';
 import { Router } from '@angular/router';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MenuGroup, MENUS } from './app.model';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,8 @@ export class AppComponent {
   currentUrl: string;
 
   menus: MenuGroup[] = MENUS;
+  @ViewChild('sidenav', { static: false }) nav: MatSidenav;
+  @ViewChild('menuToggle', { static: false }) menuToggle: MatButton;
 
   constructor(
     private routeStateService: RouteStateService,
@@ -50,11 +53,26 @@ export class AppComponent {
 
   onRouteActivate(event) {
     this.currentUrl = decodeURIComponent(this.router.url);
+    this.onToolbarClick(this.nav);
+    this.menuToggle._elementRef.nativeElement.blur();
+  }
+
+  onMenuItemClick(sideNav: MatSidenav) {
+    sideNav.toggle();
   }
 
   onToolbarClick(sideNav: MatSidenav) {
-    if (sideNav.opened) {
+    if (sideNav && sideNav.opened) {
       sideNav.toggle();
     }
+  }
+
+  toggleSideNav(event): void {
+    let button = event.target;
+    if (this.nav) {
+      this.nav.toggle();
+    }
+    button.blur();
+    event.stopPropagation();
   }
 }
