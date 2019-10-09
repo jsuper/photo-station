@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, ElementRef, IterableDiffers, IterableDiffer, IterableChanges } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Photo } from 'app/photo.model';
+import { PhotoService } from 'app/photo.service';
+import { Segment, Box } from 'app/flex-layout/flex-layout.model';
 
 @Component({
   selector: 'app-flex-photo',
@@ -8,37 +10,41 @@ import { Photo } from 'app/photo.model';
   styleUrls: ['./flex-photo.component.css']
 })
 export class FlexPhotoComponent implements OnInit {
-  items: number[] = [1,2,3,4,5];
 
-  @Input('photos') photos: Photo[];
-  @Input('box-space') boxSpace: number = 4;
-  @Input('container-padding') containerPadding: number = 0;
-  @Input('height') targetHeight: number = 200;
-
-  private iterableDiffer: IterableDiffer<number>;
-  private layoutConfig;
+  segment: Segment[] = [];
+  total: number = 0;
+  hasMore: boolean = true;
   constructor(private el: ElementRef,
-    private _iterableDiffers: IterableDiffers) {
-    this.iterableDiffer = this._iterableDiffers.find(this.items).create();
+    private photoService: PhotoService) {
+    this.loadNextPage();
   };
 
-  ngDoCheck(): void {
-    let changes:IterableChanges<number> = this.iterableDiffer.diff(this.items);
-    if (changes) {
-      changes.forEachAddedItem(rc => {
-        console.log(rc.item);
-      }) ;
-    }
+  processPhoto(photos: Photo[]) {
+    let boxes: Box[] = photos.map(photo => {
+      let box: Box = new Box();
+      box.height = photo.height;
+      box.width = photo.width;
+      box.raw = {
+        width: photo.width,
+        height: photo.height,
+        id: photo.id,
+      };
+      return box;
+    });
+    this.segment.push({ boxes: boxes });
   }
 
   ngOnInit() {
-    const parent = this.el.nativeElement.parentElement;
-    this.layoutConfig = {
-      containerWidth: parent.clientWidth,
-      targetRowHeight: this.targetHeight,
-      boxSpacing: this.boxSpace,
-      containerPadding: this.containerPadding,
-    }
+
   }
 
+  loadNextPage() {
+    if (this.hasMore) {
+      this.photoService.search(this.total, 20, '').subscribe(data => {
+        this.total += data.length;
+        this.hasMore = data.length == 20;
+        this.processPhoto(data);
+      });
+    }
+  }
 }

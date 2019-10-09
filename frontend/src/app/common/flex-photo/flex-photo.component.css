@@ -1,0 +1,12 @@
+.nextPage {
+  position: fixed;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  transform: translateY(-50%);
+  right: 30px;
+  z-index: 100;
+  outline: none;
+}
