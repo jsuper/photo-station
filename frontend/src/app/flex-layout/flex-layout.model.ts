@@ -19,5 +19,6 @@ export class Box {
   left: number;
   width: number;
   height: number;
-  row: number ; //row number
+  row: number; //row number
+  raw: any;
 }

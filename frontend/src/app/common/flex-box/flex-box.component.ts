@@ -81,8 +81,22 @@ export class FlexBoxComponent implements OnInit {
     }
   }
 
-  private fireNewSegmentAdded(segment: Segment) {
+  private addBoxTo(addTo: Box[], add: Box[]) {
+    add.forEach(box => {
+      let w: number = box.raw.width;
+      let h: number = box.raw.height;
+      let t: Box = new Box();
+      t.width = w;
+      t.height = h;
+      addTo.push(t);
+    });
+  }
 
+  private fireNewSegmentAdded(segment: Segment) {
+    let lastRowBoxes: Box[] = this.getLastRowBoxes();
+    let calcBoxes: Box[] = [];
+    this.addBoxTo(calcBoxes, lastRowBoxes);
+    this.addBoxTo(calcBoxes, segment.boxes);
   }
 
   private getLastRowBoxes(): Box[] {
