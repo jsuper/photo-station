@@ -27,7 +27,7 @@ export class FlexBoxComponent implements OnInit {
   private flexLayoutService: FlexLayoutService = new FlexLayoutService({});
   private differ: IterableDiffer<any>;
 
-  private boxes: Box[] = [];
+  boxes: Box[] = [];
 
   totalHeight: number = 0;
   rows: number = 0;
@@ -43,9 +43,7 @@ export class FlexBoxComponent implements OnInit {
     if (this.containerWidth == -1) {
       this.containerWidth = parent.clientWidth;
     }
-    console.log(parent);
-
-    console.log(`container width: ${this.containerWidth}`);
+    console.log(`container width: ${this.containerWidth}, box height: ${this.boxHeight}`);
 
     this.config = {
       containerPadding: this.containerPadding,
@@ -87,14 +85,13 @@ export class FlexBoxComponent implements OnInit {
     let lastHeight: number = 0;
     if (lastRowBoxes.length) {
       lastHeight = lastRowBoxes[0].height;
+      this.totalHeight -= lastHeight;
     }
-    this.totalHeight += Math.floor(layout.containerHeight) + lastHeight + this.boxMargin * 2;
+    this.totalHeight += Math.ceil(layout.containerHeight);
     let baseTop: number = lastRowBoxes.length > 0 ? lastRowBoxes[lastRowBoxes.length - 1].top : this.containerPadding;
     if (lastRowBoxes.length > 0) {
       this.rows--;
     }
-    console.log(layout.boxes);
-    
     layout.boxes.forEach((box, index) => {
       if (box.left == this.containerPadding) {
         this.rows++;

@@ -28,7 +28,7 @@
               "src/styles.css"
             ],
             "scripts": [
-              "./node_modules/justified-layout/dist/justified-layout.js"
+              "./src/lib/justified-layout/justified-layout.js"
             ]
           },
           "configurations": {

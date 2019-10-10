@@ -1,4 +1,4 @@
-<div class="flex-box-container">
+<div class="flex-box-container" [ngStyle]="{'height': (totalHeight+20)+'px'}">
   <div class="flex-box-wrapper" *ngFor="let box of boxes;let i=index;"
        [ngStyle]="{width: box.width+'px',height: box.height+'px',top: box.top+'px',left:box.left+'px'}"
        [ngClass]="{lastBoxItem: i==boxes.length-1}">

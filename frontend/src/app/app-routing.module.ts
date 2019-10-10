@@ -12,7 +12,8 @@ const routes: Routes = [
   { path: 'groups', component: PhotoGroupListComponent },
   { path: 'albums', component: GroupsComponent, data: { 'field': 'album' } },
   { path: 'album/:id', component: PhotoJustifyDisplayComponent, outlet: 'popup' },
-  { path: 'flex', component: FlexPhotoComponent },
+  { path: 'deleted', component: FlexPhotoComponent, data: { 'field': 'deleted', 'query': '1' } },
+  { path: 'favorites', component: FlexPhotoComponent, data: { 'field': 'favorite', 'query': '1' } },
   { path: '', redirectTo: '/photos', pathMatch: 'full' },
   { path: '**', redirectTo: '/photos', pathMatch: 'full' }
 ];

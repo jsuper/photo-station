@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Photo } from 'app/photo.model';
 import { PhotoService } from 'app/photo.service';
 import { Segment, Box } from 'app/flex-layout/flex-layout.model';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-flex-photo',
@@ -14,9 +15,16 @@ export class FlexPhotoComponent implements OnInit {
   segment: Segment[] = [];
   total: number = 0;
   hasMore: boolean = true;
+
+  private field: string;
+  private query: string;
   constructor(private el: ElementRef,
-    private photoService: PhotoService) {
-    this.loadNextPage();
+    private photoService: PhotoService,
+    private activatedRoute: ActivatedRoute) {
+    this.activatedRoute.data.subscribe(data => {
+      this.field = data.field;
+      this.query = data.query;
+    });
   };
 
   processPhoto(photos: Photo[]) {
@@ -35,12 +43,18 @@ export class FlexPhotoComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    console.log(`Query: ${this.field}:${this.query}`);
+    this.loadNextPage();
   }
 
   loadNextPage() {
+    if (!this.field || !this.query) {
+      this.hasMore = false;
+      return;
+    }
     if (this.hasMore) {
-      this.photoService.search(this.total, 20, '').subscribe(data => {
+      let q = `${this.field}:${this.query}`;
+      this.photoService.search(this.total, 20, q).subscribe(data => {
         this.total += data.length;
         this.hasMore = data.length == 20;
         this.processPhoto(data);

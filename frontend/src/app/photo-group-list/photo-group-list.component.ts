@@ -1,6 +1,5 @@
 import { Component, OnInit, ElementRef, Inject, LOCALE_ID } from '@angular/core';
 import { PhotoService } from 'app/photo.service';
-import * as justifiedLayout from 'justified-layout'
 import { Photo } from 'app/photo.model';
 import { Section, Block } from 'app/sections/section.model';
 import { ActivatedRoute, Params, Router } from '@angular/router';

@@ -1,11 +1,7 @@
-
-import * as justifiedLayout from 'justified-layout'
 import { Box, FlexLayout } from './flex-layout.model';
 
 export class FlexLayoutService {
-
   private configuration: any;
-
   constructor(config: any) {
     this.configuration = config;
   }

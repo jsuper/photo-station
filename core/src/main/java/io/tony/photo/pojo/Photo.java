@@ -58,6 +58,8 @@ public class Photo {
 
   private int favorite;
 
+  private int deleted ;
+
   @JsonIgnore
   public Camera getOrCreateCamera() {
     if (this.camera == null) {
