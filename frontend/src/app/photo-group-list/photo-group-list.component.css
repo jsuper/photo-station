@@ -5,6 +5,12 @@
   padding: 0;
 }
 
+@media (max-width:600px) {
+  .group-list {
+    width: 100%;
+  }
+}
+
 .container {
   position: relative;
   margin-top: 20px;
@@ -200,5 +206,3 @@ div.thumbnail-loaded {
 .operation mat-icon:hover {
   opacity: 1;
 }
-
-

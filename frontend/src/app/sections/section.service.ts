@@ -19,6 +19,7 @@ export class SectionService {
   private containerWidth: number = 0;
   private targetRowHeight: number = 0;
   private blockSpace: number = 4;
+  private containerPadding:number = 0 ;
 
   private sections: Section[] = [];//all sections
   private totalPhotos: number = 0;//loaded photo size
@@ -27,15 +28,16 @@ export class SectionService {
   constructor() {
   }
 
-  public setLayoutConfig(containerWidth: number, targetRowHeight: number, blockSpace: number): void {
+  public setLayoutConfig(containerWidth: number, targetRowHeight: number, blockSpace: number,containerPadding:number): void {
     this.containerWidth = containerWidth;
     this.targetRowHeight = targetRowHeight;
     this.blockSpace = blockSpace;
+    this.containerPadding = containerPadding;
     this.layoutService.updateConfig({
       containerWidth: this.containerWidth,
       targetRowHeight: this.targetRowHeight,
       boxSpacing: this.blockSpace,
-      containerPadding: this.blockSpace,
+      containerPadding: this.containerPadding,
     });
   }
 
@@ -92,7 +94,7 @@ export class SectionService {
 
       section.updateBlockBox(boxes);
       section.calculateWidth(this.blockSpace);
-      section.updateRows(this.blockSpace);
+      section.updateRows(this.containerPadding);
 
       this.sections.push(section);
     });

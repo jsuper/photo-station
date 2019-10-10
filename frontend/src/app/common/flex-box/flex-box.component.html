@@ -1,4 +1,4 @@
-<div class="flex-box-container" [ngStyle]="{'height': (totalHeight+20)+'px'}">
+<div class="flex-box-container" [ngStyle]="{'height': (totalHeight+20)+'px'}" *ngIf="boxes.length">
   <div class="flex-box-wrapper" *ngFor="let box of boxes;let i=index;"
        [ngStyle]="{width: box.width+'px',height: box.height+'px',top: box.top+'px',left:box.left+'px'}"
        [ngClass]="{lastBoxItem: i==boxes.length-1}">
@@ -6,5 +6,11 @@
       <div class="box-content" [ngStyle]="{'background-image': 'url(/api/photo/'+box.raw.id+'?t=true)'}">
       </div>
     </a>
+  </div>
+</div>
+
+<div *ngIf="!boxes.length" [ngClass]="{'flex-box-empty': !boxes.length}">
+  <div class="empty_info">
+    <h1>没有更多内容</h1>
   </div>
 </div>

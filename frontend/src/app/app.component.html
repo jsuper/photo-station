@@ -37,7 +37,7 @@
       </div>
     </mat-sidenav>
     <mat-sidenav-content #container role="main" class="main-container" (scroll)="onScroll(container)">
-      <div style="width: calc(100vw - 40px);height: 100%; margin: 0 auto; padding: 0;">
+      <div style="width: calc(100vw - 40px);height: 100%; margin: 0 auto; padding: 0;" class="main-content">
         <router-outlet (activate)="onRouteActivate($event);"></router-outlet>
       </div>
     </mat-sidenav-content>

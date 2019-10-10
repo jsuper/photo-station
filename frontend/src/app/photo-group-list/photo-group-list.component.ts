@@ -101,7 +101,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     let rowCols: number = Math.ceil(this.containerWidth / 300);
     this.pageSize = maxRows * rowCols;
 
-    this.sectionService.setLayoutConfig(container.clientWidth, this.targetHeight, this.blockSpacing);
+    this.sectionService.setLayoutConfig(container.clientWidth, this.targetHeight, this.blockSpacing, this.blockSpacing);
     this.loadNextPagePhotos();
   }
 
