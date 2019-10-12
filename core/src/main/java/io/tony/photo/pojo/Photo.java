@@ -48,6 +48,7 @@ public class Photo {
   //图片大小
   private long size;
 
+
   private String type;
 
   private int width;

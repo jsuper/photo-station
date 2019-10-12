@@ -3,6 +3,7 @@ package io.tony.photo.service.impl;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.LatLonPoint;
@@ -354,6 +355,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     document.add(new IntPoint("year", localTime.getYear()));
     document.add(new IntPoint("month", localTime.getMonthValue()));
     document.add(new IntPoint("favorite", metadata.getFavorite()));
+    document.add(new StringField("deleted", String.valueOf(metadata.getDeleted()), NO));
 
     if (metadata.getLocation() != null) {
       document.add(new StringField("loc_nation", getOrDefault(metadata.getLocation().getNation(), ""), YES));

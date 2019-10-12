@@ -200,7 +200,9 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
           String id = DigestUtils.md5Hex(uploadedFile.getBytes());
 
           Path tempFile = this.uploadDir.resolve(id + "/" + fileName);
-          Files.createDirectory(tempFile.getParent());
+          if (Files.notExists(tempFile.getParent())) {
+            Files.createDirectories(tempFile.getParent());
+          }
 
           try (OutputStream fos = Files.newOutputStream(tempFile)) {
             fos.write(uploadedFile.getBytes());

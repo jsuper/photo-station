@@ -184,7 +184,13 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   private loadNextPagePhotos() {
     if (this.hasMore) {
-      this.photoService.search(this.total, this.pageSize, this.query ? this.query.queryStr() : '')
+      let q = this.query?this.query.queryStr():'';
+      if(!q.length) {
+        q = 'deleted:0' ;
+      }else {
+        q += ',-deleted:0' ;
+      }
+      this.photoService.search(this.total, this.pageSize, q)
         .subscribe(resp => {
           this.hasMore = resp.length == this.pageSize;
           this.total += resp.length;
