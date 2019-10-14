@@ -255,4 +255,8 @@ export class SectionService {
   public numberOfSelectedBlocks(): number {
     return this.selectedBlocks;
   }
+
+  public moveSelectedPhotosToTrash(callback:Function):void {
+    setTimeout(callback,2000);
+  }
 }

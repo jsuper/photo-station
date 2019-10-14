@@ -168,21 +168,24 @@ div.thumbnail-loaded {
   transform: translateZ(0px) scale3d(0.92, 0.87, 1);
 }
 
-.photo-block .operation {
+.photo-block .photo-status-container {
   position: absolute;
-  top: 0;
-  left: 0;
   display: flex;
   height: 48px;
   width: 100%;
   vertical-align: middle;
   align-items: center;
-  visibility: hidden;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
   user-select: none;
 }
 
-.operation div {
+.photo-block .operation {
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+}
+
+.photo-status-container .photo-status-wrapper {
   display: flex;
   flex-basis: 40px;
   align-items: center;
@@ -190,12 +193,20 @@ div.thumbnail-loaded {
   vertical-align: middle;
 }
 
-.photo-block mat-icon {
+.photo-status-container .photo-status {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+.photo-status-container mat-icon {
   width: 24px;
   height: 24px;
   color: #fff;
-  fill-opacity: .54;
-  opacity: .54;
 }
 
 .photo-block:hover .operation {
@@ -203,6 +214,35 @@ div.thumbnail-loaded {
   transition: all .135s cubic-bezier(0.0, 0.0, 0.2, 1), opacity linear .15s .15s;
 }
 
+.operation mat-icon {
+  fill-opacity: .54;
+  opacity: .54;
+}
+
 .operation mat-icon:hover {
   opacity: 1;
+}
+
+mat-icon.check {
+  z-index: 100;
+}
+
+.checked.icon-wrapper:before {
+  border-radius: 50%;
+  outline: none;
+  display: block;
+  width: 14px;
+  height: 14px;
+  content: '';
+  position: absolute;
+  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.photo-block .favorites {
+  bottom: 0;
+  left: 0;
 }

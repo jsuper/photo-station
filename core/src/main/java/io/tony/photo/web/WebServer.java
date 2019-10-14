@@ -17,6 +17,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
 public class WebServer implements Closeable {
@@ -39,6 +40,7 @@ public class WebServer implements Closeable {
     registryRequestHandler(router -> {
       router.route("/static/*").handler(StaticHandler.create());
       router.route("/").handler(ctx -> ctx.reroute("/static/index.html"));
+      router.route("/api/*").handler(BodyHandler.create().setMergeFormAttributes(true));
     });
   }
 

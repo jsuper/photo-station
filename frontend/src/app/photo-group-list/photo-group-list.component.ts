@@ -68,7 +68,7 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
     private dialog: MatDialog,
     private sectionService: SectionService,
     private router: Router) {
-
+    this.reset();
     this.activeRoute.queryParams.subscribe(qp => {
       let q = qp['q'] || '';
       let field = this.activeRoute.snapshot.params['field'];
@@ -184,11 +184,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
 
   private loadNextPagePhotos() {
     if (this.hasMore) {
-      let q = this.query?this.query.queryStr():'';
-      if(!q.length) {
-        q = 'deleted:0' ;
-      }else {
-        q += ',-deleted:0' ;
+      let q = this.query ? this.query.queryStr() : '';
+      if (!q.length) {
+        q = 'deleted:0';
+      } else {
+        q += ',-deleted:0';
       }
       this.photoService.search(this.total, this.pageSize, q)
         .subscribe(resp => {
@@ -196,6 +196,11 @@ export class PhotoGroupListComponent implements OnInit, Scrollable {
           this.total += resp.length;
           this.sectionService.addNewLoadedPhotos(resp);
           this.sectionService.mergeSections(this.hasMore);
+
+          if (!this.hasMore) {
+            console.log(`Total loaded photos: ${this.total}`);
+
+          }
         });
     }
   }

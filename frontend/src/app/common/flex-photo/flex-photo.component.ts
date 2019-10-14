@@ -16,14 +16,12 @@ export class FlexPhotoComponent implements OnInit {
   total: number = 0;
   hasMore: boolean = true;
 
-  private field: string;
-  private query: string;
+  _query: string = '';
   constructor(private el: ElementRef,
     private photoService: PhotoService,
     private activatedRoute: ActivatedRoute) {
     this.activatedRoute.data.subscribe(data => {
-      this.field = data.field;
-      this.query = data.query;
+      this._query = data['filter'].join(',') || '';
     });
   };
 
@@ -43,18 +41,17 @@ export class FlexPhotoComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(`Query: ${this.field}:${this.query}`);
+    console.log(`Query: ${this._query}`);
     this.loadNextPage();
   }
 
   loadNextPage() {
-    if (!this.field || !this.query) {
+    if (!this._query) {
       this.hasMore = false;
       return;
     }
     if (this.hasMore) {
-      let q = `${this.field}:${this.query}`;
-      this.photoService.search(this.total, 20, q).subscribe(data => {
+      this.photoService.search(this.total, 20, this._query).subscribe(data => {
         this.total += data.length;
         this.hasMore = data.length == 20;
         this.processPhoto(data);

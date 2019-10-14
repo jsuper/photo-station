@@ -19,4 +19,18 @@ export class PhotoService {
     const updateApi = "api/photo/" + photo.id;
     return this.http.put<Photo>(updateApi, photo);
   }
+
+  delete(photoId: string[]): Observable<any> {
+    return this.http.put<any>("/api/trash/photos", photoId);
+  }
+
+  addToFavorite(photoId: string[]): Observable<any> {
+    let partialReq = {
+      'photos': photoId,
+      'fields': {
+        'favorite': '1',
+      }
+    };
+    return this.http.put<any>('api/favorite/photos', partialReq);
+  }
 }

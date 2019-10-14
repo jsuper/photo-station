@@ -45,6 +45,8 @@ public interface PhotoStore extends Closeable {
    */
   void refresh();
 
+  void refreshIndexesFromMetadata() ;
+
   Path getThumbnail(String photoId);
 
   PhotoIndexStore getIndexStore();
@@ -52,4 +54,7 @@ public interface PhotoStore extends Closeable {
   Photo getPhotoById(String id) ;
 
   Photo update(Photo photo);
+
+  //Flush metadata to disk
+  void flush(Photo photo) ;
 }

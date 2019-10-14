@@ -1,5 +1,7 @@
 package io.tony.photo.service.impl;
 
+import com.drew.lang.StringUtil;
+
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
@@ -15,6 +17,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.surround.parser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -61,9 +64,12 @@ import io.tony.photo.service.PhotoIndexStore;
 import io.tony.photo.service.impl.agg.AggregateTerm;
 import io.tony.photo.service.impl.agg.Aggregation;
 import io.tony.photo.service.impl.agg.AggregatorCache;
+import io.tony.photo.utils.Json;
+import io.tony.photo.utils.Strings;
 
 import static org.apache.lucene.document.Field.Store.NO;
 import static org.apache.lucene.document.Field.Store.YES;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 
 public class LucenePhotoIndexStore implements PhotoIndexStore {
@@ -156,24 +162,14 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     }
   }
 
-  @Override
-  public List<String> list(int from, int size, Map<String, String> query) {
-    Query imageQuery;
-
-    if (query == null || query.isEmpty()) {
-      imageQuery = new MatchAllDocsQuery();
-    } else {
-      BooleanQuery.Builder builder = new BooleanQuery.Builder();
-      query.forEach((k, v) -> builder.add(fieldQueries.getOrDefault(k, stringTermQuery).apply(k, v), SHOULD));
-      imageQuery = builder.build();
-    }
-
+  private List<String> internalQuery(int from, int size, Query q) {
     int numDocs = from + size;
     int totalDocs = this.reader.numDocs();
     if (from > totalDocs) {
       return Collections.emptyList();
     }
 
+    log.info("Query: {}", q);
     int numHint = Math.max(1, Math.min(numDocs, totalDocs));
     Sort sort = new Sort(new SortField("timestamp", SortField.Type.LONG, true));
 
@@ -182,7 +178,7 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
     final IndexSearcher searcher = getSearcher();
     try {
       if (searcher != null) {
-        searcher.search(imageQuery, collector);
+        searcher.search(q, collector);
         TopDocs pageDocs = collector.topDocs(from, size);
         return Optional.ofNullable(pageDocs.scoreDocs)
           .map(doc ->
@@ -202,6 +198,31 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
       release(searcher);
     }
     return Collections.emptyList();
+  }
+
+  @Override
+  public List<String> list(int from, int size, Map<String, String> query) {
+    Query imageQuery;
+
+    if (query == null || query.isEmpty()) {
+      imageQuery = new MatchAllDocsQuery();
+    } else {
+      BooleanQuery.Builder builder = new BooleanQuery.Builder();
+      query.forEach((k, v) -> builder.add(fieldQueries.getOrDefault(k, stringTermQuery).apply(k, v), MUST));
+      imageQuery = builder.build();
+    }
+    return internalQuery(from, size, imageQuery);
+  }
+
+  @Override
+  public List<String> list(int start, int page, String query) {
+    Query q;
+    if (Strings.notBlank(query)) {
+      String[] queries = query.split(",");
+      BooleanQuery.Builder builder = new BooleanQuery.Builder();
+      QueryParser qp = new QueryParser();
+    }
+    return null;
   }
 
   private IndexSearcher getSearcher() {

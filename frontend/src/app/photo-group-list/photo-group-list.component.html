@@ -1,9 +1,9 @@
 <app-selected-bar></app-selected-bar>
 <div class="group-list">
   <div class="container" #container>
-    <div *ngFor="let sec of sections();let si=index;" class="box section-box"
-         [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
-         'width':pixel(sec.width),'height':pixel(sec.height),'margin-bottom':(si==sections().length-1)?'28px':''}" [attr.data-rows]="sec.rows" #sectionState>
+    <div *ngFor="let sec of sections();let si=index;" class="box section-box" [ngStyle]="{'top':pixel(sec.top),'left':pixel(sec.left),
+         'width':pixel(sec.width),'height':pixel(sec.height),'margin-bottom':(si==sections().length-1)?'28px':''}"
+         [attr.data-rows]="sec.rows" #sectionState>
       <div class="section-info" [ngStyle]="{'left': blockSpacing+'px'}">
         <div class="check-all" [ngClass]="sectionState.enterBlock||selectedSections()>0?'block-enter':''"
              *ngIf="sec.length()>1">
@@ -23,25 +23,30 @@
         </div>
       </div>
       <div *ngFor="let block of sec.blocks;let bi=index;" [ngStyle]="{'top': pixel(block.top),'left':pixel(block.left),
-           'height':pixel(block.height),'width':pixel(block.width),'background-color':selectedSections()>0?'#e8f0fe':''}"
-           style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);cursor: pointer;"
-           (click)="openImageViewer(si,bi)" class="photo-block" (mouseover)="sectionState.enterBlock=true"
-           (mouseleave)="sectionState.enterBlock=false">
+           'height':pixel(block.height),'width':pixel(block.width)}" style="position: absolute;transition: none 0s ease 0s;transform: translate3d(0px, 0px, 0px);cursor: pointer;
+           background: #e8f0fe;" (click)="openImageViewer(si,bi)" class="photo-block"
+           (mouseover)="sectionState.enterBlock=true" (mouseleave)="sectionState.enterBlock=false">
         <a class="photo-thumbnail"
            [ngStyle]="{'transform': sec.hasSelected()||block.selected?getTransform(block.width,block.height):''}">
           <div class="thumbnail-loaded" [ngStyle]="{'background-image':'url('+block.url()+')'}">
           </div>
         </a>
-        <div class="operation" [ngStyle]="{'visibility': selectedBlocks()>0?'visible':'hidden'}">
-          <div class="check-photo">
-            <mat-icon class="check" [ngStyle]="{'color': block.selected?'#4285f4':'',
-          'opacity':block.selected?'1':''}" (click)="$event.stopPropagation();checkBlock(si,bi);">
-              {{block.selected?'check_circle':'radio_button_unchecked_outline'}}</mat-icon>
+        <div class="operation photo-status-container" [ngStyle]="{'visibility': selectedBlocks()>0?'visible':'hidden',
+          'background-image':block.selected?'none':''}">
+          <div class="check-photo photo-status-wrapper">
+            <div class="icon-wrapper photo-status" [ngClass]="{'checked': block.selected}">
+              <mat-icon class="check" [ngStyle]="{'color': block.selected?'#4285f4':'',
+              'opacity':block.selected?'1':''}" (click)="$event.stopPropagation();checkBlock(si,bi);">
+                {{block.selected?'check_circle':'radio_button_unchecked_outline'}}</mat-icon>
+            </div>
           </div>
-          <!-- <div style="flex:1 1 auto"></div>
-          <div class="like-it">
-            <mat-icon class="check" (click)="$event.stopPropagation();">favorite_border_outline</mat-icon>
-          </div> -->
+        </div>
+        <div class="favorites photo-status-container" *ngIf="block.photo.favorite==1" >
+          <div class="photo-status-wrapper" >
+            <div class="photo-status">
+              <mat-icon >favorite</mat-icon>
+            </div>
+          </div>
         </div>
       </div>
     </div>

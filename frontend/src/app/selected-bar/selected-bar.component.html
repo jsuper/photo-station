@@ -14,7 +14,8 @@
     <button mat-icon-button [matMenuTriggerFor]="addOptions" style="width: 48px;height: 48px;">
       <mat-icon>add</mat-icon>
     </button>
-    <button mat-icon-button [matMenuTriggerFor]="deleteOptions" style="width: 48px;height: 48px;">
+    <button id="removeToTrash" #removeToTrash
+       mat-icon-button style="width: 48px;height: 48px;" (click)="showDeleteConfirm(removeToTrash)">
       <mat-icon>delete</mat-icon>
     </button>
     <button mat-icon-button style="width: 48px;height: 48px;" [matMenuTriggerFor]="moreOptions">
@@ -23,16 +24,12 @@
     <mat-menu #addOptions="matMenu" yPosition="above">
       <button mat-menu-item (click)="addToAlbum()"><mat-icon>photo_library</mat-icon>影集</button>
     </mat-menu>
-    <mat-menu #deleteOptions="matMenu" yPosition="above">
-      <button mat-menu-item>移动到回收站</button>
-      <button mat-menu-item>永久删除</button>
-    </mat-menu>
     <mat-menu #moreOptions="matMenu" yPosition="above">
       <button mat-menu-item>下载</button>
-      <button mat-menu-item>收藏</button>
+      <button mat-menu-item (click)="addToFavorites();">收藏</button>
       <button mat-menu-item>修改日期和时间</button>
       <button mat-menu-item>修改位置信息</button>
-      <button mat-menu-item>仅登陆可见</button>
+      <!-- <button mat-menu-item>仅登陆可见</button> -->
     </mat-menu>
   </div>
 </div>

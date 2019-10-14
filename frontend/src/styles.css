@@ -363,5 +363,20 @@ mat-sidenav .doc-version select option {
   -webkit-box-pack: justify;
 }
 
-
+.remove-trash-dialog .mat-dialog-container{
+  position: relative;
+  overflow: visible;
+}
+.remove-trash-dialog .mat-dialog-container:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -10px;
+  right: 38px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #fff;
+}
 /* common top bar style */

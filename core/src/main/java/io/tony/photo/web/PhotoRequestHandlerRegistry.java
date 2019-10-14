@@ -71,12 +71,10 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     router.route("/api/nav-agg").handler(this::navigationHandler);
     router.route("/api/photos").handler(this::handlePhotoLists);
     router.route(HttpMethod.GET, "/api/photo/:photo").handler(this::handlePhotoImage);
-    router.route(HttpMethod.PUT, "/api/photo/:photo").handler(BodyHandler.create());
     router.route(HttpMethod.PUT, "/api/photo/:photo").handler(this::handleUpdatePhotoMeta);
-
-    router.route(API_PHOTO_UPLOAD).handler(BodyHandler.create()
-      .setMergeFormAttributes(true));
-    router.route(API_PHOTO_UPLOAD).handler(this::handlePhotoUpload);
+    router.route(HttpMethod.POST, "/api/photos/upload").handler(this::handlePhotoUpload);
+    router.route(HttpMethod.PUT, "/api/trash/photos").handler(this::handleDeletePhoto);
+    router.route(HttpMethod.PUT, "/api/favorite/photos").handler(this::handlePartialUpdate);
   }
 
   /**
@@ -245,4 +243,75 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     ctx.response().end(Json.toJson(data));
   }
 
+  private void handleDeletePhoto(RoutingContext ctx) {
+    int status;
+    String message;
+    try {
+      String deletedPhotos = ctx.getBodyAsString();
+      List<String> deleted;
+      if (Strings.notBlank(deletedPhotos) && ((deleted = Json.from(deletedPhotos, List.class))) != null) {
+        List<Photo> removed = deleted.parallelStream().map(id -> {
+          try {
+            Photo metadataFromDisk = photoStore.getMetadataFromDisk(id);
+            metadataFromDisk.setDeleted(1);
+            photoStore.flush(metadataFromDisk);
+            return metadataFromDisk;
+          } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+          }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        if (removed.size() > 0) {
+          photoIndexStore.index(removed);
+          photoIndexStore.refreshSearcher();
+        }
+        status = 200;
+        message = "共" + deleted.size() + "条记录，删除" + removed.size() + "条记录";
+      } else {
+        status = 400;
+        message = "请求参数不能为空";
+      }
+    } catch (Exception e) {
+      status = 500;
+      message = "照片移除失败";
+    }
+    ctx.response().end(Json.toJson(new OperationResult(status, message)));
+  }
+
+  private void handlePartialUpdate(RoutingContext ctx) {
+    int status;
+    String message;
+    try {
+      String json = ctx.getBodyAsString();
+      PartialUpdateRequest req = Json.from(json, PartialUpdateRequest.class);
+      if (req == null || req.getPhotos() == null || req.getPhotos().isEmpty() || req.getFields() == null ||
+        req.getFields().isEmpty()) {
+        status = 400;
+        message = "请求参数错误";
+      } else {
+        List<Photo> updated = req.getPhotos().parallelStream().map(pid -> {
+          try {
+            Photo photo = photoStore.getMetadataFromDisk(pid);
+            req.applyUpdate(photo);
+            photoStore.flush(photo);
+            return photo;
+          } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+          }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        if (!updated.isEmpty()) {
+          this.photoIndexStore.index(updated);
+          this.photoIndexStore.refreshSearcher();
+        }
+        status = 200;
+        message = String.format("共%d条记录, 更新了%d条记录.", req.getPhotos().size(), updated.size());
+      }
+    } catch (Exception e) {
+      status = 500;
+      message = "更新失败";
+    }
+    ctx.response().end(Json.toJson(new OperationResult(status, message)));
+  }
 }

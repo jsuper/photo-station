@@ -15,7 +15,7 @@ import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.componen
 import { FormsModule } from '@angular/forms';
 import { PhotoJustifyDisplayComponent } from './photo-justify-display/photo-justify-display.component';
 import { PhotoGroupListComponent } from './photo-group-list/photo-group-list.component';
-import { SelectedBarComponent, AddPhotoToAlbumDialog } from './selected-bar/selected-bar.component';
+import { SelectedBarComponent, AddPhotoToAlbumDialog, RemoveTrashConfirmDialog } from './selected-bar/selected-bar.component';
 import { GroupsComponent } from './groups/groups.component';
 import { HeaderBarComponent } from './common/header-bar/header-bar.component';
 import { FlexPhotoComponent } from './common/flex-photo/flex-photo.component';
@@ -35,7 +35,9 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     GroupsComponent,
     HeaderBarComponent,
     FlexPhotoComponent,
-    FlexBoxComponent
+    FlexBoxComponent,
+    RemoveTrashConfirmDialog
+
   ],
   imports: [
     BrowserModule,
@@ -48,7 +50,7 @@ registerLocaleData(localeZhHans, 'zh-Hans');
     FormsModule
   ],
   entryComponents: [
-    PhotoViewerComponent, AddPhotoToAlbumDialog],
+    PhotoViewerComponent, AddPhotoToAlbumDialog,RemoveTrashConfirmDialog],
   providers: [{ provide: LOCALE_ID, useValue: 'zh-Hans' }],
   bootstrap: [AppComponent]
 })

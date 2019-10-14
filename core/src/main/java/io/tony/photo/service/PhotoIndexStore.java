@@ -20,6 +20,8 @@ public interface PhotoIndexStore extends Closeable {
 
   List<String> list(int start, int page, Map<String, String> query);
 
+  List<String> list(int start, int page, String query);
+
   long total();
 
   Map<String,List<AggregateTerm>> aggregate(int topN, String... aggFieldName) ;

@@ -24,12 +24,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.tony.photo.exception.PhotoDuplicateException;
@@ -350,6 +352,28 @@ public class PhotoStoreImpl implements PhotoStore {
   }
 
   @Override
+  public void refreshIndexesFromMetadata() {
+    try {
+      long start = System.currentTimeMillis();
+      List<Photo> photos = Files.list(this.metaData).map(meta -> {
+        try {
+          return Json.from(meta, Photo.class);
+        } catch (Exception e) {
+          return null;
+        }
+
+      }).filter(Objects::nonNull).collect(Collectors.toList());
+
+      this.indexStore.index(photos);
+
+      log.info("Finished refreshing index from metadata, total docs: {}, elapsed time: {}ms", photos.size(),
+        (System.currentTimeMillis() - start));
+    } catch (IOException e) {
+      log.error("Failed index from metadata.");
+    }
+  }
+
+  @Override
   public Path getThumbnail(String photoId) {
     return this.thumbnails.resolve(photoId + ".jpg");
   }
@@ -381,6 +405,11 @@ public class PhotoStoreImpl implements PhotoStore {
     return null;
   }
 
+  @Override
+  public void flush(Photo photo) {
+    writeMetaData(photo);
+  }
+
 
   @Override
   public void close() throws IOException {
@@ -391,6 +420,7 @@ public class PhotoStoreImpl implements PhotoStore {
   public static void main(String[] args) {
     Random r = new Random();
     PhotoStoreImpl ps = new PhotoStoreImpl(args[0]);
-    ps.refresh();
+//    ps.refresh();
+    ps.refreshIndexesFromMetadata();
   }
 }
