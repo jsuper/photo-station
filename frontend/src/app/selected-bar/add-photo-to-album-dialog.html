@@ -21,7 +21,8 @@ line-height: 1.5rem;">
         <mat-form-field style="flex:1">
           <input matInput placeholder="相集名称" [(ngModel)]="albumName">
         </mat-form-field>
-        <button mat-icon-button style="width: 48px;height: 48px;" (click)="onAddAlbum();$event.stopPropagation();">
+        <button mat-icon-button style="width: 48px;height: 48px;" (click)="onAddAlbum();$event.stopPropagation();"
+          [disabled]="!canClickAdd">
           <mat-icon>add</mat-icon>
         </button>
       </div>

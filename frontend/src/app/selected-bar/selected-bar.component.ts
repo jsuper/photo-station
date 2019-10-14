@@ -19,10 +19,11 @@ export class AddPhotoToAlbumDialog {
   scrolled: boolean = false;
   showAddDiv: boolean = false;
   albumName: string;
-
+  canClickAdd: boolean = true;
   constructor(public dialogRef: MatDialogRef<AddPhotoToAlbumDialog>,
     private albumService: AlbumService,
-    private sectionService: SectionService) {
+    private sectionService: SectionService,
+    private _snackBar: MatSnackBar,) {
   }
 
   onNoClick(): void {
@@ -51,10 +52,16 @@ export class AddPhotoToAlbumDialog {
       alert('请输入相册名称');
       return;
     }
-    this.albumService.addAlbum(this.albumName).subscribe(resp => {
-      this.albumName = null;
-      this.showAddDiv = false;
-    });
+    console.log(this.canClickAdd);
+
+    if (this.canClickAdd) {
+      this.canClickAdd = false;
+      this.albumService.addAlbum(this.albumName,()=>{
+        this.albumName = null;
+        this.showAddDiv = false;
+        this.canClickAdd = true;
+      });
+    }
   }
 
   addToAlbum(album: Album): void {
@@ -63,11 +70,13 @@ export class AddPhotoToAlbumDialog {
       alert('未选择任何照片');
       return;
     }
+    let sb = this._snackBar.open(`正在将照片添加至相册${album.name}...`) ;
+    this.onNoClick();
     this.albumService.addPhotoToAlbum(album.id, photoId).subscribe(resp => {
       if (resp.code === 200) {
         this.sectionService.addAlbumToSelectedPhoto(album.id);
-        this.onNoClick();
       }
+      sb.dismiss() ;
     });
   }
 }

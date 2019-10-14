@@ -15,11 +15,13 @@ export class AlbumService {
   constructor(private http: HttpClient) {
   }
 
-  public addAlbum(name: string): Observable<Album> {
+  public addAlbum(name: string,callback:Function): void {
     let req = this.api + '/' + name;
-    let ob: Observable<Album> = this.http.put(req, '');
-    ob.subscribe(res => this.album.push(res));
-    return ob;
+    this.http.put(req, '')
+    .subscribe(res => {
+      this.album.push(res);
+      callback();
+    });
   }
 
   public listAlbums(): Observable<Album[]> {
