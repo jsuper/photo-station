@@ -1,10 +1,13 @@
 package io.tony.photo.web;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +42,6 @@ public class WebServer implements Closeable {
     this.port = port;
     registryRequestHandler(router -> {
       router.route("/static/*").handler(StaticHandler.create());
-      router.route("/").handler(ctx -> ctx.reroute("/static/index.html"));
       router.route("/api/*").handler(BodyHandler.create().setMergeFormAttributes(true));
     });
   }
@@ -57,6 +59,8 @@ public class WebServer implements Closeable {
       if (log.isDebugEnabled()) {
         router.getRoutes().forEach(route -> log.debug("Mapped {}", route.getPath()));
       }
+      //for all views, redirect to index page, then route by angular
+      router.route("/*").handler(ctx -> ctx.reroute("/static/index.html"));
       httpServer.requestHandler(router).listen(port);
       if (log.isDebugEnabled()) {
         log.debug("Http service started, listened on port: {}", port);

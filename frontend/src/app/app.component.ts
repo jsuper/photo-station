@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
@@ -28,7 +28,11 @@ export class AppComponent {
     private routeStateService: RouteStateService,
     private sectionService: SectionService,
     private albumService: AlbumService,
-    private router: Router, ) {
+    private router: Router,
+    private _el:ElementRef) {
+    let redirect = this._el.nativeElement.getAttribute('redirect') ;
+    console.log(`Redirect to uri: ${redirect}`);
+
     this.albumService.loadAllAlbums();
   }
 

@@ -166,6 +166,6 @@ public class AlbumFileStore implements AlbumStore {
 
     album.setPhotos(indexStore.getTotalDocs("albums", album.getId()));
     start = System.currentTimeMillis() - start;
-    log.debug("Query album info spends: {}ms", start);
+//    log.debug("Query album info spends: {}ms", start);
   }
 }
