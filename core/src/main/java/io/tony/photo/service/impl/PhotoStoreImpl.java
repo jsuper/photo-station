@@ -131,6 +131,7 @@ public class PhotoStoreImpl implements PhotoStore {
     this.afterChangedListeners.add(event -> {
       switch (event.getEventType()) {
         case ADD:
+          log.info("Starting to index document: {}", Json.toJson(event.getPhoto()));
           indexStore.index(event.getPhoto());
           break;
       }

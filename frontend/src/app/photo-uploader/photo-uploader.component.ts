@@ -10,9 +10,7 @@ import { Observable } from 'rxjs';
 export class PhotoUploaderComponent implements OnInit {
 
   uploading: boolean = false;
-
-  preview:string = '';
-
+  preview: string = '';
   total: number;
   current: number;
   progress: number;
@@ -24,16 +22,14 @@ export class PhotoUploaderComponent implements OnInit {
   ngOnInit() {
   }
 
-  firePhotoChosen(fileInput: any) {
-    this.reset();
-    let files = <FileList>fileInput.target.files;
-
-    for (let i = 0; i < files.length; i++) {
-      this.uploadQueue.push(files[i]);
-    }
-    this.total = files.length;
-    if (this.total > 0) {
-      this.doUploadFile();
+  public uploadFiles(input: File[]): void {
+    if (input && input.length) {
+      this.uploadQueue = input;
+      this.current = -1;
+      this.total = this.uploadQueue.length;
+      this.progress = 0;
+      this.uploading = true;
+      this.doNextSubmit();
     }
   }
 

@@ -1,5 +1,9 @@
 @media(max-width: 600px) {
-    .main-container .main-content {
-        width: 100% !important;
-    }
+  .main-container .main-content {
+    width: 100% !important;
+  }
+
+  .toolbar-shadow {
+    top: 51px;
+  }
 }

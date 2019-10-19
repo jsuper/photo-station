@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -191,36 +192,47 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
     Map<String, String> errorFile = new LinkedHashMap<>();
     if (fileUploads != null && !fileUploads.isEmpty()) {
       for (FileUpload fileUpload : fileUploads) {
+        String fileName = null;
         try {
-          Buffer uploadedFile = vertx.fileSystem().readFileBlocking(fileUpload.uploadedFileName());
-          String fileName = URLDecoder.decode(fileUpload.fileName(), "UTF-8");
-
-          String id = DigestUtils.md5Hex(uploadedFile.getBytes());
-
-          Path tempFile = this.uploadDir.resolve(id + "/" + fileName);
-          if (Files.notExists(tempFile.getParent())) {
-            Files.createDirectories(tempFile.getParent());
-          }
-
-          try (OutputStream fos = Files.newOutputStream(tempFile)) {
-            fos.write(uploadedFile.getBytes());
-            photoStore.add(tempFile);
-            System.out.println("success upload file: " + fileName);
-            succeed++;
-          } catch (Exception e) {
-            if (e instanceof PhotoDuplicateException) {
-              errorFile.put(fileName, "Photo already exists");
-            } else {
-              errorFile.put(fileName, "Upload file error");
+          fileName = URLDecoder.decode(fileUpload.fileName(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          fileName = fileUpload.fileName() ;
+        }
+        if(fileUpload !=null && fileUpload.size()>0) {
+          Path tempFile = null;
+          try {
+            System.out.println("Starting process upload file: "+fileName);
+            Buffer uploadedFile = vertx.fileSystem().readFileBlocking(fileUpload.uploadedFileName());
+            String id = DigestUtils.md5Hex(uploadedFile.getBytes());
+            tempFile = this.uploadDir.resolve(id + "/" + fileName);
+            if (Files.notExists(tempFile.getParent())) {
+              Files.createDirectories(tempFile.getParent());
             }
-          } finally {
-            Files.deleteIfExists(tempFile);
-            Files.deleteIfExists(tempFile.getParent());
-          }
+            try (OutputStream fos = Files.newOutputStream(tempFile)) {
+              fos.write(uploadedFile.getBytes());
+              photoStore.add(tempFile);
+              succeed++;
+            } catch (Exception e) {
+              if (e instanceof PhotoDuplicateException) {
+                errorFile.put(fileName, "Photo already exists: " + id);
+              } else {
+                log.error("Upload file error", e);
+                errorFile.put(fileName, "Upload file error");
+              }
+            } finally {
+              if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+                Files.deleteIfExists(tempFile.getParent());
+              }
+            }
 
-        } catch (Exception e) {
-          log.error("Failed to process photo uploaded.", e);
-          errorFile.put(fileUpload.fileName(), "Process error");
+          } catch (Exception e) {
+            log.error("Failed to process photo uploaded.", e);
+            errorFile.put(fileUpload.fileName(), "Process error");
+          }
+        }else {
+          errorFile.put(fileName,"File is empty") ;
+          log.warn("Invalid file, it was empty: {}",fileName);
         }
       }
     }

@@ -65,3 +65,20 @@
 .block.lastRow {
   margin-bottom: 24px;
 }
+
+.group-title {
+  margin: 52px 0 0 0;
+  font: 400 3.5rem/4rem 'Google Sans Display', Roboto, Arial, sans-serif;
+  color: #202124;
+}
+
+@media(max-width:599px) {
+  .popup-content {
+    padding: 4px;
+  }
+
+  .group-title {
+    margin-top: 10px;
+    font: 400 1.5rem/3rem 'Google Sans Display', Roboto, Arial, sans-serif;
+  }
+}

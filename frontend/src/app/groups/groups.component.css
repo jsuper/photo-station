@@ -40,3 +40,13 @@
   font-weight: 400;
   line-height: 1rem;
 }
+
+.group-container {
+  width: 14%;margin-right: 12px;margin-bottom: 22px;cursor: pointer;
+}
+
+@media(max-width:599px) {
+  .group-container {
+    min-width: 43%;
+  }
+}

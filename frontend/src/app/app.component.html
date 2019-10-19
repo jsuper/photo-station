@@ -1,8 +1,7 @@
 <div style="height: 100%">
   <router-outlet name="popup"></router-outlet>
   <mat-toolbar class="top-bar" (click)="onToolbarClick(sidenav)">
-    <div class="toolbar-shadow" [ngClass]="container.elementRef.nativeElement.scrollTop>0
-      ||hasBlockSelected()?'toolbar-shadow-shown':''">
+    <div class="toolbar-shadow" [ngClass]="showToolbarShadow||hasBlockSelected()?'toolbar-shadow-shown':''">
     </div>
     <mat-toolbar-row class="toolbar-rows">
       <button mat-icon-button (click)="toggleSideNav($event);" #menuToggle>
@@ -11,7 +10,12 @@
       <span>Photostation</span>
       <div style="flex: 1 1 auto;"></div>
       <div>
-        <app-photo-uploader></app-photo-uploader>
+        <input type="file" style="display:none" #files (change)="firePhotoChosen($event,uploader)" multiple
+               accept=".3fr,.3gp,.arw,.avi,.cr2,.crw,.dc2,.dcr,.dng,.erf,.heic,.jpeg,.k25,.kdc,.mdc,.mef,.mkv,.mos,.mov,.mrw,.mts,.nef,.nrw,.orf,.pef,.qtk,.raf,.raw,.rdc,.rw2,.sr2,.srf,.x3f,image/bmp,image/gif,image/jpeg,image/png,image/tiff,image/webp,video/mp4,video/x-m4v,video/*">
+        <button mat-button (click)="files.click()">
+          <mat-icon>cloud_upload</mat-icon>
+          上传
+        </button>
       </div>
     </mat-toolbar-row>
   </mat-toolbar>
@@ -26,8 +30,7 @@
         <div style="padding:24px 0;" *ngFor="let mg of menus;let i=index;"
              [ngStyle]="{'border': i==0?'none':'','border-top':i>0?'1px #dadce0 solid;':''}">
           <a class="menu-item" *ngFor="let menu of mg.items" [routerLink]="menu.link"
-             [ngClass]="menu.link===currentUrl?'selected':''" routerLinkActive="selected"
-             >
+             [ngClass]="menu.link===currentUrl?'selected':''" routerLinkActive="selected">
             <mat-icon>{{menu.icon}}</mat-icon>
             <div style="width: 100%;">
               <div class="menu-title">{{menu.title}}</div>
@@ -42,4 +45,5 @@
       </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
+  <app-photo-uploader #uploader></app-photo-uploader>
 </div>

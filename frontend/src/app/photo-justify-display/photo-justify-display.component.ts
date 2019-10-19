@@ -53,7 +53,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
   showHeaderShadow: boolean = false;
 
-  boxHeight:number = 300 ;
+  boxHeight: number = 300;
   loadedPhotos: Segment[] = [];
 
   private pageSize: number = 15;
@@ -67,7 +67,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
     private el: ElementRef) {
     let path: string = location.path();
     let realPath: string = '/' + path.substring(path.indexOf('popup:') + 6, path.length - 1);
-    // location.replaceState(realPath);
+    location.replaceState(realPath);
   }
 
 
@@ -77,11 +77,21 @@ export class PhotoJustifyDisplayComponent implements OnInit {
     let containerWidth = this.flexBoxContainer.nativeElement.clientWidth;
     let height = window.innerHeight;
 
+    if (containerWidth <= 600) {
+      if (containerWidth <= 375) {
+        this.boxHeight = 124;
+      } else {
+        this.boxHeight = 200;
+      }
+    }
+    console.log(`The target box height is : ${this.boxHeight}`);
+
+
     let cols = Math.floor(containerWidth / 300);
     let rows = Math.floor(height / 200);
     let size = rows * cols;
     console.log(`page size is: ${size}`);
-    this.pageSize = size;
+    this.pageSize = Math.max(this.pageSize, size);
 
     this.qf = "albums";
     this.query = this.activeRoute.snapshot.params['id'];

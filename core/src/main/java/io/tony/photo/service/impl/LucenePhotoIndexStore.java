@@ -163,19 +163,18 @@ public class LucenePhotoIndexStore implements PhotoIndexStore {
   }
 
   private List<String> internalQuery(int from, int size, Query q) {
+    final IndexSearcher searcher = getSearcher();
     int numDocs = from + size;
-    int totalDocs = this.reader.numDocs();
+    int totalDocs = searcher.getIndexReader().numDocs();
     if (from > totalDocs) {
       return Collections.emptyList();
     }
 
-    log.info("Query: {}", q);
     int numHint = Math.max(1, Math.min(numDocs, totalDocs));
     Sort sort = new Sort(new SortField("timestamp", SortField.Type.LONG, true));
 
     TopFieldCollector collector = TopFieldCollector.create(sort, numHint, null, 10000);
 
-    final IndexSearcher searcher = getSearcher();
     try {
       if (searcher != null) {
         searcher.search(q, collector);

@@ -33,11 +33,11 @@ export class PhotoViewerComponent implements OnInit {
   private totalPhotos: number = 0;
   private sectionIndex: number = 0;
   private blockIndex: number = 0;
-
   private sectionLengthReader;
-  private canMoveNext: boolean;
-  private canMovePrevious: boolean;
   private albums: Map<string, Album> = new Map();
+  
+  canMoveNext: boolean;
+  canMovePrevious: boolean;
 
   constructor(public dialogRef: MatDialogRef<PhotoViewerComponent>,
     @Inject(MAT_DIALOG_DATA) public data: object,
@@ -82,9 +82,11 @@ export class PhotoViewerComponent implements OnInit {
       maxWidth = maxWidth - 350;
     }
     let maxHeight = window.innerHeight;
+    console.log(window.innerWidth);
+    
 
     if (width > maxWidth || height > maxHeight) {
-      if (width > maxWidth && height < maxHeight) {
+      if (width > maxWidth) {
         //以x缩放
         let ratio: number = maxWidth / width;
         this.imageWidth = maxWidth;

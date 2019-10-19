@@ -32,7 +32,7 @@ public class LuceneQueryTest {
 
   @Before
   public void setUp() throws Exception {
-    this.indexes = Paths.get("D:\\photos\\.index\\indexes");
+    this.indexes = Paths.get("D:\\test-photos\\.index\\indexes");
     this.directory = FSDirectory.open(indexes);
     this.reader = DirectoryReader.open(directory);
     this.searcher = new IndexSearcher(this.reader);
@@ -49,7 +49,7 @@ public class LuceneQueryTest {
   public void testFieldNotExistsQuery() throws Exception {
     QueryParser parser = new QueryParser("deleted", new StandardAnalyzer());
     parser.setAllowLeadingWildcard(true);
-    Query parse = parser.parse("deleted:1");
+    Query parse = parser.parse("deleted:0");
 
     System.out.println(parse);
 

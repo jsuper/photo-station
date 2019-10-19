@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, ViewChild} from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, OnInit } from '@angular/core';
 
 import { RouteStateService } from './route-state.service';
 import { Scrollable } from './scrollable';
@@ -8,13 +8,16 @@ import { Router } from '@angular/router';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MenuGroup, MENUS } from './app.model';
 import { MatButton } from '@angular/material/button';
+import { PhotoUploaderComponent } from './photo-uploader/photo-uploader.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  ngOnInit(): void {
+  }
   title = 'photo-station';
 
   private lastScrollTop: number = 0;
@@ -24,14 +27,17 @@ export class AppComponent {
   @ViewChild('sidenav', { static: false }) nav: MatSidenav;
   @ViewChild('menuToggle', { static: false }) menuToggle: MatButton;
 
+  showToolbarShadow: boolean = false;
+
   constructor(
     private routeStateService: RouteStateService,
     private sectionService: SectionService,
     private albumService: AlbumService,
     private router: Router,
-    private _el:ElementRef) {
-    let redirect = this._el.nativeElement.getAttribute('redirect') ;
+    private _el: ElementRef) {
+    let redirect = this._el.nativeElement.getAttribute('redirect');
     console.log(`Redirect to uri: ${redirect}`);
+
 
     this.albumService.loadAllAlbums();
   }
@@ -39,6 +45,7 @@ export class AppComponent {
   onScroll(container: any): void {
     let scrollElementRef: ElementRef = container.elementRef;
     let scrollTop: number = scrollElementRef.nativeElement.scrollTop;
+    this.showToolbarShadow = scrollTop > 0;
     let direction: string = scrollTop > this.lastScrollTop ? 'DOWN' : 'UP';
     this.lastScrollTop = scrollTop;
     let scrollable: Scrollable = this.routeStateService.getComponent();
@@ -78,5 +85,16 @@ export class AppComponent {
     }
     button.blur();
     event.stopPropagation();
+  }
+
+  firePhotoChosen(fileInput: any, uploader: PhotoUploaderComponent) {
+    let uploadQueue: File[] = [];
+    let files = <FileList>fileInput.target.files;
+    for (let i = 0; i < files.length; i++) {
+      uploadQueue.push(files[i]);
+    }
+    if (uploadQueue.length) {
+      uploader.uploadFiles(uploadQueue);
+    }
   }
 }

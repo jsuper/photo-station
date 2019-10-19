@@ -12,14 +12,13 @@
     <div style="display: flex;flex-direction: column;min-height: 100%">
       <div style="display: flex;flex-direction: column; margin: 0 auto; width: 100%;">
         <div style="margin: 0 auto;display: flex;flex-direction: column;width:90%;">
-          <span
-                style="margin:52px 0 0 0;font: 400 3.5rem/4rem 'Google Sans Display',Roboto,Arial,sans-serif;color: #202124;">DDDDDDDDDDDD</span>
+          <span class="group-title">DDDDDDDDDDDD</span>
           <span style="color: #80868b; font-size: 14px; padding: 6px 0 28px 0;">2015年4月11日至2019年9月19日</span>
         </div>
       </div>
       <div style="position: relative;flex:1 1 auto;">
         <div id="flexBoxContainer" #flexBoxContainer class="group-container">
-          <app-flex-box [data]="loadedPhotos" [box-height]="300"></app-flex-box>
+          <app-flex-box [data]="loadedPhotos" [box-height]="boxHeight"></app-flex-box>
         </div>
       </div>
     </div>
