@@ -1,5 +1,5 @@
 <div style="display: flex; flex-wrap: wrap;padding:10px;">
-  <a *ngFor="let album of getAlbums()" 
+  <a *ngFor="let album of getAlbums()"
       class="group-container"
      [routerLink]="['',{outlets: {popup:['album',album.id]}}]">
     <div class="album-cover" [ngStyle]="{'background-image': album.cover?'url(/api/photo/'+album.cover+'?t=true)':''}">

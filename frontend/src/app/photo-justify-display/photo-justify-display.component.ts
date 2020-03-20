@@ -9,6 +9,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Scrollable } from 'app/scrollable';
 import { FlexLayoutService } from 'app/flex-layout/flex-layout.service';
 import { Segment, Box } from 'app/flex-layout/flex-layout.model';
+import { Album } from 'app/model/album.model';
+import { AlbumService } from 'app/services/album.service';
 
 
 class BoxModel {
@@ -48,6 +50,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
   hasMorePage: boolean = true;
   loaded: number = 0;
+  album: Album;
   private qf: string;
   private query: string;
 
@@ -59,12 +62,14 @@ export class PhotoJustifyDisplayComponent implements OnInit {
   private pageSize: number = 15;
   private scrollState: Map<number, number> = new Map();
 
+
   @ViewChild('flexBoxContainer', { static: true }) flexBoxContainer: ElementRef;
 
   constructor(private photoService: PhotoService,
     private activeRoute: ActivatedRoute,
     private location: Location,
-    private el: ElementRef) {
+    private el: ElementRef,
+    private albumService:AlbumService) {
     let path: string = location.path();
     let realPath: string = '/' + path.substring(path.indexOf('popup:') + 6, path.length - 1);
     location.replaceState(realPath);
@@ -95,6 +100,7 @@ export class PhotoJustifyDisplayComponent implements OnInit {
 
     this.qf = "albums";
     this.query = this.activeRoute.snapshot.params['id'];
+    this.album = this.albumService.getAlbumById(this.query);
     this.loadNextPage();
   }
 
