@@ -12,5 +12,6 @@ logs/
 .classpath
 .factorypath
 classpath-data.json
+package-log.json
 
 file-uploads/
