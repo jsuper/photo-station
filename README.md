@@ -7,6 +7,11 @@
 mvn clean package
 ```
 
+运行
+```shell script
+java -cp core.jar io.tony.photo.App [文件保存目录]
+```
+
 ## 功能列表
 - [DONE] 照片列表
 - [DONE] 照片上传、删除、创建相册、收藏
