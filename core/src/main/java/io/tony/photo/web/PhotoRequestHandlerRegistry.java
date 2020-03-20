@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import io.tony.photo.exception.PhotoDuplicateException;
@@ -31,6 +32,7 @@ import io.tony.photo.service.PhotoStore;
 import io.tony.photo.utils.FileOp;
 import io.tony.photo.utils.Json;
 import io.tony.photo.utils.Strings;
+import io.tony.photo.web.response.UploadResponse;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -187,72 +189,79 @@ public class PhotoRequestHandlerRegistry implements RequestRegistry {
   }
 
   private void handlePhotoUpload(RoutingContext ctx) {
-    Set<FileUpload> fileUploads = ctx.fileUploads();
-    int succeed = 0;
-    Map<String, String> errorFile = new LinkedHashMap<>();
-    if (fileUploads != null && !fileUploads.isEmpty()) {
+    ctx.response().putHeader("Content-Type", "application/json");
+    final Set<FileUpload> fileUploads = ctx.fileUploads();
+    if (fileUploads == null || fileUploads.isEmpty()) {
+      final UploadResponse response = UploadResponse.builder()
+        .message("No files found")
+        .status(0)
+        .build();
+      ctx.response().end(Json.toJson(response));
+      return;
+    }
+    CompletableFuture.runAsync(() -> {
+      log.info("handlePhotoUpload | Starting handle photo upload | {} ", fileUploads.size());
+      int succeed = 0;
+      Map<String, String> errorFile = new LinkedHashMap<>();
+
       for (FileUpload fileUpload : fileUploads) {
-        String fileName = null;
+        String fileName;
         try {
           fileName = URLDecoder.decode(fileUpload.fileName(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
-          fileName = fileUpload.fileName() ;
+          fileName = fileUpload.fileName();
         }
-        if(fileUpload !=null && fileUpload.size()>0) {
-          Path tempFile = null;
-          try {
-            System.out.println("Starting process upload file: "+fileName);
-            Buffer uploadedFile = vertx.fileSystem().readFileBlocking(fileUpload.uploadedFileName());
-            String id = DigestUtils.md5Hex(uploadedFile.getBytes());
-            tempFile = this.uploadDir.resolve(id + "/" + fileName);
-            if (Files.notExists(tempFile.getParent())) {
-              Files.createDirectories(tempFile.getParent());
-            }
-            try (OutputStream fos = Files.newOutputStream(tempFile)) {
-              fos.write(uploadedFile.getBytes());
-              photoStore.add(tempFile);
-              succeed++;
-            } catch (Exception e) {
-              if (e instanceof PhotoDuplicateException) {
-                errorFile.put(fileName, "Photo already exists: " + id);
-              } else {
-                log.error("Upload file error", e);
-                errorFile.put(fileName, "Upload file error");
-              }
-            } finally {
-              if (tempFile != null) {
-                Files.deleteIfExists(tempFile);
-                Files.deleteIfExists(tempFile.getParent());
-              }
-            }
-
-          } catch (Exception e) {
-            log.error("Failed to process photo uploaded.", e);
-            errorFile.put(fileUpload.fileName(), "Process error");
+        if (fileUpload == null || fileUpload.size() <= 0) {
+          log.warn("handlePhotoUpload | Invalid uploaded file, file data is empty | {} ", fileName);
+          errorFile.put(fileName, "File is invalid, the size is " + fileUpload.size());
+          continue;
+        }
+        Path tempFile;
+        try {
+          log.info("handlePhotoUpload | Starting process upload file | {} ", fileName);
+          long elapsed = System.currentTimeMillis();
+          Buffer uploadedFile = vertx.fileSystem().readFileBlocking(fileUpload.uploadedFileName());
+          String id = DigestUtils.md5Hex(uploadedFile.getBytes());
+          tempFile = this.uploadDir.resolve(id + "/" + fileName);
+          if (Files.notExists(tempFile.getParent())) {
+            Files.createDirectories(tempFile.getParent());
           }
-        }else {
-          errorFile.put(fileName,"File is empty") ;
-          log.warn("Invalid file, it was empty: {}",fileName);
+          try (OutputStream fos = Files.newOutputStream(tempFile)) {
+            fos.write(uploadedFile.getBytes());
+            photoStore.add(tempFile);
+            succeed++;
+            elapsed = System.currentTimeMillis() - elapsed;
+            log.info("handlePhotoUpload | File was uploaded | {} | {}ms", fileName, elapsed);
+          } catch (Exception e) {
+            throw e;
+          } finally {
+            if (tempFile != null) {
+              Files.deleteIfExists(tempFile);
+              Files.deleteIfExists(tempFile.getParent());
+            }
+          }
+        } catch (Exception e) {
+          log.error("Failed to process photo uploaded.", e);
+          if (e instanceof PhotoDuplicateException) {
+            errorFile.put(fileName, "Photo already exists.");
+          } else {
+            errorFile.put(fileName, "Upload file error");
+          }
         }
       }
-    }
-    if (succeed > 0) {
-      photoIndexStore.refreshSearcher();
-    }
-    ctx.response().putHeader("Content-Type", "application/json");
-    Map<String, Object> data = new LinkedHashMap<>();
-    int totalFile = fileUploads.size();
-    data.put("total", totalFile);
-    data.put("succeed", succeed);
-    data.put("errors", errorFile);
-    if (totalFile == succeed) {
-      data.put("status", 1);
-      data.put("message", "Successfully uploaded all files.");
-    } else {
-      data.put("status", succeed == 0 ? 0 : 2);
-      data.put("message", succeed == 0 ? "All files uploaded failed." : "Partial files uploaded failed.");
-    }
-    ctx.response().end(Json.toJson(data));
+      if (succeed > 0) {
+        photoIndexStore.refreshSearcher();
+      }
+
+      final UploadResponse resp = UploadResponse.builder()
+        .total(fileUploads.size())
+        .succeed(succeed)
+        .errors(errorFile)
+        .status(fileUploads.size() == succeed ? 1 : succeed == 0 ? 0 : 2)
+        .message(succeed == fileUploads.size() ? "Successfully uploaded all photos" : "Partially success uploading files")
+        .build();
+      ctx.response().end(Json.toJson(resp));
+    });
   }
 
   private void handleDeletePhoto(RoutingContext ctx) {
