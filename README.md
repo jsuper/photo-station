@@ -31,11 +31,11 @@ java -cp core.jar io.tony.photo.App [文件保存目录]
 - 照片列表
 ![PhotoList](screenshots/photos.png)
 
-- 照片大图查看
-![PhotoPreview](screenshots/image_prev.png)
+- 照片大图查看  
+![PhotoPreview](screenshots/image_prev.png)  
 
 - 相册
-![Albums](screenshots/albums.png)
+![Albums](screenshots/albums.png)  
 
 - 菜单
 ![sidebar](screenshots/siderbar.png)
