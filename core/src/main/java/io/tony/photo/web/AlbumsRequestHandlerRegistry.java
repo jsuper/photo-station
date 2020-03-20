@@ -1,6 +1,5 @@
 package io.tony.photo.web;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
 import io.tony.photo.pojo.Album;
@@ -71,7 +70,7 @@ public class AlbumsRequestHandlerRegistry implements RequestRegistry {
     router.route(HttpMethod.GET, "/api/albums").handler(ctx -> {
       int loadSize = Integer.MAX_VALUE;
       String size = ctx.request().getParam("size");
-      if (size != null && !size.isBlank()) {
+      if (size != null && !size.isEmpty()) {
         loadSize = Integer.parseInt(size);
       }
       json(ctx, albumStore.getAlbums(loadSize));
