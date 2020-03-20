@@ -2,6 +2,8 @@
 可本地部署的照片管理服务，可设备照片同步、重复照片处理
 
 ## 怎样运行
+java版本`12`及以上
+
 下载源代码后，本地执行maven 打包
 ```shell script
 mvn clean package
